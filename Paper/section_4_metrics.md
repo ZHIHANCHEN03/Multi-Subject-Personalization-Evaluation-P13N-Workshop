@@ -1,6 +1,6 @@
 ## Evaluation Metrics
 
-A central contribution of our benchmark is identifying the limitations of standard personalization metrics when applied to multi-subject composition. Existing protocols heavily rely on global CLIP embeddings~[radford2021learning]. However, global embeddings are highly tolerant of local structural distortions and identity bleeding, rendering them inadequate for measuring severe identity entanglement. To provide a rigorous and comprehensive assessment that aligns with the P13N workshop's call for advanced evaluation metrics for personalization quality, we introduce a multi-tiered evaluation framework.
+A central contribution of our benchmark is identifying the limitations of standard personalization metrics when applied to multi-subject composition. Existing protocols heavily rely on global CLIP embeddings~[radford2021learning]. However, global embeddings are highly tolerant of local structural distortions and identity bleeding, rendering them inadequate for measuring severe identity entanglement. To provide a rigorous and comprehensive assessment that aligns with the need for advanced evaluation metrics for personalization quality, we introduce a multi-tiered evaluation framework.
 
 ### Text-Image Alignment (CLIP-T)
 
@@ -31,7 +31,7 @@ Average similarity scores can obscure catastrophic failures of individual subjec
 To explicitly quantify these localized failures, we propose the **Subject Collapse Rate (SCR)**, conceptually illustrated in **Figure fig:scr_illustration**. We define a subject as "collapsed" if its DINOv2 cosine similarity with the reference image falls below a predefined threshold $\tau$. The SCR for a given generated image is defined as the ratio of collapsed subjects to the total number of subjects:
 
 $$
-\text{SCR}_{@\tau} = \frac{\sum_{i=1}^{N} \mathbf{1}[\cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^i)) < \tau]}{N}
+\text{SCR}_{@\tau} = \frac{1}{N} \sum_{i=1}^{N} \mathbf{1}[\cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^i)) < \tau]
 $$
 
 where $\mathbf{1}[\cdot]$ is the indicator function. Because DINOv2 similarities typically occupy a lower and more discriminative numerical range than CLIP, we employ strict thresholds $\tau \in \{0.4, 0.5, 0.6\}$. A lower SCR indicates better multi-subject preservation, while an SCR approaching 1.0 signifies a complete collapse of personalization.

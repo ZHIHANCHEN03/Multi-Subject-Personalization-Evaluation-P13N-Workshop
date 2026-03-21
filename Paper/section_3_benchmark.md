@@ -1,6 +1,6 @@
 ## Multi-Subject Benchmark
 
-To systematically evaluate the limits of current subject-driven diffusion models in handling complex multi-entity compositions, we construct a rigorous, scalable stress-test benchmark. Unlike existing datasets that primarily focus on single or dual subjects in isolated settings, our benchmark is specifically designed to assess identity preservation and physical interaction reasoning as the number of subjects scales from 2 to 10. This directly addresses the critical need for "Dataset curation for benchmarking personalized generative models" as highlighted by the P13N workshop.
+To systematically evaluate the limits of current subject-driven diffusion models in handling complex multi-entity compositions, we construct a rigorous, scalable stress-test benchmark. Unlike existing datasets that primarily focus on single or dual subjects in isolated settings, our benchmark is specifically designed to assess identity preservation and physical interaction reasoning as the number of subjects scales from 2 to 10. This directly addresses the critical need for dataset curation for benchmarking personalized generative models.
 
 ### Subject Pool Construction
 

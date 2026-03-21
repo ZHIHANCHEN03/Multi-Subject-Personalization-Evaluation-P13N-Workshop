@@ -34,7 +34,7 @@ Our benchmark is constructed by sampling from a unified subject pool and inserti
 Standard CLIP-T metrics often present an *illusion of scalability*. As $N$ increases, models default to generating a generic "group of people," which satisfies the global text prompt but completely destroys local identity fidelity. 
 
 To address this, we propose **SCR (Subject Collapse Rate)**:
-$$ \text{SCR}_{@\tau} = \frac{\sum_{i=1}^{N} \mathbf{1}[\cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^i)) < \tau]}{N} $$
+$$ \text{SCR}_{@\tau} = \frac{1}{N} \sum_{i=1}^{N} \mathbf{1}[\cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^i)) < \tau] $$
 
 *See `scripts/` for the evaluation code used to compute DINOv2, CLIP-I, CLIP-T, and SCR.*
 
