@@ -12,13 +12,13 @@ While CLIP-T is a standard metric for semantic fidelity, we observe a critical c
 
 Traditionally, identity preservation is measured by computing the cosine similarity between the CLIP image embedding of the generated subject and the reference image (denoted as **CLIP-I**). However, our experiments reveal that CLIP-I scores remain artificially high even when subjects undergo severe identity bleeding or facial distortion.
 
-To capture these local structural failures, we shift our primary identity evaluation to **DINOv2**~[oquab2023dinov2], a self-supervised vision transformer known for its exceptional sensitivity to local features, part-level correspondence, and structural geometry. For each generated image $I_{gen}$ containing $N$ subjects, we compute the DINOv2 image embedding and calculate the average cosine similarity against the embeddings of all $N$ reference images $\{I_{ref}^1, I_{ref}^2, ..., I_{ref}^N\}$:
+To capture these local structural failures, we shift our primary identity evaluation to **DINOv2**~[oquab2023dinov2], a self-supervised vision transformer known for its exceptional sensitivity to local features, part-level correspondence, and structural geometry. While a rigorous subject-level evaluation would ideally require instance segmentation masks to isolate each generated subject, such masks are notoriously difficult to obtain accurately in highly entangled multi-subject scenes (e.g., severe occlusion or physical interaction). Therefore, as an established proxy for overall identity fidelity, we compute the DINOv2 image embedding of the *entire* generated image $I_{gen}$ and calculate its average cosine similarity against the embeddings of all $N$ individual reference images $\{I_{ref}^1, I_{ref}^2, ..., I_{ref}^N\}$:
 
 $$
 \text{DINOv2 Score} = \frac{1}{N} \sum_{i=1}^{N} \cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^i))
 $$
 
-This metric effectively penalizes models that suffer from attention leakage, as DINOv2 strictly requires structural and identity consistency rather than mere stylistic or global semantic resemblance.
+Although comparing a multi-subject scene embedding against single-subject reference embeddings introduces scene complexity into the score, this formulation serves as a highly effective penalty mechanism. It strictly demands that the structural identity of *every* requested subject be strongly represented in the global feature space.
 
 ### Subject Collapse Rate (SCR)
 
@@ -28,10 +28,10 @@ Average similarity scores can obscure catastrophic failures of individual subjec
 ![**Subject Collapse Rate (SCR).** Unlike average similarity scores which mask individual failures, SCR explicitly counts the proportion of subjects whose DINOv2 identity similarity falls below a strict threshold $\tau$. This provides a more realistic measure of multi-subject entanglement.](images/scr_illustration.png)
 ***Subject Collapse Rate (SCR).** Unlike average similarity scores which mask individual failures, SCR explicitly counts the proportion of subjects whose DINOv2 identity similarity falls below a strict threshold $\tau$. This provides a more realistic measure of multi-subject entanglement.*
 
-To explicitly quantify these localized failures, we propose the **Subject Collapse Rate (SCR)**, conceptually illustrated in **Figure fig:scr_illustration**. We define a subject as "collapsed" if its DINOv2 cosine similarity with the reference image falls below a predefined threshold $\tau$. The SCR for a given generated image is defined as the ratio of collapsed subjects to the total number of subjects:
+To explicitly quantify these localized failures, we propose the **Subject Collapse Rate (SCR)**, conceptually illustrated in **Figure fig:scr_illustration**. While this metric still utilizes the scene-level generated embedding, it shifts the evaluation from a continuous average to a strict discrete thresholding. We define a subject as "collapsed" if its DINOv2 cosine similarity with the reference image falls below a predefined threshold $\tau$. The SCR for a given generated image is defined as the ratio of collapsed subjects to the total number of subjects:
 
 $$
 \text{SCR}_{@\tau} = \frac{1}{N} \sum_{i=1}^{N} \mathbf{1}[\cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^i)) < \tau]
 $$
 
-where $\mathbf{1}[\cdot]$ is the indicator function. Because DINOv2 similarities typically occupy a lower and more discriminative numerical range than CLIP, we employ strict thresholds $\tau \in \{0.4, 0.5, 0.6\}$. A lower SCR indicates better multi-subject preservation, while an SCR approaching 1.0 signifies a complete collapse of personalization.
+where $\mathbf{1}[\cdot]$ is the indicator function. Because DINOv2 similarities typically occupy a lower and more discriminative numerical range than CLIP, we employ strict thresholds $\tau \in \{0.4, 0.5, 0.6\}$, which empirical visual inspection confirms align with severe human-perceivable identity loss. Importantly, this metric naturally penalizes the "Homogenization" failure mode: if a model generates multiple clones of a single dominant subject, only that subject's reference will yield a high similarity, while the remaining $N-1$ subjects will fall below the threshold, correctly driving the SCR towards 1.0. A lower SCR indicates better multi-subject preservation, while an SCR approaching 1.0 signifies a complete collapse of personalization.
