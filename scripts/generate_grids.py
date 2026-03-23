@@ -102,14 +102,16 @@ def create_image_grid():
         # to match the user's request (similar to MOSAIC paper)
         # We'll put them right below the prompt text
         ref_y = y_offset + 60 + len(lines) * 25 + 10
-        ref_box_size = 40
+        ref_box_size = 50
         num_subjects = 2 if '2' in case_title else 4
         
-        draw.text((20, ref_y), "Inputs:", font=prompt_font, fill='blue')
+        draw.text((20, ref_y + 15), "Inputs:", font=prompt_font, fill='blue')
         for i in range(num_subjects):
             rx = 20 + 70 + i * (ref_box_size + 10)
             draw.rectangle([rx, ref_y, rx+ref_box_size, ref_y+ref_box_size], fill='#e6f2ff', outline='black')
-            draw.text((rx+10, ref_y+10), f"S{i+1}", font=prompt_font, fill='black')
+            # Add small "Image" text to make it look like a placeholder for an actual image
+            draw.text((rx+10, ref_y+5), "Img", font=prompt_font, fill='#555555')
+            draw.text((rx+15, ref_y+25), f"S{i+1}", font=prompt_font, fill='black')
             
         # Draw images
         for c, model in enumerate(models):
