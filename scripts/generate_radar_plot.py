@@ -18,8 +18,8 @@ def load_data():
 def plot_radar(df, output_dir):
     df_filtered = df[(df['scene_type'] == 'all') & (df['subject_count'] == 2)]
     
-    metrics = ['clip_t', 'clip_i', 'dino', 'dinov2']
-    labels = ['CLIP-T\n(Semantic)', 'CLIP-I\n(Style)', 'DINO\n(Structure)', 'DINOv2\n(Identity)']
+    metrics = ['clip_t', 'clip_i', 'dinov2', 'scr@0.4']
+    labels = ['CLIP-T\n(Semantic)', 'CLIP-I\n(Style)', 'DINOv2\n(Identity)', 'SCR@0.4\n(Collapse)']
     
     models = ['MOSAIC', 'XVerse', 'PSR']
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
@@ -44,8 +44,11 @@ def plot_radar(df, output_dir):
             # Normalize to 0-1 scale relative to typical max values for radar aesthetics
             if m == 'clip_t': val = val / 0.35
             if m == 'clip_i': val = val / 0.85
-            if m == 'dino': val = val / 0.85
             if m == 'dinov2': val = val / 0.55
+            if m == 'scr@0.4': 
+                # SCR is lower the better (0 to 1). We invert it to 1-SCR 
+                # so that a larger radar area means better performance.
+                val = 1.0 - val
             values.append(val)
             
         values += values[:1]

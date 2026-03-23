@@ -2,7 +2,17 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
 
+# Adjust figure size or font sizes here if needed.
+# The user requested larger fonts for figure 2 (benchmark_design).
+plt.rcParams['font.size'] = 14
+
 def create_benchmark_design(filename):
+    # Set font to match CVPR style
+    plt.rcParams['font.family'] = 'Times New Roman'
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+    plt.rcParams['font.size'] = 14
+
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.set_xlim(0, 10)
     ax.set_ylim(0, 5)
@@ -11,8 +21,8 @@ def create_benchmark_design(filename):
     # Subject Pool Box
     pool_box = patches.FancyBboxPatch((0.5, 1), 2, 3, boxstyle="round,pad=0.1", linewidth=2, edgecolor='#1f77b4', facecolor='#e6f2ff')
     ax.add_patch(pool_box)
-    ax.text(1.5, 3.5, "Subject\nPool", fontsize=12, fontweight='bold', ha='center', va='center')
-    ax.text(1.5, 2.5, "Identity A\nIdentity B\n...\nIdentity Z", fontsize=10, ha='center', va='center')
+    ax.text(1.5, 3.5, "Subject\nPool", fontsize=14, fontweight='bold', ha='center', va='center')
+    ax.text(1.5, 2.5, "Identity A\nIdentity B\n...\nIdentity Z", fontsize=12, ha='center', va='center')
 
     # Arrow to Prompts
     ax.annotate('', xy=(3.5, 2.5), xytext=(2.5, 2.5), arrowprops=dict(facecolor='gray', shrink=0.05, width=2))
@@ -20,8 +30,8 @@ def create_benchmark_design(filename):
     # Prompts Box
     prompt_box = patches.FancyBboxPatch((3.5, 1), 2.5, 3, boxstyle="round,pad=0.1", linewidth=2, edgecolor='#2ca02c', facecolor='#e6ffe6')
     ax.add_patch(prompt_box)
-    ax.text(4.75, 3.5, "Complexity\nScaling", fontsize=12, fontweight='bold', ha='center', va='center')
-    ax.text(4.75, 2.5, "2 Subjects\n4 Subjects\n6 Subjects\n8 Subjects\n10 Subjects", fontsize=10, ha='center', va='center')
+    ax.text(4.75, 3.5, "Complexity\nScaling", fontsize=14, fontweight='bold', ha='center', va='center')
+    ax.text(4.75, 2.5, "2 Subjects\n4 Subjects\n6 Subjects\n8 Subjects\n10 Subjects", fontsize=12, ha='center', va='center')
 
     # Arrows to Scenes
     ax.annotate('', xy=(7, 4), xytext=(6, 2.5), arrowprops=dict(facecolor='gray', shrink=0.05, width=2))
@@ -31,15 +41,15 @@ def create_benchmark_design(filename):
     # Scene Types
     scene1 = patches.FancyBboxPatch((7, 3.5), 2.5, 1, boxstyle="round,pad=0.1", linewidth=2, edgecolor='#ff7f0e', facecolor='#fff2e6')
     ax.add_patch(scene1)
-    ax.text(8.25, 4, "Neutral\n(No Interaction)", fontsize=10, fontweight='bold', ha='center', va='center')
+    ax.text(8.25, 4, "Neutral\n(No Interaction)", fontsize=12, fontweight='bold', ha='center', va='center')
 
     scene2 = patches.FancyBboxPatch((7, 2), 2.5, 1, boxstyle="round,pad=0.1", linewidth=2, edgecolor='#ff7f0e', facecolor='#fff2e6')
     ax.add_patch(scene2)
-    ax.text(8.25, 2.5, "Occlusion\n(Spatial Overlap)", fontsize=10, fontweight='bold', ha='center', va='center')
+    ax.text(8.25, 2.5, "Occlusion\n(Spatial Overlap)", fontsize=12, fontweight='bold', ha='center', va='center')
 
     scene3 = patches.FancyBboxPatch((7, 0.5), 2.5, 1, boxstyle="round,pad=0.1", linewidth=2, edgecolor='#ff7f0e', facecolor='#fff2e6')
     ax.add_patch(scene3)
-    ax.text(8.25, 1, "Interaction\n(Physical Contact)", fontsize=10, fontweight='bold', ha='center', va='center')
+    ax.text(8.25, 1, "Interaction\n(Physical Contact)", fontsize=12, fontweight='bold', ha='center', va='center')
 
     plt.tight_layout()
     plt.savefig(filename, dpi=300, bbox_inches='tight')

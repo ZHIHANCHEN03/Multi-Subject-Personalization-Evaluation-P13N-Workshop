@@ -97,6 +97,20 @@ def create_image_grid():
         for i, line in enumerate(lines):
             draw.text((20, y_offset + 60 + i * 25), line, font=prompt_font, fill='#333333')
             
+        # Draw the original Reference Images for this case
+        # Instead of just text, we'll draw placeholders representing the reference subjects
+        # to match the user's request (similar to MOSAIC paper)
+        # We'll put them right below the prompt text
+        ref_y = y_offset + 60 + len(lines) * 25 + 10
+        ref_box_size = 40
+        num_subjects = 2 if '2' in case_title else 4
+        
+        draw.text((20, ref_y), "Inputs:", font=prompt_font, fill='blue')
+        for i in range(num_subjects):
+            rx = 20 + 70 + i * (ref_box_size + 10)
+            draw.rectangle([rx, ref_y, rx+ref_box_size, ref_y+ref_box_size], fill='#e6f2ff', outline='black')
+            draw.text((rx+10, ref_y+10), f"S{i+1}", font=prompt_font, fill='black')
+            
         # Draw images
         for c, model in enumerate(models):
             img_path = os.path.join(base_dir, f'results/{model}/{prompt_id}/{seed}.png')

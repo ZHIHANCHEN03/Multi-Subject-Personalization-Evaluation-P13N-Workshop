@@ -51,6 +51,8 @@ def create_advanced_teaser():
     ax1.imshow(img2)
     ax1.axis('off')
     ax1.set_title("N=2: Successful Composition\n(Identities Maintained)", fontsize=16, color='#2ca02c', fontweight='bold', pad=10)
+    ax1.text(0.5, -0.1, 'Prompt: "A black woman and a\nwestern woman shaking hands."', 
+             transform=ax1.transAxes, ha='center', va='top', fontsize=13, style='italic')
     
     rect = patches.Rectangle((0,0), img2.shape[1], img2.shape[0], linewidth=6, edgecolor='#2ca02c', facecolor='none')
     ax1.add_patch(rect)
@@ -62,6 +64,8 @@ def create_advanced_teaser():
     ax2.imshow(img8)
     ax2.axis('off')
     ax2.set_title("N=8: Catastrophic Collapse\n(Attention Leakage & Clones)", fontsize=16, color='#d62728', fontweight='bold', pad=10)
+    ax2.text(0.5, -0.1, 'Prompt: "Eight people of varying ethnicities\nand genders hugging in a circle."', 
+             transform=ax2.transAxes, ha='center', va='top', fontsize=13, style='italic')
     
     rect2 = patches.Rectangle((0,0), img8.shape[1], img8.shape[0], linewidth=6, edgecolor='#d62728', facecolor='none')
     ax2.add_patch(rect2)
