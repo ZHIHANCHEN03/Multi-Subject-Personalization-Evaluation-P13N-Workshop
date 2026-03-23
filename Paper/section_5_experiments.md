@@ -28,7 +28,7 @@ While all models fail at extreme subject counts, **MOSAIC** demonstrates a notic
 
 A counter-intuitive phenomenon emerges when we analyze the Text-Image Alignment (CLIP-T)~[radford2021learning] scores alongside the identity metrics. While DINOv2~[oquab2023dinov2] scores plummet as the subject count increases, the CLIP-T scores for all models actually exhibit a slight upward trend. For example, PSR's CLIP-T score rises from 0.274 (2 subjects) to 0.309 (10 subjects), and MOSAIC rises from 0.261 to 0.300.
 
-This exposes a critical trade-off mechanism inherent in current diffusion models. When faced with the overwhelming complexity of generating 8 or 10 distinct, interacting individuals, the models actively ``take a shortcut.'' Instead of attempting to faithfully reconstruct each specific identity---which would require precise, uncorrupted attention routing---the models revert to generating a generic ``group of people'' that satisfies the macro-level semantic constraints of the prompt. Consequently, the global CLIP-T score improves, but at the total expense of personalized identity.
+This exposes a critical trade-off mechanism inherent in current diffusion models. When faced with the overwhelming complexity of generating 8 or 10 distinct, interacting individuals, the models actively ``take a shortcut.'' Instead of attempting to faithfully reconstruct each specific identity, which would require precise, uncorrupted attention routing, the models revert to generating a generic ``group of people'' that satisfies the macro-level semantic constraints of the prompt. Consequently, the global CLIP-T score improves, but at the total expense of personalized identity.
 
 ### Qualitative Failure Analysis
 
