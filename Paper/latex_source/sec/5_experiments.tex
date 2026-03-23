@@ -42,7 +42,7 @@ The most striking finding from our benchmark is the catastrophic collapse of ide
 
 This failure is further magnified when examining the Subject Collapse Rate (SCR). At the most lenient threshold ($\tau=0.4$), MOSAIC exhibits a 48.9\% collapse rate even with just 2 subjects. When pushed to 8 subjects, the SCR skyrockets to 94.7\% for MOSAIC, 94.4\% for XVerse, and 95.0\% for PSR. At 10 subjects, the SCR for all models exceeds 96\%, indicating that nearly every generated subject has lost its intended identity. This quantitative evidence strongly supports our hypothesis: current attention-routing mechanisms are fundamentally inadequate for resolving dense physical entanglement.
 
-\paragraph{Model Comparison}
+\textbf{Model Comparison.} 
 While all models fail at extreme subject counts, \textbf{MOSAIC} demonstrates a noticeably stronger baseline in low-complexity scenarios. At 2 subjects, MOSAIC achieves the highest DINOv2 score (0.425) and the lowest SCR (48.9\%), outperforming XVerse (0.355 / 58.9\%) and PSR (0.325 / 63.3\%). This multifaceted performance profile is further detailed in \textbf{Figure \ref{fig:radar_plot}}, which compares the semantic, style, structure, and identity metrics simultaneously. This suggests that MOSAIC's representation-centric disentanglement provides a more robust defense against attention leakage when the scene is relatively sparse. However, this advantage quickly dissipates as the subject count reaches 6 and beyond, underscoring the universal scalability bottleneck in current DiT/FLUX architectures~\cite{peebles2023scalable,flux2024}.
 
 \begin{figure}[t]
