@@ -37,7 +37,7 @@ To rigorously assess model performance, we first examine the overall trend of id
   \label{fig:trend_charts}
 \end{figure*}
 
-\paragraph{Catastrophic Identity Forgetting}
+\textbf{Catastrophic Identity Forgetting.} 
 The most striking finding from our benchmark is the catastrophic collapse of identity fidelity when scaling beyond 4 subjects. As shown in the DINOv2 scores, all models experience a precipitous drop. For instance, MOSAIC~\cite{mosaic2024}, which performs best at the 2-subject level with a DINOv2 score of 0.425, plummets to 0.110 at 10 subjects. XVerse~\cite{xverse2024} and PSR~\cite{psr2024} follow a nearly identical trajectory, dropping from 0.355 and 0.325 to 0.104 and 0.101, respectively. 
 
 This failure is further magnified when examining the Subject Collapse Rate (SCR). At the most lenient threshold ($\tau=0.4$), MOSAIC exhibits a 48.9\% collapse rate even with just 2 subjects. When pushed to 8 subjects, the SCR skyrockets to 94.7\% for MOSAIC, 94.4\% for XVerse, and 95.0\% for PSR. At 10 subjects, the SCR for all models exceeds 96\%, indicating that nearly every generated subject has lost its intended identity. This quantitative evidence strongly supports our hypothesis: current attention-routing mechanisms are fundamentally inadequate for resolving dense physical entanglement.
@@ -56,7 +56,7 @@ While all models fail at extreme subject counts, \textbf{MOSAIC} demonstrates a 
 
 A counter-intuitive phenomenon emerges when we analyze the Text-Image Alignment (CLIP-T)~\cite{radford2021learning} scores alongside the identity metrics. While DINOv2~\cite{oquab2023dinov2} scores plummet as the subject count increases, the CLIP-T scores for all models actually exhibit a slight upward trend. For example, PSR's CLIP-T score rises from 0.274 (2 subjects) to 0.309 (10 subjects), and MOSAIC rises from 0.261 to 0.300.
 
-This exposes a critical trade-off mechanism inherent in current diffusion models. When faced with the overwhelming complexity of generating 8 or 10 distinct, interacting individuals, the models actively "take a shortcut." Instead of attempting to faithfully reconstruct each specific identity—which would require precise, uncorrupted attention routing—the models revert to generating a generic "group of people" that satisfies the macro-level semantic constraints of the prompt. Consequently, the global CLIP-T score improves, but at the total expense of personalized identity.
+This exposes a critical trade-off mechanism inherent in current diffusion models. When faced with the overwhelming complexity of generating 8 or 10 distinct, interacting individuals, the models actively ``take a shortcut.'' Instead of attempting to faithfully reconstruct each specific identity---which would require precise, uncorrupted attention routing---the models revert to generating a generic ``group of people'' that satisfies the macro-level semantic constraints of the prompt. Consequently, the global CLIP-T score improves, but at the total expense of personalized identity.
 
 \subsection{Qualitative Failure Analysis}
 
@@ -74,7 +74,7 @@ To better understand \textit{how} these models fail, we perform a qualitative vi
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig_case_analysis.png}
-  \caption{\textbf{Detailed Case Analysis of Identity Bleeding.} (Left) Reference images of two distinct subjects. (Right) Generation results for a complex interaction prompt ("A black woman and a western woman shaking hands"). While the MOSAIC baseline successfully maintains identity boundaries (marked with green check), XVerse and PSR suffer from severe identity bleeding, where the features of Subject A contaminate the spatial region of Subject B (marked with red cross).}
+  \caption{\textbf{Detailed Case Analysis of Identity Bleeding.} (Left) Reference images of two distinct subjects. (Right) Generation results for a complex interaction prompt (``A black woman and a western woman shaking hands''). While the MOSAIC baseline successfully maintains identity boundaries (marked with green check), XVerse and PSR suffer from severe identity bleeding, where the features of Subject A contaminate the spatial region of Subject B (marked with red cross).}
   \label{fig:case_analysis}
 \end{figure*}
 

@@ -19,9 +19,9 @@ The core of our benchmark is a set of carefully crafted evaluation prompts desig
 
 For each subject level, we design 15 unique prompts, resulting in a total of 75 base prompts. To thoroughly investigate the impact of spatial entanglement on attention leakage, we strictly control the prompt IDs (1-75) and categorize them into three distinct scene types, ensuring an even distribution of 5 prompts per type within each subject level:
 \begin{itemize}
-    \item \textbf{Neutral (No Interaction)}: Subjects are placed in the same scene without physical overlap (e.g., \textit{"Subject A and Subject B standing next to each other"}). These prompts test the model's baseline ability to prevent identity bleeding across spatially separated regions.
-    \item \textbf{Occlusion}: One subject partially blocks the view of another (e.g., \textit{"Subject A standing behind Subject B"}). These prompts test the model's amodal completion and depth ordering capabilities.
-    \item \textbf{Interaction}: Subjects are physically engaged with one another (e.g., \textit{"Subject A hugging Subject B"} or \textit{"Subject A hugging Subject B while Subject C stands behind Subject D"}). These are the most challenging prompts, testing the model's ability to maintain fine-grained contact geometry and identity under severe attention entanglement.
+    \item \textbf{Neutral (No Interaction)}: Subjects are placed in the same scene without physical overlap (e.g., \textit{``Subject A and Subject B standing next to each other''}). These prompts test the model's baseline ability to prevent identity bleeding across spatially separated regions.
+    \item \textbf{Occlusion}: One subject partially blocks the view of another (e.g., \textit{``Subject A standing behind Subject B''}). These prompts test the model's amodal completion and depth ordering capabilities.
+    \item \textbf{Interaction}: Subjects are physically engaged with one another (e.g., \textit{``Subject A hugging Subject B''} or \textit{``Subject A hugging Subject B while Subject C stands behind Subject D''}). These are the most challenging prompts, testing the model's ability to maintain fine-grained contact geometry and identity under severe attention entanglement.
 \end{itemize}
 
 \subsection{Evaluation Protocol}
