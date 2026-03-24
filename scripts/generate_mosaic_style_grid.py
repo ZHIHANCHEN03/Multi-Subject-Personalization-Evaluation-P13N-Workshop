@@ -33,7 +33,11 @@ def create_mosaic_style_grid():
     top_margin = 80
     
     grid_w = ref_area_w + len(models) * (img_w + padding_x) + 20
-    grid_h = top_margin + img_h + padding_y + 140
+    
+    # Calculate required height based on max content
+    total_ref_h = int(min(img_w, img_h) * 0.7) * 2 + 20
+    max_content_h = max(img_h, total_ref_h)
+    grid_h = top_margin + max_content_h + padding_y + 80
     
     grid_img = Image.new('RGB', (grid_w, grid_h), color='white')
     draw = ImageDraw.Draw(grid_img)
@@ -114,8 +118,11 @@ def create_mosaic_style_grid():
             print(f"Error loading {img_path}: {e}")
             
     # Add prompt at the bottom
+    # We need to make sure the text is placed below both the generated images AND the reference images
+    max_y_content = max(top_margin + img_h, start_y + ref_size * 2 + 20)
+    
     prompt_text = "Prompt: A black woman and a western woman shaking hands."
-    draw.text((20, top_margin + img_h + 50), prompt_text, font=prompt_font, fill='#333333')
+    draw.text((20, max_y_content + 20), prompt_text, font=prompt_font, fill='#333333')
             
     output_path = os.path.join(output_dir, 'fig_case_analysis.png')
     grid_img.save(output_path)
