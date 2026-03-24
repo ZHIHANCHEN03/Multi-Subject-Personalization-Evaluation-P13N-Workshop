@@ -6,7 +6,7 @@ import os
 
 def create_advanced_teaser():
     base_dir = '/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop'
-    output_dir = os.path.join(base_dir, 'Paper', 'images')
+    output_dir = os.path.join(base_dir, 'Paper', 'latex_source', 'figures')
     os.makedirs(output_dir, exist_ok=True)
     
     plt.rcParams['font.family'] = 'Times New Roman'

@@ -1,6 +1,6 @@
 import os
 import json
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 def get_prompts():
     base_dir = '/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop'
@@ -16,7 +16,7 @@ def get_prompts():
 
 def create_image_grid():
     base_dir = '/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop'
-    output_dir = os.path.join(base_dir, 'Paper', 'images')
+    output_dir = os.path.join(base_dir, 'Paper', 'latex_source', 'figures')
     os.makedirs(output_dir, exist_ok=True)
     
     prompts = get_prompts()
@@ -98,20 +98,31 @@ def create_image_grid():
             draw.text((20, y_offset + 60 + i * 25), line, font=prompt_font, fill='#333333')
             
         # Draw the original Reference Images for this case
-        # Instead of just text, we'll draw placeholders representing the reference subjects
-        # to match the user's request (similar to MOSAIC paper)
-        # We'll put them right below the prompt text
         ref_y = y_offset + 60 + len(lines) * 25 + 10
         ref_box_size = 50
-        num_subjects = 2 if '2' in case_title else 4
+        
+        subject_map = {
+            '01_no_interaction': ['black_women.jpg', 'western_woman.jpg'],
+            '06_occlusion': ['blackman.jpg', 'old_man.jpg'],
+            '11_interaction': ['black_women.jpg', 'western_woman.jpg'],
+            '16_no_interaction': ['black_women.jpg', 'western_woman.jpg', 'asian_woman.jpg', 'girl.jpg']
+        }
         
         draw.text((20, ref_y + 15), "Inputs:", font=prompt_font, fill='blue')
-        for i in range(num_subjects):
+        subjects = subject_map.get(prompt_id, [])
+        for i, subj_file in enumerate(subjects):
             rx = 20 + 70 + i * (ref_box_size + 10)
-            draw.rectangle([rx, ref_y, rx+ref_box_size, ref_y+ref_box_size], fill='#e6f2ff', outline='black')
-            # Add small "Image" text to make it look like a placeholder for an actual image
-            draw.text((rx+10, ref_y+5), "Img", font=prompt_font, fill='#555555')
-            draw.text((rx+15, ref_y+25), f"S{i+1}", font=prompt_font, fill='black')
+            subj_path = os.path.join(base_dir, 'val_dataset', subj_file)
+            try:
+                with Image.open(subj_path) as s_img:
+                    s_img = ImageOps.fit(s_img, (ref_box_size, ref_box_size), Image.Resampling.LANCZOS)
+                    grid_img.paste(s_img, (rx, ref_y))
+            except Exception as e:
+                # Fallback to placeholder if not found
+                draw.rectangle([rx, ref_y, rx+ref_box_size, ref_y+ref_box_size], fill='#e6f2ff')
+            
+            draw.rectangle([rx, ref_y, rx+ref_box_size, ref_y+ref_box_size], outline='black', width=1)
+            # draw.text((rx+15, ref_y+25), f"S{i+1}", font=prompt_font, fill='black') # Removed to just show the image
             
         # Draw images
         for c, model in enumerate(models):
@@ -128,7 +139,7 @@ def create_image_grid():
             except Exception as e:
                 print(f"Error loading {img_path}: {e}")
                 
-    output_path = os.path.join(output_dir, 'fig_qualitative_comparison.png')
+    output_path = os.path.join(output_dir, 'qualitative_failures.png')
     grid_img.save(output_path)
     print(f"Saved qualitative comparison grid to {output_path}")
 

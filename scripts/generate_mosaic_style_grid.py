@@ -1,10 +1,10 @@
 import os
 import json
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 def create_mosaic_style_grid():
     base_dir = '/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop'
-    output_dir = os.path.join(base_dir, 'Paper', 'images')
+    output_dir = os.path.join(base_dir, 'Paper', 'latex_source', 'figures')
     os.makedirs(output_dir, exist_ok=True)
     
     # Simulating a case analysis with reference images on the left, and generated results on the right
@@ -24,16 +24,16 @@ def create_mosaic_style_grid():
     img_h = int(img_h * scale_factor)
     
     # We will draw placeholders for reference images on the left
-    ref_w = int(img_w * 0.8)
-    ref_h = int(img_h * 0.8)
+    # Make the reference boxes perfectly square to match the source images better
+    ref_size = int(min(img_w, img_h) * 0.7)
     
     padding_x = 20
     padding_y = 60
-    ref_area_w = ref_w + 40
+    ref_area_w = ref_size + 40
     top_margin = 80
     
     grid_w = ref_area_w + len(models) * (img_w + padding_x) + 20
-    grid_h = top_margin + img_h + padding_y + 100
+    grid_h = top_margin + img_h + padding_y + 140
     
     grid_img = Image.new('RGB', (grid_w, grid_h), color='white')
     draw = ImageDraw.Draw(grid_img)
@@ -52,21 +52,33 @@ def create_mosaic_style_grid():
     
     # Draw two dummy reference boxes
     # Load actual reference images if available, otherwise use placeholders
-    # For prompt 11, it's 2 subjects. The eval.py uses 'results/subjects/subject_{i:03d}.jpg'
-    # Since we don't have the actual subjects images in the current scope, we will use text but style it beautifully
-    # Or, we can just use the provided text as the user requested "input 的 subject 为什么不能直接显示在图片里面呢"
-    # I will create stylized colored blocks that represent the reference images better
+    
+    # Calculate y positions to center the two squares vertically relative to the generated images
+    total_ref_h = ref_size * 2 + 20
+    start_y = top_margin + (img_h - total_ref_h) // 2
     
     # We will just draw a nicer "Image" placeholder to represent the inputs
     # Subject A
-    ref1_y = top_margin
-    draw.rectangle([20, ref1_y, 20+ref_w, ref1_y+ref_h//2 - 20], fill='#e6f2ff', outline='black', width=2)
-    draw.text((20 + ref_w//2 - 60, ref1_y + ref_h//4 - 25), "Input Image\n  (Subj A)", font=text_font, fill='black')
+    ref1_y = start_y
+    subj1_path = os.path.join(base_dir, 'val_dataset', 'black_women.jpg')
+    try:
+        with Image.open(subj1_path) as s_img:
+            s_img = ImageOps.fit(s_img, (ref_size, ref_size), Image.Resampling.LANCZOS)
+            grid_img.paste(s_img, (20, ref1_y))
+    except Exception:
+        draw.rectangle([20, ref1_y, 20+ref_size, ref1_y+ref_size], fill='#e6f2ff')
+    draw.rectangle([20, ref1_y, 20+ref_size, ref1_y+ref_size], outline='black', width=2)
     
     # Subject B
-    ref2_y = top_margin+ref_h//2 + 20
-    draw.rectangle([20, ref2_y, 20+ref_w, ref2_y+ref_h//2 - 20], fill='#e6ffe6', outline='black', width=2)
-    draw.text((20 + ref_w//2 - 60, ref2_y + ref_h//4 - 25), "Input Image\n  (Subj B)", font=text_font, fill='black')
+    ref2_y = start_y + ref_size + 20
+    subj2_path = os.path.join(base_dir, 'val_dataset', 'western_woman.jpg')
+    try:
+        with Image.open(subj2_path) as s_img:
+            s_img = ImageOps.fit(s_img, (ref_size, ref_size), Image.Resampling.LANCZOS)
+            grid_img.paste(s_img, (20, ref2_y))
+    except Exception:
+        draw.rectangle([20, ref2_y, 20+ref_size, ref2_y+ref_size], fill='#e6ffe6')
+    draw.rectangle([20, ref2_y, 20+ref_size, ref2_y+ref_size], outline='black', width=2)
     
     # Draw column titles
     for i, title in enumerate(model_titles):
@@ -103,7 +115,7 @@ def create_mosaic_style_grid():
             
     # Add prompt at the bottom
     prompt_text = "Prompt: A black woman and a western woman shaking hands."
-    draw.text((20, top_margin + img_h + 30), prompt_text, font=prompt_font, fill='#333333')
+    draw.text((20, top_margin + img_h + 50), prompt_text, font=prompt_font, fill='#333333')
             
     output_path = os.path.join(output_dir, 'fig_case_analysis.png')
     grid_img.save(output_path)
