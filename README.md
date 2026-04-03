@@ -45,16 +45,48 @@ $$ \text{SCR}_{@\tau} = \frac{1}{N} \sum_{i=1}^{N} \mathds{1}\big[\cos(\text{DIN
 ```text
 ├── Paper/
 │   ├── images/               # High-res generated charts, grids, and teasers
-│   ├── latex_source/         # Full LaTeX source code for the CVPR submission
-│   └── section_*.md          # Markdown versions of the paper sections
+│   └── latex_source/         # Full LaTeX source code for the CVPR submission
 ├── eval_outputs/             # Raw JSON/CSV evaluation metrics for MOSAIC, XVerse, PSR
 ├── results/                  # Generated images from the benchmarked models
-└── scripts/                  # Python scripts for data processing and chart generation
-    ├── generate_advanced_teaser.py
-    ├── generate_mosaic_style_grid.py
-    ├── generate_radar_plot.py
-    └── ...
+├── scripts/                  # Python scripts for data processing and chart generation
+├── val_dataset/              # The benchmark dataset (prompts, subjects, config)
+├── MOSAIC-main/              # Submodule/Fork of MOSAIC for evaluation
+├── XVerse-main/              # Submodule/Fork of XVerse for evaluation
+├── PSR-main/                 # Submodule/Fork of PSR for evaluation
+└── start.sh                  # Main entry point for running the benchmark
 ```
+
+---
+
+## 🛠️ Installation & Quick Start
+
+Our benchmark is designed to be fully reproducible. You can use the provided `start.sh` script to automate environment setup, model execution, and evaluation.
+
+### Prerequisites
+- Linux or macOS
+- Python 3.9+
+- NVIDIA GPU (Recommended) or Apple Silicon (Mac)
+
+### 1. Run the Full Benchmark Pipeline
+The `start.sh` script will automatically create virtual environments, download required weights (e.g., SAM2, Florence-2, DINOv2), and run the generation and evaluation loop.
+
+```bash
+# Run generation and evaluation for all three baseline models
+bash start.sh all
+```
+
+### 2. Step-by-Step Execution
+If you prefer to run generation and evaluation separately:
+
+```bash
+# Step 1: Generate images using the benchmark prompts (outputs to results/)
+bash start.sh gen --models xverse,mosaic,psr
+
+# Step 2: Evaluate the generated images to compute SCR, DINOv2, and CLIP metrics
+bash start.sh eval --models xverse,mosaic,psr
+```
+
+*Note: The script automatically handles dependency isolation for different models to prevent pip conflicts.*
 
 ---
 
