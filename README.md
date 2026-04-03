@@ -18,7 +18,7 @@ This repository provides a comprehensive **stress-test benchmark** and a novel e
 ### Key Contributions
 1. **A Scalable Multi-Subject Benchmark**: A rigorous testing suite scaling from 2 to 10 subjects, categorized by interaction complexity (Neutral, Occlusion, Interaction).
 2. **Subject Collapse Rate (SCR)**: A new DINOv2-based metric that explicitly quantifies the percentage of subjects that lose their identity in a generated scene, overcoming the "Semantic Shortcut" flaw of global CLIP metrics.
-3. **Comprehensive Failure Analysis**: Quantitative and qualitative evidence revealing that while current models succeed at $N=2$, they suffer >95% identity collapse at $N=8$.
+3. **Comprehensive Failure Analysis**: Quantitative and qualitative evidence revealing that while current models succeed at `N=2`, they suffer >95% identity collapse at `N=8`.
 
 ---
 
@@ -36,10 +36,13 @@ Our benchmark is constructed by sampling from a unified subject pool and inserti
 
 ## 📈 Evaluation Metrics & SCR
 
-Standard CLIP-T metrics often present an *illusion of scalability*. As $N$ increases, models default to generating a generic "group of people," which satisfies the global text prompt but completely destroys local identity fidelity. 
+Standard CLIP-T metrics often present an *illusion of scalability*. As `N` increases, models default to generating a generic "group of people," which satisfies the global text prompt but completely destroys local identity fidelity. 
 
 To address this, we propose **SCR (Subject Collapse Rate)**:
-$$ \text{SCR}_{@\tau} = \frac{1}{N} \sum_{i=1}^{N} \mathbb{1}\big[\cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^{(i)})) < \tau\big] $$
+
+```math
+\text{SCR}_{@\tau} = \frac{1}{N} \sum_{i=1}^{N} \mathbb{1}\big[\cos(\text{DINOv2}(I_{gen}), \text{DINOv2}(I_{ref}^{(i)})) < \tau\big]
+```
 
 *See `scripts/` for the evaluation code used to compute DINOv2, CLIP-I, CLIP-T, and SCR.*
 
