@@ -1,8 +1,13 @@
 # When Identities Collapse: A Stress-Test Benchmark for Multi-Subject Personalization
 
+[![arXiv](https://img.shields.io/badge/arXiv-2603.26078-b31b1b.svg)](https://arxiv.org/abs/2603.26078)
+[![CVPR 2026 P13N](https://img.shields.io/badge/CVPR%202026-P13N%20Workshop-blue.svg)](#)
+
+**Zhihan Chen, Yuhuan Zhao, Yijie Zhu, Xinyu Yao**
+
 ![Teaser](Paper/latex_source/figures/teaser.png)
 
-This repository contains the code, data, and evaluation scripts for our paper: **"When Identities Collapse: A Stress-Test Benchmark for Multi-Subject Personalization"** (Submitted to CVPR 2026 P13N Workshop).
+This repository contains the code, data, and evaluation scripts for our paper: **"When Identities Collapse: A Stress-Test Benchmark for Multi-Subject Personalization"** (Accepted by CVPR 2026 P13N Workshop).
 
 ## 📢 Overview
 
@@ -103,13 +108,13 @@ You can find all our generated analytical charts in `Paper/latex_source/figures/
 
 ## 📝 Citation
 
-If you find our benchmark or metrics useful, please consider citing our work (details pending acceptance).
+If you find our benchmark or metrics useful, please consider citing our work:
 
 ```bibtex
-@article{anonymous2026identities,
+@inproceedings{chen2026identities,
   title={When Identities Collapse: A Stress-Test Benchmark for Multi-Subject Personalization},
-  author={Anonymous},
-  journal={CVPR P13N Workshop},
+  author={Chen, Zhihan and Zhao, Yuhuan and Zhu, Yijie and Yao, Xinyu},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
   year={2026}
 }
 ```
