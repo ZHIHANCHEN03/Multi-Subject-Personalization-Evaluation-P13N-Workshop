@@ -8,13 +8,14 @@ class LENS(nn.Module):
     LENS (Localized Entanglement Navigation and Scoring) Architecture
     - Backbone: Qwen3.5-9B (Frozen or LoRA)
     - Score Head: 1D scalar for preference ranking (Margin Ranking Loss)
-    - Classification Head: 4D logits for diagnostic taxonomy (Cross Entropy Loss)
-      * Class 0: Perfect Alignment
-      * Class 1: Attribute Bleeding
-      * Class 2: Semantic Swapping
-      * Class 3: Entity Collapse (Homogenization / Missing)
+    - Classification Head: 4D logits for diagnostic taxonomy (BCEWithLogitsLoss)
+      * Index 0: Class 4 (Entity Collapse)
+      * Index 1: Class 3 (Semantic Swapping)
+      * Index 2: Class 2 (Attribute Bleeding)
+      * Index 3: Class 1 (Prompt Misalignment)
+      Note: Class 0 (Perfect Alignment) is implicitly learned when all 4 dimensions are 0.0.
     """
-    def __init__(self, model_name="Qwen/Qwen3.5-9B", num_classes=4, use_lora=False):
+    def __init__(self, model_name="Qwen/Qwen3.5-9B", num_error_classes=4, use_lora=False):
         super(LENS, self).__init__()
         
         print(f"Loading VLM Backbone: {model_name}...")
@@ -56,7 +57,7 @@ class LENS(nn.Module):
         self.classification_head = nn.Sequential(
             nn.Linear(hidden_size, hidden_size // 2),
             nn.GELU(),
-            nn.Linear(hidden_size // 2, num_classes)
+            nn.Linear(hidden_size // 2, num_error_classes)
         ).to(torch.bfloat16)
 
     def forward(self, input_ids, attention_mask, pixel_values=None):

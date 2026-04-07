@@ -10,8 +10,8 @@ def main(args):
     print(f"Initializing LENS Model Training. LoRA Enabled: {args.use_lora}")
     
     # 1. Load Model (Dual-Head VLM)
-    # Using Qwen3.5-9B as the foundation
-    model = LENS(model_name="Qwen/Qwen3.5-9B", num_classes=4, use_lora=args.use_lora)
+    # Using Qwen3.5-9B as the foundation. 4 error classes for multi-label prediction.
+    model = LENS(model_name="Qwen/Qwen3.5-9B", num_error_classes=4, use_lora=args.use_lora)
     
     # 2. Extract Trainable Parameters
     trainable_params = [p for p in model.parameters() if p.requires_grad]
@@ -24,9 +24,9 @@ def main(args):
     # The Margin Ranking Loss is for the Score Head (Preference)
     ranking_loss_fn = nn.MarginRankingLoss(margin=1.0)
     
-    # The Cross Entropy Loss is for the Classification Head (Diagnostic Taxonomy)
-    # 0: Perfect, 1: Bleeding, 2: Swapping, 3: Collapse
-    classification_loss_fn = nn.CrossEntropyLoss()
+    # The BCEWithLogitsLoss is for the Classification Head (Diagnostic Taxonomy)
+    # Allows for multi-label and 3-tier continuous soft-labels (0.0, 0.5, 1.0)
+    classification_loss_fn = nn.BCEWithLogitsLoss()
     
     # 4. Load PrismBench Data
     dataset = PrismBenchDataset(length=20) # Dummy for now, replace with JSON loader
@@ -52,13 +52,21 @@ def main(args):
         )
         
         # C. Calculate Ranking Loss (Who won?)
-        labels = batch["preference_label"].to(device).to(torch.bfloat16)
-        loss_rank = ranking_loss_fn(score_A.squeeze(), score_B.squeeze(), labels)
+        # Using preference_score_A and preference_score_B to derive ranking target
+        pref_A = batch["preference_score_A"].to(device)
+        pref_B = batch["preference_score_B"].to(device)
+        # target = 1 if A > B, else -1 (simplification for MarginRankingLoss)
+        labels = torch.where(pref_A > pref_B, torch.tensor(1.0).to(device), torch.tensor(-1.0).to(device)).to(torch.bfloat16)
+        loss_rank = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
         
         # D. Calculate Diagnostic Classification Loss (Why did Image A/B fail?)
-        # Assuming logits_A maps to the flawed image in this batch for demonstration
-        cls_labels = batch["classification_label"].to(device)
-        loss_cls = classification_loss_fn(logits_A, cls_labels)
+        # Apply BCE loss on both branches to penalize diagnostic errors on both images
+        targets_A = batch["category_scores_A"].to(device).to(torch.bfloat16)
+        targets_B = batch["category_scores_B"].to(device).to(torch.bfloat16)
+        
+        loss_cls_A = classification_loss_fn(logits_A, targets_A)
+        loss_cls_B = classification_loss_fn(logits_B, targets_B)
+        loss_cls = (loss_cls_A + loss_cls_B) / 2.0
         
         # E. Joint Backward Pass (Multi-Task Learning Regularization)
         # This forces the Backbone to extract fine-grained subject features
