@@ -7,15 +7,16 @@
 > LENS 的设计初衷，就是通过一套严密的 MECE 诊断分类树，精准打击 CLIP 和 DINO 的评估盲区，重新定义多主体生成的 Benchmark 标杆。
 
 ## 1. 数据组成 (Data Composition)
-为了将 LENS 训练为行业标准的诊断型指标模型，PrismBench 采用了以下规模和策略：
+为了将 LENS 训练为行业标准的诊断型指标模型，同时确保在学术研究中的最高投资回报率 (ROI)，PrismBench 采用了以下“甜点级 (Sweet Spot)” 规模和策略：
 
-- **银集 (Silver Set, 自动打标训练集)**: 约 **100,000 (10w)** 个图像对。
+- **总数据量**: 约 **53,000 (5.3w)** 个图像对。
+- **银集 (Silver Set, 自动打标训练集)**: 约 **50,000 (5w)** 个图像对。
   - 数据引擎：采用多模型协作。由 **GPT-4o (DALL-E)** 负责生成高质量、纯白背景的主体 Reference Images，并由 **Claude** 负责撰写连贯、高难度的场景 Prompt。
-  - 生成模型对决：最后由 **[Gemini (Nano Banana 2)](https://gemini.google/overview/image-generation/)** 生成“好图”，由 **[MOSAIC](https://github.com/bytedance-fanqie-ai/MOSAIC)** 等开源基线生成“差图”。
-  - 由高级 AI 教师 (例如 `Qwen3.5-35B-A3B-FP8`) 进行 VLM 伪标签打标。
+  - 生成模型对决 (控制变量配对)：固定使用 **[Gemini (Nano Banana 2)](https://gemini.google/overview/image-generation/)** 作为强模型锚点生成“好图”，使用 **MOSAIC** 等特定策略基线作为弱模型锚点生成“差图”。初始生成 151,000 张单图 (75,500 对)，经过严格漏斗清洗后保留 50,000 对。
+  - 由高级 AI 教师 (例如 `Qwen-VL-Max` 或 `GPT-4o`) 结合 CoT (思维链) 与硬锚点清洗机制进行高质量 VLM 伪标签打标。
   - 主体数量分布：$N \in \{2, 4, 6, 8\}$（剔除单主体，专注特征纠缠）。
-- **金集 (Golden Set, 人工打标测试/验证集)**: 约 **10,000 (1w)** 个图像对。
-  - 由人类专家严格标注。
+- **金集 (Golden Set, 人工打标测试/验证集)**: 约 **3,000 (3k)** 个图像对。
+  - 由领域专家采用 **双盲标注 (Double-Blind) + 冲突仲裁 (Tie-breaker)** 的机制严格标注，彻底消除自动化偏见 (Automation Bias)。
   - 同样覆盖 $N \in \{2, 4, 6, 8\}$ 的极端密度失败场景，用于验证 LENS 模型的 Zero-Shot（零样本）鲁棒性。
 
 ## 2. 图像预处理 (拼接 Stitching vs. 独立推理)
