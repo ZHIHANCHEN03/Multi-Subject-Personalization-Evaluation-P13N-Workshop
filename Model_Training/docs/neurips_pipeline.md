@@ -46,6 +46,17 @@
 *   **人工标注 (Human-labels)：** 约 **10,000 (1w)** 条数据由人类专家严格标注，作为测试集 (Golden Set)。
 
 ### 2.1 6类层级化错误分类体系与三级打分制 (3-Tier Scoring)
+
+#### 金集双盲标注与仲裁机制 (Golden Set Double-Blind Annotation Protocol)
+为了彻底消除自动化偏见 (Automation Bias) 和人类锚定效应，我们在构建 1w 条金集时**坚决不使用任何 VLM 预打标**，而是采用了纯人类主导的“双盲标注 + 自动仲裁”机制，这是在 NeurIPS 论文中证明数据集 Ground Truth 质量的最强有力手段：
+1.  **双盲独立标注 (Double-Blind)**：同一张生成的图像会被随机分发给两位相互独立的标注员（Annotator A 和 B）。他们通过“瀑布流单选问卷”从头开始盲标。
+2.  **一致性检验 (Inter-Annotator Agreement, IAA)**：在论文中，我们将使用 Cohen's Kappa ($\kappa$) 系数来证明这 6 类诊断体系是客观的。只要 $\kappa > 0.6$，就能在统计学上向 Reviewer 证明该分类体系没有主观歧义。
+3.  **冲突仲裁机制 (Tie-breaking Resolution)**：
+    *   *高度一致 (Absolute Agreement)*：两人选择完全相同，直接入库。
+    *   *轻微偏差 (Minor Discrepancy)*：例如 A 给 `1.0` (确定错)，B 给 `0.5` (疑似错)。系统自动平均为软标签 `0.75`，保留人类的不确定性。
+    *   *严重冲突 (Severe Conflict)*：例如 A 给 `0.0` (没问题)，B 给 `1.0` (严重错误)。该样本将被打上 `[Conflict]` 标签，交由核心作者/领域专家进行最终一锤定音的仲裁 (Tie-breaker)。
+
+#### 诊断体系与打分示例
 LENS 的核心在于诊断多主体生成**为什么**失败。加上将“实体崩溃”拆分为“缺失”与“崩坏”，我们构建了一个完美的 6 类互斥（MECE）决策树。
 
 为了解决生成图像中常见的“模棱两可”情况，我们引入了**三级打分制 (3-Tier Scoring System)**，为每个错误类别分配：
