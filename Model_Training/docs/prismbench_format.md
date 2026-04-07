@@ -18,23 +18,41 @@
   - 由人类专家严格标注。
   - 同样覆盖 $N \in \{2, 4, 6, 8\}$ 的极端密度失败场景，用于验证 LENS 模型的 Zero-Shot（零样本）鲁棒性。
 
-## 2. 图像预处理 (拼接 Stitching)
-与其将多个独立的图像分别喂给 VLM，我们将它们**拼接 (stitch)**成一个单一的网格。
-- **参考图像 (Reference Images)**: 由 **GPT-4o / DALL-E 3** 自动生成的高质量单主体图像。**纯白背景**（以隔离身份特征，防止背景干扰）。
-- **生成图像 (Generated Images)**: 由 Claude 编写的复杂 Prompt 驱动，包含真实世界或风格化的**复杂背景**（用于测试空间注意力的特征纠缠和背景对齐能力）。
+## 2. 图像预处理 (拼接 Stitching vs. 独立推理)
 
-**拼接格式：**
+在 LENS 的生命周期中，**训练 (Train) 阶段**和**推理/评估 (Inference) 阶段**对输入图像的格式要求是**完全不同**的。这种设计是为了兼顾“大规模自动打标的成本”与“模型实际应用的灵活性”。
+
+### 2.1 训练阶段 (Train / Data Annotation) 的输入：Stitched Grid
+在生成 10w 条训练集（给 Teacher VLM 打标）时，我们采用的是**拼接网格 (Stitched Grid)** 格式。
+*   **为什么这么做？** 
+    1. 节约大模型 API Token 成本：将 Reference 和两张生成的图拼在一起，一次 API 调用就能得出所有分数。
+    2. 强化对比学习：Teacher VLM 可以在同一张大图里直接对比好图（Image A）和差图（Image B）的细节差异。
+*   **网格像素要求 (Grid Resolution)：**
+    为了让 VLM 能够清晰地辨认局部特征泄漏（Class 2）和结构畸变（Class 4），单个子图必须统一为 `512x512` 像素。
+    - **N=2 或 N=4 时**: 采用 **2x2 Grid (1024x1024 px)**。
+    - **N=6 或 N=8 时**: 采用 **垂直扩展网格 (Vertical Expanded Grid)**，高度变为 1536px 或 2048px，确保每张生成的图像（Img 1 和 Img 2）和多达 8 张 Reference 始终能保持 `512x512` 的清晰分辨率。
+
+*(示例：N=2 时的基础网格 1024x1024)*
 ```text
 +-------------------+-------------------+
-|                   |                   |
+|   512x512 px      |   512x512 px      |
 |   Reference A     |   Reference B     |
-|                   |                   |
 +-------------------+-------------------+
-|                   |                   |
+|   512x512 px      |   512x512 px      |
 |   Generated Img 1 |   Generated Img 2 |
-|                   |                   |
 +-------------------+-------------------+
 ```
+
+### 2.2 推理/评估阶段 (Inference) 的输入：独立图像序列 (Sequential Input)
+当 LENS 训练完成，作为一个开源评估工具发布在 Hugging Face 给社区使用时，我们**不强制要求**用户把图片拼成 Grid！
+*   **输入格式：** 列表形式的独立图片 `[Ref_1, Ref_2, ..., Ref_N, Generated_Image]`。
+*   **为什么这么做？**
+    1. **解耦评估**：在实际应用中，用户通常是拿 LENS 来评估单张生成的图片，而不是成对对比。
+    2. **用户友好 (User-Friendly)**：如果要求开源社区每次评测前还要写复杂的 Python PIL 代码去拼长图，这会极大增加工具的使用门槛。
+*   **内部处理逻辑 (In LENS Forward Pass)**：
+    当用户传入一个图片列表时，LENS 模型内部会自动利用 Qwen3.5-9B 的 Multi-Image 处理能力，将它们编码为独立的视觉 Token 序列：
+    `<image> (Ref 1) <image> (Ref 2) ... <image> (Generated) + Text Prompt`
+    然后，LENS 附加的 MLP Heads（Score Head 和 Classification Head）会直接输出针对这一张 Generated Image 的打分和 5D 诊断向量。
 
 ## 3. JSON 标签格式 (孪生网络成对学习)
 
