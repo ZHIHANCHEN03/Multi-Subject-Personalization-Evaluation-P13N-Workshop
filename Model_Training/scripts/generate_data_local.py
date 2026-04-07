@@ -76,17 +76,18 @@ class LocalPrismBenchPipeline:
         Task 1: Assign a preference score (0.0 to 1.0) for both images based on overall quality.
         
         Task 2: Diagnose the errors in BOTH Image 1 and Image 2 using a 3-tier scoring system (1.0 = Yes, 0.5 = Maybe, 0.0 = No).
-        Class 4 (Collapse): Are there exactly N distinct subjects as requested? (If NO -> 1.0 or 0.5)
-        Class 3 (Swapping): Are the core identities assigned to the wrong actions/roles? (If YES -> 1.0 or 0.5)
-        Class 2 (Bleeding): Are local attributes leaking across subjects? (If YES -> 1.0 or 0.5)
-        Class 1 (Misalignment): Is the global background/style ignoring the prompt? (If YES -> 1.0 or 0.5)
+        Class 5 (Omission/Homogenization): Are any of the requested N distinct core subjects missing or cloned? (If YES -> 1.0 or 0.5)
+        Class 4 (Distortion/Mutilation): Are any subjects' physical structures severely distorted or mutilated? (If YES -> 1.0 or 0.5)
+        Class 3 (Swapping): Are the core identities assigned to the wrong actions, roles, or props? (If YES -> 1.0 or 0.5)
+        Class 2 (Bleeding): Are local attributes (colors, textures) leaking across subjects? (If YES -> 1.0 or 0.5)
+        Class 1 (Misalignment): Are requested actions or non-reference text props missing? (If YES -> 1.0 or 0.5)
         
         Output JSON EXACTLY like this (no markdown, just json):
         {{
             "preference_score_A": 0.9,
             "preference_score_B": 0.2,
-            "category_scores_A": {{"class_4_collapse": 0.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0}},
-            "category_scores_B": {{"class_4_collapse": 1.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0}}
+            "category_scores_A": {{"class_5_omission": 0.0, "class_4_distortion": 0.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0}},
+            "category_scores_B": {{"class_5_omission": 1.0, "class_4_distortion": 0.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0}}
         }}
         """
         
@@ -109,8 +110,8 @@ class LocalPrismBenchPipeline:
     def _fallback_labels(self):
         return {
             "preference_score_A": 0.5, "preference_score_B": 0.5,
-            "category_scores_A": {"class_4_collapse": 0.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0},
-            "category_scores_B": {"class_4_collapse": 0.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0}
+            "category_scores_A": {"class_5_omission": 0.0, "class_4_distortion": 0.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0},
+            "category_scores_B": {"class_5_omission": 0.0, "class_4_distortion": 0.0, "class_3_swapping": 0.0, "class_2_bleeding": 0.0, "class_1_misalignment": 0.0}
         }
 
     def process_task(self, task):
@@ -120,7 +121,7 @@ class LocalPrismBenchPipeline:
         subjects = task["subjects"]
         
         # 1. Reference Images MUST have solid backgrounds
-        # In a real GPT-driven pipeline, these would be retrieved from SemAlign-MS-Subjects200K
+        # In the full Multi-Agent pipeline, these are retrieved from GPT-4o / DALL-E 3
         # Here we simulate the process using SDXL.
         refs = []
         for i, sub in enumerate(subjects):

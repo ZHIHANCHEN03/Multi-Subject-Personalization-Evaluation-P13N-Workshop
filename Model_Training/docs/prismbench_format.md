@@ -10,8 +10,8 @@
 为了将 LENS 训练为行业标准的诊断型指标模型，PrismBench 采用了以下规模和策略：
 
 - **银集 (Silver Set, 自动打标训练集)**: 约 **100,000 (10w)** 个图像对。
-  - 数据引擎：使用 **GPT** 自动生成多主体描述与组合 Prompt，并生成对应的 Reference Images。
-  - 生成模型对决：好的图片来自 **[Gemini (Nano Banana 2)](https://gemini.google/overview/image-generation/)**，差的图片来自 **[MOSAIC](https://github.com/bytedance-fanqie-ai/MOSAIC)**。
+  - 数据引擎：采用多模型协作。由 **GPT-4o (DALL-E)** 负责生成高质量、纯白背景的主体 Reference Images，并由 **Claude** 负责撰写连贯、高难度的场景 Prompt。
+  - 生成模型对决：最后由 **[Gemini (Nano Banana 2)](https://gemini.google/overview/image-generation/)** 生成“好图”，由 **[MOSAIC](https://github.com/bytedance-fanqie-ai/MOSAIC)** 等开源基线生成“差图”。
   - 由高级 AI 教师 (例如 `Qwen3.5-35B-A3B-FP8`) 进行 VLM 伪标签打标。
   - 主体数量分布：$N \in \{2, 4, 6, 8\}$（剔除单主体，专注特征纠缠）。
 - **金集 (Golden Set, 人工打标测试/验证集)**: 约 **10,000 (1w)** 个图像对。
@@ -20,8 +20,8 @@
 
 ## 2. 图像预处理 (拼接 Stitching)
 与其将多个独立的图像分别喂给 VLM，我们将它们**拼接 (stitch)**成一个单一的网格。
-- **参考图像 (Reference Images)**: 直接来源于 MOSAIC 开源的 SemAlign-MS-Subjects200K 数据集。纯白背景（以隔离身份特征）。
-- **生成图像 (Generated Images)**: 由 Prompt 驱动的复杂背景（用于测试空间注意力的特征纠缠）。
+- **参考图像 (Reference Images)**: 由 **GPT-4o / DALL-E 3** 自动生成的高质量单主体图像。**纯白背景**（以隔离身份特征，防止背景干扰）。
+- **生成图像 (Generated Images)**: 由 Claude 编写的复杂 Prompt 驱动，包含真实世界或风格化的**复杂背景**（用于测试空间注意力的特征纠缠和背景对齐能力）。
 
 **拼接格式：**
 ```text
@@ -51,13 +51,15 @@
     "preference_score_A": 0.9, 
     "preference_score_B": 0.2,
     "category_scores_A": {
-      "class_4_collapse": 0.0,
+      "class_5_omission": 0.0,
+      "class_4_distortion": 0.0,
       "class_3_swapping": 0.0,
       "class_2_bleeding": 0.5,
       "class_1_misalignment": 0.0
     },
     "category_scores_B": {
-      "class_4_collapse": 1.0,
+      "class_5_omission": 1.0,
+      "class_4_distortion": 0.0,
       "class_3_swapping": 0.0,
       "class_2_bleeding": 0.0,
       "class_1_misalignment": 0.0
@@ -78,18 +80,38 @@
 
 按以下顺序评估：
 
-1. **Class 4 - 实体崩溃 (Entity Collapse)**: 画面中是否恰好存在请求的 $N$ 个不同的主体？ (如果“否” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
+1. **Class 5 - 核心实体缺失与同质化 (Subject Omission & Homogenization)**: 画面中是否恰好存在请求的 $N$ 个**独立的**核心参考主体？ (如果“否” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
    - **对标指标**：DINOv2, YOLO (目标检测), SCR (你的CVPR指标)。
-2. **Class 3 - 语义错位 (Semantic Swapping / Misbinding)**: 核心身份是否被分配了属于彼此的错误的动作/角色？ (如果“是” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
+   - **核心防线**：仅清点“提供的参考主体”。文本里随口提的普通道具（如汉堡、剑）如果丢了，不在此类，归入 Class 1。
+   - **示例**：
+     - `1.0分`：明确少人（要参考主体猫和狗，只有狗，猫完全消失）；克隆（要参考主体A和B，生成了两个一模一样的A）；物种消失（要A人和B猫，画了两个人，猫没了）。
+     - `0.5分`：严重遮挡（某主体只露出半只手或半张脸）；极度模糊无法确认身份。
+2. **Class 4 - 实体结构扭曲与崩坏 (Subject Distortion & Mutilation)**: 在主体存在的前提下，其基础生物/物理结构是否发生了严重扭曲或畸变？ (如果“是” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
+   - **对标指标**：FID, IS (Inception Score), BRISQUE。
+   - **核心防线**：专门惩罚把人画成“怪物”的模型。不包含串色问题（Class 2）。
+   - **示例**：
+     - `1.0分`：肢体变异（长了三个胳膊、六根手指且极其明显）；身体残缺（只有一个悬空的头，没有身干）；脸部如融化的蜡像。
+     - `0.5分`：轻微比例失调（腿异常短小）；身体连接处轻微不对齐。
+3. **Class 3 - 语义错位 (Semantic Swapping / Misbinding)**: 核心身份是否被分配了属于彼此的错误的动作/角色？ (如果“是” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
    - **对标指标**：VQA (视觉问答), T2I-CompBench。
    - **核心防线**：强调“元素生成出来了，但给错人了”。
-3. **Class 2 - 特征泄漏 (Attribute Bleeding)**: 核心身份和动作是否正确，但局部特征（颜色、配饰、肢体特征）在主体之间泄漏？ (如果“是” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
+   - **示例**：
+     - `1.0分`：动作给错（要A骑马B牵马，变成B骑马A牵马）；衣服穿错（要A穿红B穿蓝，变成A蓝B红）；道具拿错（要A拿剑，变成B拿剑）；位置关系互换（A在桌上B在椅上，反过来了）。
+     - `0.5分`：动作不标准（要“背靠背”，但看起来像“并排站”）；道具归属不清（剑放两人中间，看不出谁拿）。
+4. **Class 2 - 特征泄漏 (Attribute Bleeding)**: 核心身份和动作是否正确，但局部特征（颜色、配饰、肢体特征）在主体之间泄漏？ (如果“是” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
    - **对标指标**：**目前学术界空白**（这正是 LENS 最大的独家贡献）。
-4. **Class 1 - 文本遗漏与语境不对齐 (Prompt Misalignment / Omission)**: 主体和特征没串味，但生成的动作是否彻底丢失了（如要A吃饭但画面没饭），或者全局背景/画风忽略了 Prompt 的要求？ (如果“是” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
+   - **示例**：
+     - `1.0分`：颜色渗透（A的红衣服在B的蓝衣服上染了一大块红斑）；肢体融合（握手时手部长成一团带有双人肤色的肉块）；配饰传染（A戴眼镜，B没戴，但B脸上有眼镜框）。
+     - `0.5分`：接缝处颜色轻微渗透；疑似环境光影反射导致的模糊串色。
+5. **Class 1 - 文本遗漏与动作不对齐 (Prompt Misalignment / Omission)**: 主体和特征没串味，但 Prompt 要求的核心动作、交互或**纯文本指定的普通道具（非定制主体）**是否彻底丢失了？ (如果“是” $\rightarrow$ 得分 `1.0` 或 `0.5`)。
    - **对标指标**：CLIP Score (CLIP-T), ImageReward, PickScore。
-   - **核心防线**：强调“根本没生成出来”的文本截断或遗忘。
-5. **Class 0 - 完美对齐 (Perfect Alignment)**: 上述四项得分全为 `0.0`，即为完美对齐。
+   - **核心防线**：核心人物都完美在场，专门惩罚**动作的无视**和**非参考道具的遗漏**。
+   - **示例**：
+     - `1.0分`：动作彻底遗漏（要求“A和B握手”，但两人只是毫无接触地并排站着，变成木头人）；纯文本道具缺失（要求“A吃汉堡”，A在场但画面里根本没有汉堡，A空手站着）；状态丢失（要求“A躺在地上睡觉”，但A是睁眼站着的）。
+     - `0.5分`：动作含糊（要求“A吃汉堡”，A手里拿着汉堡但并没有做出“吃”的动作，仅持有）；次要道具遗漏（要求“A戴着帽子弹吉他”，吉他在但帽子没画）。
+6. **Class 0 - 完美对齐 (Perfect Alignment)**: 上述五项得分全为 `0.0`，即为完美对齐。
    - **对标指标**：Human Preference Score (人类主观评价)。
+   - **示例**：要求“钢铁侠和美国队长在握手，钢铁侠左手拿着公文包”，画面中两人（N=2）都完美呈现，未畸变，衣服颜色独立无污染，正在握手，且钢铁侠拿着包。完美达成目标。
 
 ## 4. 多任务学习 (MTL) 架构
 LENS 使用孪生网络 (Siamese Network)，让 Image A 和 Image B 独立通过一个共享的 VLM backbone。

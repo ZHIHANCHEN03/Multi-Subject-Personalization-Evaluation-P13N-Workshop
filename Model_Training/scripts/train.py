@@ -7,33 +7,39 @@ from lens.model import LENS
 from lens.dataset import PrismBenchDataset
 
 def main(args):
-    print(f"Initializing LENS Model Training. LoRA Enabled: {args.use_lora}")
+    print(f"--- Initializing LENS Training Pipeline ---")
+    print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
     
     # 1. Load Model (Dual-Head VLM)
-    # Using Qwen3.5-9B as the foundation. 4 error classes for multi-label prediction.
-    model = LENS(model_name="Qwen/Qwen3.5-9B", num_error_classes=4, use_lora=args.use_lora)
+    # Using Qwen3.5-9B as the foundation. 5 error classes for multi-label prediction.
+    model = LENS(model_name="Qwen/Qwen3.5-9B", num_error_classes=5, mode=args.mode)
     
     # 2. Extract Trainable Parameters
+    # Automatically filters out frozen backbone parameters if mode == "head_only"
     trainable_params = [p for p in model.parameters() if p.requires_grad]
     
-    # Adjust learning rate based on Phase (Head-only vs LoRA Joint)
-    lr = 2e-5 if args.use_lora else 1e-4
+    # Adjust learning rate based on Phase
+    # LoRA on Backbone requires a smaller LR (2e-5) to avoid catastrophic forgetting
+    # Training Heads only from scratch requires a larger LR (1e-4)
+    lr = 2e-5 if args.mode == "lora" else 1e-4
     optimizer = torch.optim.AdamW(trainable_params, lr=lr)
     
     # 3. Initialize Multi-Task Loss Functions
     # The Margin Ranking Loss is for the Score Head (Preference)
-    ranking_loss_fn = nn.MarginRankingLoss(margin=1.0)
+    # We use a soft margin (0.5) to accommodate the continuous preference scores (0.0~1.0)
+    ranking_loss_fn = nn.MarginRankingLoss(margin=0.5)
     
     # The BCEWithLogitsLoss is for the Classification Head (Diagnostic Taxonomy)
     # Allows for multi-label and 3-tier continuous soft-labels (0.0, 0.5, 1.0)
     classification_loss_fn = nn.BCEWithLogitsLoss()
     
     # 4. Load PrismBench Data
-    dataset = PrismBenchDataset(length=20) # Dummy for now, replace with JSON loader
+    data_path = os.path.join(os.path.dirname(__file__), "../PrismBench_Local_Data/silver_dataset.json")
+    dataset = PrismBenchDataset(json_path=data_path)
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
     
     model.train()
-    print("Starting Diagnostic-Aware Joint Training Loop...")
+    print(f"Starting Diagnostic-Aware Joint Training Loop. Total Batches: {len(dataloader)}")
     
     for step, batch in enumerate(dataloader):
         optimizer.zero_grad()
@@ -79,10 +85,17 @@ def main(args):
               f"Cls Loss: {loss_cls.item():.4f} | Total Loss: {total_loss.item():.4f}")
 
     print("Training Step Completed successfully!")
+    
+    # 6. Save the Model Weights (Ready for Hugging Face Hub)
+    save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/LENS-v1-{args.mode}")
+    model.save_pretrained(save_dir)
+    print(f"LENS Model has been successfully exported to: {os.path.abspath(save_dir)}")
+    print(f"You can now upload the contents of this folder directly to Hugging Face 🤗")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="LENS Metric Model Training")
-    parser.add_argument("--use_lora", action="store_true", help="Enable Phase 2 LoRA joint training on the backbone")
-    parser.add_argument("--batch_size", type=int, default=4, help="Batch size for training")
+    parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
+    parser.add_argument("--mode", type=str, choices=["head_only", "lora"], default="head_only", 
+                        help="Training Mode: 'head_only' (freezes VLM backbone, trains dual heads) or 'lora' (finetunes VLM with LoRA + trains dual heads).")
+    parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Siamese training")
     args = parser.parse_args()
     main(args)
