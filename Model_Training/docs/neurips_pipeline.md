@@ -70,6 +70,15 @@ LENS 的核心在于诊断多主体生成**为什么**失败。加上将“实�
 **截断补零机制 (Cascading Zero-Fill)**：
 在打标过程中（无论是人类还是 VLM），一旦在某一关触发了严重错误 (得分为 `1.0` 或 `0.5`)，流程即刻终止跳出，**后续所有更细粒度的错误分类将自动填充为 `0.0`**。例如，如果 Class 5 (少人) 得分为 1.0，那么 Class 4, 3, 2, 1 都会强制记为 0.0。这在逻辑上保证了如果连主体都不存在，就无需讨论其是否穿错衣服或串色。
 
+#### 终局偏好打分与李克特量表锚定 (Likert-Scale Anchoring)
+在完成 5 关诊断后，系统要求标注员给出一个连续的 `Preference Score (0.0 - 1.0)`。为了保证不同标注员在不同时间点的一致性（消除个人主观尺度的漂移），我们在 UI 滑动条上强制锚定了 5 个**语义刻度 (Semantic Milestones)**：
+*   **0.9 - 1.0 (完美)**：所有核心主体完美呈现，无明显特征泄漏。
+*   **0.7 - 0.8 (良好/瑕疵)**：例如出现了轻微串色 (Class 2=0.5)，或者在 N=8 时漏了 1 个人（高存活率），但整体画质依然震撼。
+*   **0.4 - 0.6 (平庸/混乱)**：发生了明显的张冠李戴 (Class 3=1.0)，或者在 N=8 时漏了一半的人。
+*   **0.1 - 0.3 (严重失败)**：变成了怪物 (Class 4=1.0)，或者几乎所有主体全部消失/同质化 (极低存活率)。
+*   **0.0 (垃圾)**：完全偏题。
+这种“连续滑动 + 离散锚定”的设计，既保留了回归分数的颗粒度，又在统计学上保证了极高的评分者间一致性 (Inter-Annotator Agreement)。
+
 *   **Class 5: 核心实体缺失与同质化 Subject Omission & Homogenization (最严重：存在性失败)**
     *   *判断条件：* 画面中是否恰好存在请求的 $N$ 个独立的**核心参考主体 (Reference Subjects)**？
     *   *打分示例：* 
@@ -170,9 +179,12 @@ LENS (Localized Entanglement Navigation and Scoring) 是一个轻量级的指标
 
 *   **输入 (Input)：** Image A（Gemini 好的图片）和 Image B（MOSAIC 差的图片），两者都是从**同一个** Prompt 生成的。
 *   **前向传播 (Forward Pass)：** 两张图像独立地通过**同一个**共享的 VLM backbone 以提取特征嵌入（embeddings）。
-*   **Loss 1 (排序损失 Ranking)：** 嵌入特征进入分数头。我们应用**边距排序损失 (Margin Ranking Loss)**。如果伪标签表示 Image A 优于 Image B，但 $Score(A) < Score(B) + margin$，则该损失会惩罚模型。
-*   **Loss 2 (分类损失 Classification)：** 嵌入特征进入分类头。由于我们采用了三级打分制（包含 `0.5` 软标签）和多标签的可能性，传统的 Cross-Entropy Loss（仅适用于互斥单分类）不再适用。我们改用 **BCEWithLogitsLoss (Binary Cross Entropy with Logits)**。该损失函数独立计算 4 个类别的二元交叉熵，能够完美兼容 `0.0`, `0.5`, `1.0` 的连续概率目标。
-*   **总损失 (Total Loss)：** $\mathcal{L}_{total} = \lambda_1 \mathcal{L}_{rank} + \lambda_2 \mathcal{L}_{cls}$
+*   **Loss 1 (综合偏好损失 Preference Scoring Loss)：** 这是一个**混合损失 (Hybrid Loss)**。嵌入特征进入分数头 (Score Head)。
+    *   **Point-wise Regression (MSE)**: 强制模型预测的绝对分数 $\hat{S}_A$ 逼近人类/VLM 给出的绝对分 $S_A$。这保证了模型在推理时能独立打分。
+    *   **Pair-wise Ranking (Margin Ranking Loss)**: 如果伪标签表示 Image A 优于 Image B，但 $\hat{S}_A < \hat{S}_B + margin$，则该损失会惩罚模型。这强化了模型在细微差异下的对比排序能力。
+    *   总偏好损失：$\mathcal{L}_{pref} = \alpha \cdot \text{MSE}(\hat{S}, S) + \beta \cdot \text{MarginLoss}(\hat{S}_A, \hat{S}_B)$
+*   **Loss 2 (分类诊断损失 Classification Diagnosis Loss)：** 嵌入特征进入分类头。由于我们采用了三级打分制（包含 `0.5` 软标签）和多标签的可能性，传统的 Cross-Entropy Loss（仅适用于互斥单分类）不再适用。我们改用 **BCEWithLogitsLoss (Binary Cross Entropy with Logits)**。该损失函数独立计算 5 个类别的二元交叉熵，能够完美兼容 `0.0`, `0.5`, `1.0` 的连续概率目标。
+*   **总损失 (Total Loss)：** $\mathcal{L}_{total} = \lambda_1 \mathcal{L}_{pref} + \lambda_2 \mathcal{L}_{cls}$
 
 *为什么这样有效：* 分类损失起到了强大的正则化作用。为了正确识别“特征泄漏”与“语义错位”，backbone 的交叉注意力（cross-attention）**必须**聚焦在主体及其边界上，从而迫使模型忽略无关的背景像素。
 
@@ -214,25 +226,57 @@ LENS (Localized Entanglement Navigation and Scoring) 是一个轻量级的指标
     *   *用途：* 绝对隔离的 Held-out 数据集。用于产出论文中证明 LENS 优于 CLIP/DINO 的性能指标（Kendall-Tau, F1-Score）。
     *   *Reviewer 防守逻辑：* 2500 条纯人工真值标签在统计学上具备极强的说服力 ($p < 0.001$)。这批数据在模型定稿前**绝对黑盒、不可见**，实现了真正的 Zero-Shot 对齐验证，从根本上杜绝了任何形式的数据泄漏 (Data Leakage) 质疑。
 
-### 3.5 行业体检报告 (Model Leaderboard Eval)
-除了证明 LENS 是一把好尺子，我们还必须用它量出行业痛点。在论文最终的实验章节，我们将构建以下规模的 Leaderboard：
-*   **被测模型：** 6 个代表性模型（如 Midjourney v6 闭源天花板、DALL-E 3 闭源对齐王、SD3 开源 DiT 代表、Flux 极简参数流、SDXL 传统基线、MOSAIC 特定策略代表）。
-*   **评测规模：** 每个模型 800 张图（N=2,4,6,8 各 200 张）。
-*   **总评估量：** 4,800 张图（一次极速的 LENS 前向推理）。这足以支撑绘制统计学极度显著且曲线平滑的**“抗压衰减折线图”**和**“死因诊断堆叠图”**，产出 Best Paper 级别的洞察。
-
-### 3.6 训练与评估框架 (Frameworks)
+### 3.5 训练与评估框架 (Frameworks)
 *   **深度学习框架：** `PyTorch 2.x`
 *   **模型库与分布式训练：** 
     *   使用 Hugging Face `transformers` 加载 Qwen3.5-9B backbone。
     *   使用 `peft` 库应用 LoRA / QLoRA 进行高效微调（Parameter-Efficient Fine-Tuning），极大降低显存开销。
     *   使用 `DeepSpeed` (ZeRO-2/3) 或 `accelerate` 进行多卡分布式并行训练。
-*   **评估指标计算框架：**
-    *   *回归指标 (Score Head)：* 使用 `scipy.stats` 计算 Kendall-Tau 和 Pearson 排序相关性系数。
-    *   *分类指标 (Classification Head)：* 使用 `scikit-learn` 计算 Accuracy 和 Macro F1-Score。
 
 ---
 
-## 阶段 4：模型发布与 Hugging Face 托管 (Deployment)
+## 阶段 4：多模型基准评测与发榜 (Benchmark Evaluation)
+
+模型训练完成后，论文的最高潮部分是**应用 LENS 评估当前行业的生成模型**，产出极具洞察力的 PrismBench Leaderboard。这一步将彻底确立该论文的学术贡献，也是最能打动 Reviewer 的“秀肌肉”环节。
+
+### 4.1 评测数据集构建 (Leaderboard Set)
+为了公平测试，我们将从金集或全新生成的 Prompt 中抽样构建专门的打榜测试集。
+*   **被测模型库：** 选取 6 个代表性生成模型：闭源天花板 (Midjourney v6, DALL-E 3)、开源 DiT 新贵 (SD3, Flux)、传统基线 (SDXL) 以及特定策略模型 (MOSAIC)。
+*   **评测规模：** 每个模型生成 800 张图（分布于 $N \in \{2, 4, 6, 8\}$ 各 200 张）。
+*   **总推理量：** 4,800 张图。这只需进行一次极速的 LENS 单图前向推理。
+
+### 4.2 论文核心图表与数据指标 (Metrics for Paper)
+通过收集 LENS 对这 4800 张图的输出（绝对 Preference Score 和 5D 分类向量），我们将在论文的 Experiment 章节呈现四大核心结果：
+
+1.  **元评估对齐度 (Meta-Evaluation: LENS vs. CLIP/DINO)**
+    *   *目标*：证明 LENS 是一把“更好的尺子”。
+    *   *方法*：在 3,000 张人类盲标的金集上，计算 LENS 的 Preference Score 与人类打分的 **Kendall-Tau ($\tau$) 排序相关性** 和 **Pearson ($r$) 线性相关性**。
+    *   *预期结论*：LENS 的相关性将达到 0.7+，而 CLIP 和 DINO 将在 0.3 左右徘徊，用铁证宣判传统指标在多主体上的彻底失效。
+
+2.  **多主体生成排行榜 (Multi-Subject Leaderboard)**
+    *   *目标*：给行业各路神仙排座次。
+    *   *方法*：按模型对所有 4800 张图的 **平均 Preference Score** 进行排名。
+    *   *预期洞察*：Midjourney 极大概率依然霸榜，但开源模型在特定 N 数量下可能会有反超表现，或者暴露出特定的缺陷。
+
+3.  **抗压衰减折线图 (Capacity Decay Curve)**
+    *   *目标*：探索模型的“容量极限”。
+    *   *方法*：X轴为请求主体数量 $N$ (2, 4, 6, 8)，Y轴为平均 Preference Score 或主体存活率。
+    *   *预期洞察*：所有模型在 N=2 时分数相近，但在 N=6, 8 时，基线模型（如 SDXL）的分数将呈现“断崖式跳水”，而强模型（如 Midjourney）的衰减更平滑。
+
+4.  **死因诊断堆叠图 (Diagnostic Error Distribution Stack/Radar)**
+    *   *目标*：解释模型为什么会输，提供可解释性洞察。
+    *   *方法*：利用 LENS 独有的 5D 分类向量，统计每个模型在触发错误时，Class 5 到 Class 1 的占比。
+    *   *预期洞察*：揭示深层机制。例如，“SD3 虽然总分不高，但它的错误多集中在 Class 2 (串色)；而 MOSAIC 的错误几乎全是因为 Class 5 (实体缺失)。” 这种**可解释性评价**是本文超越所有黑盒评价模型的核心卖点。
+
+### 4.3 定性案例分析 (Qualitative Case Studies)
+在论文的 Appendix 或正文对比图中，挑出 3-4 个经典的“打脸 CLIP”定性案例：
+*   *场景*：展示一张“美国队长穿了钢铁侠红色盔甲”的生成图。
+*   *对比*：标注 CLIP 给了 0.85 的高分（被红蓝颜色和双人标签欺骗），而 LENS 精准给出了 0.2 的低分，并高亮输出了 `Class 2 (Attribute Bleeding) = 1.0`。
+*   *效果*：视觉冲击力极强，让 Reviewer 瞬间 Get 到你这篇论文的伟大之处。
+
+---
+
+## 阶段 5：模型发布与 Hugging Face 托管 (Deployment)
 为了让整个开源社区都能轻松使用 LENS 评测他们的模型，我们设计了极简的权重保存与托管策略。
 
 ### 4.1 权重保存机制 (Save Mechanism)

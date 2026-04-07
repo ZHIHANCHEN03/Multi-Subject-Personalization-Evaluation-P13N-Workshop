@@ -61,9 +61,20 @@ def main(args):
         # Using preference_score_A and preference_score_B to derive ranking target
         pref_A = batch["preference_score_A"].to(device)
         pref_B = batch["preference_score_B"].to(device)
+        
+        # 1. Point-wise Regression Loss (MSE) - Anchors absolute scores
+        mse_loss_fn = nn.MSELoss()
+        loss_mse_A = mse_loss_fn(score_A.squeeze(-1), pref_A.squeeze(-1))
+        loss_mse_B = mse_loss_fn(score_B.squeeze(-1), pref_B.squeeze(-1))
+        loss_mse = (loss_mse_A + loss_mse_B) / 2.0
+        
+        # 2. Pair-wise Ranking Loss (Margin) - Enforces relative gap
         # target = 1 if A > B, else -1 (simplification for MarginRankingLoss)
         labels = torch.where(pref_A > pref_B, torch.tensor(1.0).to(device), torch.tensor(-1.0).to(device)).to(torch.bfloat16)
         loss_rank = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
+        
+        # Hybrid Preference Loss
+        loss_pref = loss_mse + loss_rank
         
         # D. Calculate Diagnostic Classification Loss (Why did Image A/B fail?)
         # Apply BCE loss on both branches to penalize diagnostic errors on both images
@@ -77,11 +88,11 @@ def main(args):
         # E. Joint Backward Pass (Multi-Task Learning Regularization)
         # This forces the Backbone to extract fine-grained subject features
         # instead of relying on spurious background shortcuts.
-        total_loss = loss_rank + loss_cls
+        total_loss = loss_pref + loss_cls
         total_loss.backward()
         optimizer.step()
         
-        print(f"Step {step+1}/{len(dataloader)} | Rank Loss: {loss_rank.item():.4f} | "
+        print(f"Step {step+1}/{len(dataloader)} | Pref Loss: {loss_pref.item():.4f} (MSE: {loss_mse.item():.4f}, Rank: {loss_rank.item():.4f}) | "
               f"Cls Loss: {loss_cls.item():.4f} | Total Loss: {total_loss.item():.4f}")
 
     print("Training Step Completed successfully!")

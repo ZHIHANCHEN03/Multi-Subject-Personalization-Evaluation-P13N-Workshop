@@ -40,7 +40,17 @@ Based on your reasoning, assign a 3-tier score for each Class:
 - **`0.5` (Maybe)**: A minor flaw, ambiguous occurrence, or severe occlusion making it hard to judge.
 - **`0.0` (No)**: This specific error is absolutely NOT present.
 
-Finally, assign an overall **Preference Score (0.0 to 1.0)** for both Image 1 and Image 2. The image with fewer and less severe errors should receive a higher score.
+**Cascading Zero-Fill Rule:**
+You MUST evaluate the errors in a strict top-down waterfall logic (Class 5 -> Class 1). If you assign a `1.0` or `0.5` to any higher-severity Class (e.g., Class 5), you MUST assign `0.0` to all subsequent lower-severity Classes (e.g., Class 4, 3, 2, 1). If a subject does not exist, it cannot logically have swapped clothing or bleeding colors.
+
+Finally, assign an overall **Preference Score (0.0 to 1.0)** for both Image 1 and Image 2. 
+**Preference Score Scaling Rule (CRITICAL):**
+To ensure absolute consistency across evaluations, you MUST anchor your continuous score (0.0 to 1.0) using the following semantic milestones:
+*   `0.9 - 1.0`: Flawless or near-flawless. All core subjects present, no severe distortion, perfect or near-perfect attribute binding.
+*   `0.7 - 0.8`: Good but with minor flaws. E.g., slight attribute bleeding (Class 2 = 0.5), or missing 1 out of 8 subjects (K/N > 80%) but the rest are spectacular.
+*   `0.4 - 0.6`: Mediocre. Major semantic swapping (Class 3 = 1.0), or missing roughly half of the requested subjects (K/N around 50%).
+*   `0.1 - 0.3`: Severe failure. Complete entity collapse, terrifying mutilation (Class 4 = 1.0), or missing almost all subjects (K/N < 25%).
+*   `0.0`: Absolute garbage. No correlation with the prompt whatsoever.
 
 ### OUTPUT FORMAT REQUIREMENTS:
 You must structure your response EXACTLY as follows. First provide your `<reasoning>`, then provide the `<json_output>`. DO NOT output markdown code blocks around the JSON.

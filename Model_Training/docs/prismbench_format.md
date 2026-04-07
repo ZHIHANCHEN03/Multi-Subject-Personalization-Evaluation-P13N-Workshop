@@ -139,5 +139,5 @@
 ## 4. 多任务学习 (MTL) 架构
 LENS 使用孪生网络 (Siamese Network)，让 Image A 和 Image B 独立通过一个共享的 VLM backbone。
 
-1. **排序损失 (Score Head, 分数头)**: 使用 `preference_label` 来拉高更受偏好图像的分数。
-2. **诊断损失 (Classification Head, 分类头)**: 使用 `classification_label` 强制 backbone 的交叉注意力机制（cross-attention）明确聚焦在主体边界上。**这起到了强大的正则化作用，防止模型像 CLIP 那样走“虚假的背景捷径”。**
+1. **排序损失 (Score Head, 分数头)**: 使用 `preference_score_A` 和 `preference_score_B` 来计算 Margin Ranking Loss，强制模型拉开两张图像的分数差距（优先确保好图分数高于差图）。注意：这里的 Preference Score 是针对**单张图片**的绝对打分（0.0 到 1.0），而不是简单的“A 赢还是 B 赢”的二元分类。这使得 LENS 在推理阶段能够为任何单张图像输出一个绝对的质量评估分数。
+2. **诊断损失 (Classification Head, 分类头)**: 使用 `category_scores` (5D 向量) 强制 backbone 的交叉注意力机制（cross-attention）明确聚焦在主体边界上。**这起到了强大的正则化作用，防止模型像 CLIP 那样走“虚假的背景捷径”。**
