@@ -2,12 +2,19 @@
 
 本文档概述了针对 NeurIPS Datasets & Benchmarks 赛道提交的完整端到端流水线：**PrismBench**（数据集）和 **LENS**（评估指标模型）。
 
-## 🎯 核心动机：填补 CLIP 与 DINO 的多主体评估鸿沟 (Bridging the Gap)
-现有的主流评估指标（如 CLIP Score 和 DINOv2）在单主体生成中表现良好，但在多主体生成（N>=2）时存在严重的“语义捷径 (Semantic Shortcut)”和“特征坍塌盲区”：
-1. **CLIP 的盲区 (全局词袋效应)**：CLIP 倾向于全局语义匹配。如果 Prompt 是“A打B”，哪怕模型生成了“A和B握手”（语义错位 Class 3），或者“A的衣服颜色染给了B”（特征泄漏 Class 2），CLIP 依然会给出高分。它无法察觉局部属性的错乱和张冠李戴。
-2. **DINOv2 的盲区 (密集场景失效)**：DINOv2 擅长像素级匹配，但在极端密集场景（如 N=8）或严重遮挡时，它往往无法准确数出主体数量，也无法诊断主体是否同质化（克隆人），从而掩盖了严重的实体崩溃（Class 4）。
+## 1.1 核心动机：填补多主体评估的学术空白 (The Evaluation Gap)
+现有的主流评估指标在单主体生成中表现良好，但在多主体个性化生成（N>=2）时存在严重的“语义捷径”和“特征坍塌盲区”。为了直观展示 LENS 的不可替代性，下表对比了当前最具代表性的 T2I 评价指标：
 
-**LENS 的使命**：重新审视多主体个性化生成的评价标准，通过引入包含“特征泄漏”和“语义错位”的细粒度诊断架构，彻底覆盖 CLIP 和 DINO 留下的学术空白，确保评估结果真正对齐人类视觉感知。
+| 指标名称 | 能否识别“特定身份”? | 能否量化“特征串色”? | 能否量化“张冠李戴”? | 是否具备“可解释诊断”? | 评估成本 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **CLIP Score** | ❌ (词袋效应) | ❌ (全局融合) | ❌ | ❌ | 极低 |
+| **DINOv2** | ✅ (懂特征) | ❌ (不懂语义) | ❌ | ❌ | 低 |
+| **ImageReward / PickScore** | ❌ (黑盒偏好) | ❌ (偏好唯美) | ❌ | ❌ | 低 |
+| **TIFA / T2I-CompBench** | ❌ (纯文本VQA) | ❌ (无法查串色) | ✅ | ❌ | 中等 |
+| **GPT-4V (Zero-shot)** | ✅ | ⚠️ (极不稳定) | ✅ | ✅ (自然语言) | **极高** |
+| **LENS (Ours)** | **✅ (多图参考)** | **✅ (独立外观维)** | **✅ (交互对齐维)** | **✅ (3D正交瀑布流)** | **低** |
+
+**LENS 的使命**：重新审视多主体个性化生成的评价标准，通过引入包含“特征泄漏”和“语义错位”的细粒度诊断架构，彻底覆盖上述指标留下的学术空白，确保评估结果真正对齐人类视觉感知。
 
 ---
 
@@ -43,125 +50,112 @@
 ## 阶段 2：标注与分类体系设计 (VLM 伪标签与人工标注)
 
 为了在有限的学术团队资源下实现最高 ROI（投资回报率）的顶会级论文产出，同时确保足以说服 NeurIPS 严苛评审的数据规模，我们对数据集进行了“甜点级 (Sweet Spot)” 的体量设定：
-*   **自动标注 (Auto-labels) - Silver Set：** 约 **50,000 (5w)** 条数据。由强大的 VLM（如 GPT-4o 或 Qwen-VL-Max）自动打标，作为训练集。5w 条数据在大规模数据集时代既显得扎实有诚意，又在 API 成本和生成时间上完全可控。
-*   **人工标注 (Human-labels) - Golden Set：** 扩大至 **3,000** 条数据。由领域专家全手工盲标，作为测试集。3,000 条高质量纯净数据在统计学上提供了坚不可摧的显著性 ($p < 0.001$)，足以让 Reviewer 对你的评测结论毫无疑义。
+*   **自动标注 (Auto-labels) - Silver Set：** 初始约 **65,000 (6.5w)** 条数据，经过双 Teacher 一致性与质量漏斗过滤后，保留 **50,000 (5w)** 条数据作为训练集。由两路强大的 VLM Teacher（如 GPT-4o、Qwen-VL-Max、Claude 等）独立自动打标，只有当两路 Teacher 对同一个样本给出**足够一致**的判断时，该样本才会被保留。5w 条最终训练数据在大规模数据集时代既显得扎实有诚意，又在 API 成本和生成时间上完全可控。
+*   **人工标注 (Human-labels) - Golden Set：** 初始约 **4,000 (4k)** 条数据，经双盲一致性与冲突清洗后，最终保留 **3,000 (3k)** 条高质量纯净数据作为验证/测试集。由领域专家全手工盲标。3,000 条纯净数据在统计学上提供了坚不可摧的显著性 ($p < 0.001$)，足以让 Reviewer 对你的评测结论毫无疑义。
 
-### 2.1 6类层级化错误分类体系与三级打分制 (3-Tier Scoring)
+### 2.1 3维正交解耦分类体系与二元打分制 (3D Orthogonal Taxonomy & Binary Scoring)
 
 #### 金集双盲标注与仲裁机制 (Golden Set Double-Blind Annotation Protocol)
-为了彻底消除自动化偏见 (Automation Bias) 和人类锚定效应，我们在构建 1w 条金集时**坚决不使用任何 VLM 预打标**，而是采用了纯人类主导的“双盲标注 + 自动仲裁”机制，这是在 NeurIPS 论文中证明数据集 Ground Truth 质量的最强有力手段：
+为了彻底消除自动化偏见 (Automation Bias) 和人类锚定效应，我们在构建 **初始 4k、最终保留 3k** 的金集时**坚决不使用任何 VLM 预打标**，而是采用了纯人类主导的“双盲标注 + 自动仲裁”机制，这是在 NeurIPS 论文中证明数据集 Ground Truth 质量的最强有力手段：
 1.  **双盲独立标注 (Double-Blind)**：同一张生成的图像会被随机分发给两位相互独立的标注员（Annotator A 和 B）。他们通过“瀑布流单选问卷”从头开始盲标。
-2.  **一致性检验 (Inter-Annotator Agreement, IAA)**：在论文中，我们将使用 Cohen's Kappa ($\kappa$) 系数来证明这 6 类诊断体系是客观的。只要 $\kappa > 0.6$，就能在统计学上向 Reviewer 证明该分类体系没有主观歧义。
+2.  **一致性检验 (Inter-Annotator Agreement, IAA)**：在论文中，我们将使用 Cohen's Kappa ($\kappa$) 系数来证明这 3 类诊断体系是客观的。只要 $\kappa > 0.6$，就能在统计学上向 Reviewer 证明该分类体系没有主观歧义。
 3.  **冲突仲裁机制 (Tie-breaking Resolution)**：
     *   *高度一致 (Absolute Agreement)*：两人选择完全相同，直接入库。
-    *   *轻微偏差 (Minor Discrepancy)*：例如 A 给 `1.0` (确定错)，B 给 `0.5` (疑似错)。系统自动平均为软标签 `0.75`，保留人类的不确定性。
-    *   *严重冲突 (Severe Conflict)*：例如 A 给 `0.0` (没问题)，B 给 `1.0` (严重错误)。该样本将被打上 `[Conflict]` 标签，交由核心作者/领域专家进行最终一锤定音的仲裁 (Tie-breaker)。
+    *   *严重冲突 (Severe Conflict)*：例如 A 给 `1` (Pass)，B 给 `0` (Fail)。该样本将被打上 `[Conflict]` 标签，交由核心作者/领域专家进行最终一锤定音的仲裁 (Tie-breaker)。
 
 #### 诊断体系与打分示例
-LENS 的核心在于诊断多主体生成**为什么**失败。加上将“实体崩溃”拆分为“缺失”与“崩坏”，我们构建了一个完美的 6 类互斥（MECE）决策树。
+在本文档中，**Subject 始终指 Reference Subject / 参考主体身份**，而 **Image 始终指待评估的生成图像**（Image A 或 Image B）。换句话说，`subject_refs` 存的是参考主体，`image_A_path` / `image_B_path` 存的是生成图像；`category_scores_A/B` 记录的是 **Image A / Image B 作为整张生成图像** 的最终 3 维诊断分数。
+LENS 的核心在于诊断多主体生成**为什么**失败。我们将多主体的失败本质解耦为 3 个完全正交的维度：**存在 (Existence) $\rightarrow$ 独立外观 (Appearance) $\rightarrow$ 交互 (Interaction)**。这构建了一个完美的互斥（MECE）决策树。
 
-为了解决生成图像中常见的“模棱两可”情况，我们引入了**三级打分制 (3-Tier Scoring System)**，为每个错误类别分配：
-*   **`1.0` (是 / Yes)**: 明显存在该类错误。
-*   **`0.5` (可能 / Maybe)**: 存在轻微瑕疵、部分被遮挡难以判断、或者人类也需要仔细辨认的模棱两可状态。
-*   **`0.0` (否 / No)**: 完全不存在该类错误。
+为了将人类认知负荷降到最低，并为模型提供最干净的正交梯度，我们采用了**极致的二元打分制 (1=Pass, 0=Fail)**：
+*   **`1` (Pass / 完美)**: 在该维度上没有发现任何瑕疵。
+*   **`0` (Fail / 有瑕疵)**: 只要存在该维度的瑕疵（无论是轻微还是严重），一律判定为失败。
 
-系统按以下严重程度顺序（从上往下过滤）评估，遇到第一个非 `0.0` 的类别即作为主要错误分类，**这种“瀑布流”判定法彻底消除了分类歧义**：
+系统对这三个维度进行**独立正交评估 (Independent Orthogonal Evaluation)**：
 
-**截断补零机制 (Cascading Zero-Fill)**：
-在打标过程中（无论是人类还是 VLM），一旦在某一关触发了严重错误 (得分为 `1.0` 或 `0.5`)，流程即刻终止跳出，**后续所有更细粒度的错误分类将自动填充为 `0.0`**。例如，如果 Class 5 (少人) 得分为 1.0，那么 Class 4, 3, 2, 1 都会强制记为 0.0。这在逻辑上保证了如果连主体都不存在，就无需讨论其是否穿错衣服或串色。
+**无截断评估机制 (No Cascading/Truncation)**：
+在打标过程中（无论是人类还是 VLM），这三个维度完全解耦。即使某一维度的得分是 `0` (Fail)，标注员也必须根据画面中实际生成的内容，继续对其他维度进行独立打分。例如，如果生成了 4 个人但只出现了 2 个人 (Existence = 0)，依然需要评估这幸存的 2 个人是否长得对 (Appearance) 以及动作是否正确 (Interaction)。这能最大程度榨取图像的细粒度质量特征。
 
-#### 终局偏好打分与李克特量表锚定 (Likert-Scale Anchoring)
-在完成 5 关诊断后，系统要求标注员给出一个连续的 `Preference Score (0.0 - 1.0)`。为了保证不同标注员在不同时间点的一致性（消除个人主观尺度的漂移），我们在 UI 滑动条上强制锚定了 5 个**语义刻度 (Semantic Milestones)**：
-*   **0.9 - 1.0 (完美)**：所有核心主体完美呈现，无明显特征泄漏。
-*   **0.7 - 0.8 (良好/瑕疵)**：例如出现了轻微串色 (Class 2=0.5)，或者在 N=8 时漏了 1 个人（高存活率），但整体画质依然震撼。
-*   **0.4 - 0.6 (平庸/混乱)**：发生了明显的张冠李戴 (Class 3=1.0)，或者在 N=8 时漏了一半的人。
-*   **0.1 - 0.3 (严重失败)**：变成了怪物 (Class 4=1.0)，或者几乎所有主体全部消失/同质化 (极低存活率)。
-*   **0.0 (垃圾)**：完全偏题。
-这种“连续滑动 + 离散锚定”的设计，既保留了回归分数的颗粒度，又在统计学上保证了极高的评分者间一致性 (Inter-Annotator Agreement)。
-
-*   **Class 5: 核心实体缺失与同质化 Subject Omission & Homogenization (最严重：存在性失败)**
-    *   *判断条件：* 画面中是否恰好存在请求的 $N$ 个独立的**核心参考主体 (Reference Subjects)**？
+*   **Existence (存在性 - 无缺失/无克隆)**
+    *   *判断条件：* 画面中是否恰好存在请求的 $N$ 个独立的**核心参考主体**？
     *   *打分示例：* 
-        *   `1.0`: 
-            - **明确少人**：要求参考主体A（猫）和B（狗），画面只有狗，猫完全消失。
-            - **同质化克隆**：要求参考主体A（美队）和B（钢铁侠），生成了两个一模一样的钢铁侠。
-            - **物种变异消失**：要求A（人）和B（猫），结果画出了两个人，猫没有了。
-        *   `0.5`: 
-            - **严重遮挡或残缺**：核心主体在画面边缘被严重裁剪，只露出半张脸或一只手，很难辨认身份。
-            - **极度模糊**：主体在远景中模糊成一团像素，无法确切核实是否是指定的参考主体。
-    *   *🚫 防歧义边界：* **只清点“必须通过 Reference Image 定制”的核心主体。**如果 Prompt 里随口提的一个纯文本配角（如“一个路人”）或道具（如“一把椅子”）没画出来，**不属于** Class 5，请继续往下走到 Class 1 扣分。
-    *   *对标现有指标：* **DINOv2 / Object Detection / CLIP-I** (侧重数人头和特征召回)。
+        *   `1 (Pass)`: 人数完美，没有遗漏，没有克隆。
+        *   `0 (Fail)`: 明确少人、同质化克隆、严重遮挡导致无法辨认。
+    *   *对标现有指标：* DINOv2, Object Detection。
 
-*   **Class 4: 实体结构扭曲与崩坏 Subject Distortion & Mutilation (次严重：结构性失败)**
-    *   *判断条件：* 在 $N$ 个主体都存在的前提下，是否有主体的**基础生物/物理结构**发生了严重的扭曲、残缺或畸变？
+*   **Appearance (独立外观 - 无畸变/无串色)**
+    *   *判断条件：* 对整张生成图像进行判断：所有请求的参考主体在图中是否都保持了正确的物理结构，并且**没有**发生衣服/颜色/材质的局部特征串染 (Attribute Bleeding)？
     *   *打分示例：* 
-        *   `1.0`: 
-            - **肢体恐怖变异**：美国队长长了三个胳膊，或者脸部像融化的蜡像一样完全扭曲。
-            - **身体严重残缺**：钢铁侠在画面里，但只剩下一个悬空的头，身体躯干凭空消失了。
-            - **非人物理结构崩坏**：如果主体是一辆汽车，汽车只有三个轮子或者车身折叠成了违反物理常识的形状。
-        *   `0.5`: 
-            - **轻微比例失调**：美队的腿看起来异常短小，或者手部手指有6根但整体还能认出是个人。
-            - **轻微的人体结构不对齐**：脖子和身体的连接处稍微有些生硬。
-    *   *🚫 防歧义边界：* **专门惩罚画成了“怪物”的模型。**它与串色（Class 2）绝不重合。美队自己长了三个胳膊（结构破坏）是 Class 4；美队结构完美，只是衣服染上了钢铁侠的红色（颜色转移）是 Class 2。
-    *   *对标现有指标：* **FID / IS (Inception Score) / IQA metrics (如 BRISQUE)**。
+        *   `1 (Pass)`: 结构完美，颜色纯净，没有任何特征泄漏。
+        *   `0 (Fail)`: 肢体恐怖变异；明确的局部串色（美队的制服上染了钢铁侠的金属材质）；轻微比例失调。
+    *   *对标现有指标：* 目前学术界完全空白（LENS 独家贡献）。
 
-*   **Class 3: 语义错位 Semantic Swapping (属性绑定错误)**
-    *   *判断条件：* 不同的主体是否被**错误地分配**了属于彼此的角色、动作或一整件物品？
+*   **Interaction (交互对齐 - 关系与语义无误)**
+    *   *判断条件：* 对整张生成图像进行判断：参考主体之间的关系、动作和道具归属是否完全符合 Prompt？
     *   *打分示例：* 
-        *   `1.0`: 
-            - **动作张冠李戴**：要求A骑马B牵马，生成了B骑马A牵马。
-            - **整套衣服互换**：要求A穿红裙B穿蓝裙，生成了A穿蓝裙B穿红裙。
-            - **核心道具拿错**：要求A拿剑B拿盾，生成了A拿盾B拿剑。
-            - **位置关系互换**：要求A站在桌子上，B坐在椅子上，结果变成了B站桌子上，A坐椅子上。
-        *   `0.5`: 
-            - **动作不标准或位置关系模糊**：要求“背靠背”，但看起来像“并排站”或“一前一后”。
-            - **道具归属不清**：A和B中间放着一把剑，看不出到底是谁拿着。
-    *   *🚫 防歧义边界：* **前提是“元素确实画出来了，但给错人了”。** 如果要求A拿剑，但画面里**根本没画出剑**，那不叫错位，叫彻底遗漏，去 Class 1 扣分。
-    *   *对标现有指标：* **VQA / T2I-CompBench**。
+        *   `1 (Pass)`: 交互完美，动作完全符合文本描述。
+        *   `0 (Fail)`: 动作张冠李戴（要A骑马B牵马，变成B骑马A牵马）；整套衣服互换；动作遗漏（变成木头人）；次要道具遗漏。
+    *   *对标现有指标：* T2I-CompBench, VQA Metrics。
 
-*   **Class 2: 特征泄漏 Attribute Bleeding (局部串色/材质污染)**
-    *   *判断条件：* 核心身份和动作是否正确，但局部特征（颜色、配饰、肢体特征）在主体之间泄漏？
-    *   *打分示例：* 
-        *   `1.0`: 
-            - **明确的局部串色**：美队蓝色的制服上出现了钢铁侠的红色金属材质斑块。
-            - **身体结构融合**：两个人握手时，手部融合成了一坨带有双方肤色的肉块（没有变成怪物，只是肤色和材质融合）。
-            - **配饰传染**：A戴着墨镜，B没戴，但生成的图片里B的脸上隐约出现了墨镜的边框或镜片反光。
-            - **发色泄漏**：A是金发，B是黑发，结果B的黑发里夹杂着一缕金发。
-        *   `0.5`: 
-            - **边缘接缝处的颜色渗透**：两个主体站得很近，衣服边缘有轻微的颜色相互渗透。
-            - **疑似环境光污染**：看起来像串色，但也可能是环境光影反射导致的模棱两可状态。
-    *   *🚫 防歧义边界：* **这是“像素污染”，不是“整件衣服穿错”。** 如果 A 的红衣服直接套在了 B 身上（B穿红衣服），那是 Class 3。如果 A 和 B 都穿对了衣服，但 B 的蓝衣服上有一大块红色色斑，那才是 Class 2。
-    *   *对标现有指标：* **无有效的全局指标**（LENS 独家贡献，CLIP 完全盲区）。
+#### 终局偏好选择 (Binary Preference Choice)
+在完成 3 关诊断后，系统要求标注员给出一个简单的二元偏好选择：**Image A 更好 还是 Image B 更好？**。这抛弃了难以校准的连续打分，回归到最纯粹的人类直接偏好 (RLHF 标准做法)。
 
-*   **Class 1: 文本遗漏与动作不对齐 Prompt Misalignment / Omission**
-    *   *判断条件：* 在所有**核心参考主体**都已完美出现（过了Class 5/4）、未穿错衣服拿错道具（过了Class 3）、未串色（过了Class 2）的前提下，画面是否完全遗漏了 Prompt 要求的**交互动作、状态或纯文本指定的普通道具（非定制主体）**？（注意：PrismBench 默认在纯白/纯净背景下评估，不考察背景生成）。
-    *   *打分示例：* 
-        *   `1.0`: 
-            - **动作/关系彻底丢失**：要求“A和B握手”，但两人只是毫无接触地并排站着（变成木头人）。
-            - **纯文本道具遗漏**：要求“A在吃汉堡”，A生成得很完美，但画面里根本没有汉堡。
-            - **状态丢失**：要求“A躺在地上睡觉”，但A是睁着眼站着的。
-        *   `0.5`: 
-            - **动作含糊**：要求“A吃汉堡”，A手里拿着汉堡但并没有做出“吃”的动作，只是拿着。
-            - **次要道具缺失**：要求“A戴着帽子弹吉他”，A在弹吉他但没戴帽子。
-    *   *🚫 防歧义边界：* 专门惩罚**“无中生有失败”（文本截断）**和**“木头人”（动作无视）**。走到这一步，核心人物肯定在场且没有串线，只惩罚缺失的动作细节。
-    *   *对标现有指标：* **CLIP Score (CLIP-T) / ImageReward**。
+### 2.2 训练数据格式与指标计算 (Training Data Format)
+对于最终保留下来的 **53,000 条** 训练和测试数据（**50k Silver + 3k Golden**），存下来的 JSON 格式是**成对的 (Paired)**。这是因为我们需要使用孪生网络来计算排序损失（Ranking Loss）。其中，`annotator_results` 用于保存原始标注结果：**Silver Set 通常有 2 条 VLM Teacher 结果，Golden Set 通常有 2 条人类双盲结果**。在任意一条 annotator 结果内部，`category_scores_A` / `category_scores_B` 都直接表示 **Image A / Image B 这两张生成图像** 的 3 维诊断分数。完整格式定义详见 `prismbench_format.md`。
 
-*   **Class 0: 完美对齐 Perfect Alignment**
-    *   *描述：* 上述 5 个错误维度全部得分为 `0.0`。即：人数对、没长歪、动作对、没串色、道具和交互动作完美贴合 Prompt 要求，且画面无明显崩坏。
-    *   *打分示例：* 
-        *   `0.0`: 要求“钢铁侠和美国队长在握手，钢铁侠左手拿着公文包”，画面中两人都完美呈现，未畸变，衣服颜色独立无污染，正在握手，且钢铁侠拿着包。完美达成目标。
-
-### 2.2 标签设计与指标计算
-对于这 5.3w 条数据，每个样本的 Label 输出一个包含 5 个错误维度得分的向量（例如 `[0.0, 0.0, 0.0, 0.5, 0.0]`，代表轻微特征泄漏）。这允许模型进行更平滑的回归学习，而不是生硬的 One-Hot 分类。
-
-**为什么我们需要 6 个类别？（分类的学术意义与核心贡献）**
-很多 Reviewer 可能会问：“既然 CLIP 和 DINO 只是一个总分，你们为什么要搞这么复杂的 6 类诊断体系？” 答案是：**这正是 LENS 超越现有指标的核心护城河。**
-1.  **打破“黑盒打分”**：CLIP 给一张图打 0.6 分，没人知道为什么。LENS 不仅能给出一个偏好总分（Score Head），还能通过这 6 个类别（Classification Head）告诉你**具体错在哪里**（例如：80% 错在实体缺失，20% 错在串色）。这为未来的文生图模型优化指明了具体方向，这叫**“可解释性评估 (Interpretable Evaluation)”**。
-2.  **强制特征解缠 (Forced Disentanglement)**：在多任务学习（MTL）中，这 6 个类别的分类损失起到了**极其强大的正则化作用**。如果模型只需要预测一个总分，它很容易走捷径（只看背景或只看某一个主体）。但因为 LENS 被强制要求同时预测“是否串色”、“是否错位”、“是否畸变”，它的交叉注意力（Cross-Attention）**被迫**深入到每个主体的边界和纹理细节中。换句话说，这 6 个分类是逼迫模型“认真看图”的紧箍咒。
-
-**如何利用这 6 个分类算指标？**
-*   **Error Rate Distribution (错误率分布)：** LENS 会统计一个模型在 N=2,4,6,8 时，触发 Class 1-5 的百分比。
-    *   *例如：* MOSAIC 在 N=8 时，Class 5（实体缺失）高达 80%；而 Gemini 在 N=8 时，可能只有 10% 的 Class 5，但有 30% 的 Class 2（特征泄漏）。这能极其直观地对比不同模型的短板！
+示例（简版）：
+```json
+{
+  "task_id": "0001",
+  "prompt": "A photo of [Subject A], [Subject B] walking in a cyberpunk city.",
+  "subject_count": 2,
+  "subject_refs": [
+    {
+      "id": "Subject A",
+      "image_path": "./data/refs/cat_01.jpg"
+    },
+    {
+      "id": "Subject B",
+      "image_path": "./data/refs/dog_02.jpg"
+    }
+  ],
+  "image_A_path": "./data/generated/gemini_0001.jpg",
+  "image_B_path": "./data/generated/mosaic_0001.jpg",
+  "annotator_results": [
+    {
+      "annotator_id": "teacher_vlm_01",
+      "preference": "A",
+      "category_scores_A": {
+        "existence": 1,
+        "appearance": 0,
+        "interaction": 0
+      },
+      "category_scores_B": {
+        "existence": 0,
+        "appearance": 0,
+        "interaction": 0
+      }
+    },
+    {
+      "annotator_id": "teacher_vlm_02",
+      "preference": "A",
+      "category_scores_A": {
+        "existence": 1,
+        "appearance": 0,
+        "interaction": 1
+      },
+      "category_scores_B": {
+        "existence": 0,
+        "appearance": 0,
+        "interaction": 0
+      }
+    }
+  ],
+  "metadata": {
+    "source": "GPT Automated Subject Generation"
+  }
+}
+```
 
 ---
 
@@ -172,44 +166,47 @@ LENS (Localized Entanglement Navigation and Scoring) 是一个轻量级的指标
 ### 3.1 架构：双头多任务学习 (Dual-Head MTL)
 我们在 VLM backbone 的最后隐藏层状态上附加了两个头（Heads）：
 1.  **分数头 Score Head (回归)：** 输出一个标量偏好分数。
-2.  **分类头 Classification Head (分类)：** 输出 4 个错误类别 (0, 1, 2, 3) 的 logits。
+2.  **分类头 Classification Head (分类)：** 输出 3 个正交错误维度 (Existence, Appearance, Interaction) 的 logits。
 
 ### 3.2 孪生网络训练策略 (Siamese Network Strategy)
 为了防止模型学习到虚假的上下文相关性（"聪明汉斯"效应 Clever Hans effect，比如将复杂的背景与高分相关联），我们在图像对上使用孪生网络的方法进行训练。
 
 *   **输入 (Input)：** Image A（Gemini 好的图片）和 Image B（MOSAIC 差的图片），两者都是从**同一个** Prompt 生成的。
 *   **前向传播 (Forward Pass)：** 两张图像独立地通过**同一个**共享的 VLM backbone 以提取特征嵌入（embeddings）。
-*   **Loss 1 (综合偏好损失 Preference Scoring Loss)：** 这是一个**混合损失 (Hybrid Loss)**。嵌入特征进入分数头 (Score Head)。
-    *   **Point-wise Regression (MSE)**: 强制模型预测的绝对分数 $\hat{S}_A$ 逼近人类/VLM 给出的绝对分 $S_A$。这保证了模型在推理时能独立打分。
-    *   **Pair-wise Ranking (Margin Ranking Loss)**: 如果伪标签表示 Image A 优于 Image B，但 $\hat{S}_A < \hat{S}_B + margin$，则该损失会惩罚模型。这强化了模型在细微差异下的对比排序能力。
-    *   总偏好损失：$\mathcal{L}_{pref} = \alpha \cdot \text{MSE}(\hat{S}, S) + \beta \cdot \text{MarginLoss}(\hat{S}_A, \hat{S}_B)$
-*   **Loss 2 (分类诊断损失 Classification Diagnosis Loss)：** 嵌入特征进入分类头。由于我们采用了三级打分制（包含 `0.5` 软标签）和多标签的可能性，传统的 Cross-Entropy Loss（仅适用于互斥单分类）不再适用。我们改用 **BCEWithLogitsLoss (Binary Cross Entropy with Logits)**。该损失函数独立计算 5 个类别的二元交叉熵，能够完美兼容 `0.0`, `0.5`, `1.0` 的连续概率目标。
+*   **Loss 1 (综合偏好损失 Preference Scoring Loss)：** 嵌入特征进入分数头 (Score Head) 预测单一分数，并通过 Bradley-Terry Pair-wise Ranking Loss 进行训练。
+    *   **Pair-wise Ranking Loss (Margin Ranking / BCE)**: 根据标注的 `preference` (A 或 B)，强制模型对被选中的图片预测出比另一张更高的分数。这直接优化了模型的对比排序能力。
+    *   总偏好损失：$\mathcal{L}_{pref} = \text{MarginLoss}(\hat{S}_A, \hat{S}_B)$ 或者使用 Bradley-Terry 的 BCE loss: $\mathcal{L}_{pref} = - \log \sigma(\hat{S}_{preferred} - \hat{S}_{rejected})$$
+*   **Loss 2 (分类诊断损失 Classification Diagnosis Loss)：** 嵌入特征进入分类头。由于我们采用了极简的二元分类体系（0 或 1），传统的 Cross-Entropy Loss（仅适用于互斥单分类）不再适用。我们改用 **BCEWithLogitsLoss (Binary Cross Entropy with Logits)**。该损失函数独立计算 3 个维度的二元交叉熵。
 *   **总损失 (Total Loss)：** $\mathcal{L}_{total} = \lambda_1 \mathcal{L}_{pref} + \lambda_2 \mathcal{L}_{cls}$
 
 *为什么这样有效：* 分类损失起到了强大的正则化作用。为了正确识别“特征泄漏”与“语义错位”，backbone 的交叉注意力（cross-attention）**必须**聚焦在主体及其边界上，从而迫使模型忽略无关的背景像素。
 
 ### 3.3 标签质量保证与数据清洗漏斗 (Label Quality Assurance & Data Funnel)
-在使用 5w 条 VLM 伪标签 (Silver Set) 训练模型时，Reviewer 必然会质疑数据噪声问题（Garbage In, Garbage Out）。为了保证 Silver Set 的绝对高质量并向学术界展示严谨的工程把控，我们不仅采用了 Teacher-Student 强弱代差蒸馏（使用 GPT-4o 等顶尖闭源模型进行打标），还设计了严格的多级数据清洗漏斗 (Data Cleaning Funnel)：
+在使用最终 **50,000 条** VLM 伪标签 (Silver Set) 训练模型时，Reviewer 必然会质疑数据噪声问题（Garbage In, Garbage Out）。为了保证 Silver Set 的绝对高质量并向学术界展示严谨的工程把控，我们不仅采用了 Teacher-Student 强弱代差蒸馏（使用 GPT-4o 等顶尖闭源模型进行打标），还设计了严格的多级数据清洗漏斗 (Data Cleaning Funnel)：
 
-*   **初始生成数据量**：总计生成 151,000 张单图，组合成 **75,500 对图像 (Pairs)**。
+*   **初始候选数据量**：约 **65,000 对图像 (Pairs)**。
 *   **Step 1: CoT 格式与逻辑校验**
     *   *过滤字段*：`reasoning_format` 和 `json_parsing_success`。
     *   *逻辑步骤*：剔除 VLM 未能遵循思维链 (Chain-of-Thought) 规范或 JSON 格式损坏的样本，确保所有标签均基于充分的逻辑推理过程。
-    *   *数据量变化*：移除 4,100 对，保留 71,400 对。
-*   **Step 2: 强制锚点与无区分度过滤 (Hard Anchors)**
+    *   *数据量变化*：移除 2,000 对，保留 63,000 对。
+*   **Step 2: 双 Teacher 一致性过滤 (Teacher Agreement Filter)**
+    *   *过滤字段*：`annotator_results`。
+    *   *逻辑步骤*：要求两路 Teacher VLM 对 `preference`、`category_scores_A` 和 `category_scores_B` 的判断高度一致。若两路模型的结论冲突明显，则直接剔除该样本，仅保留高一致性样本。
+    *   *数据量变化*：移除 5,000 对，保留 58,000 对。
+*   **Step 3: 强制锚点与无区分度过滤 (Hard Anchors)**
     *   *过滤字段*：`category_scores_A` 和 `category_scores_B`。
-    *   *逻辑步骤*：对比两张图像的得分。如果两图在所有 5 个错误分类上的得分完全相同（缺乏对比梯度），或者两图的最大错误得分均仅为 `0.5`（缺乏明确的 `1.0` 致命错误锚点），则直接剔除。这保证了送入 Siamese 网络的每一对数据都具有极强的对比区分度。
-    *   *数据量变化*：移除 16,800 对，保留 54,600 对。
-*   **Step 3: 多轮一致性校验 (Self-Consistency)**
+    *   *逻辑步骤*：对比两张图像的得分。如果两图在所有 3 个错误分类上的得分完全相同（缺乏对比梯度），则直接剔除。这保证了送入 Siamese 网络的每一对数据都具有极强的对比区分度。
+    *   *数据量变化*：移除 4,000 对，保留 54,000 对。
+*   **Step 4: 多轮一致性校验 (Self-Consistency)**
     *   *过滤字段*：`temperature_variance_score`。
-    *   *逻辑步骤*：对同一图像对使用不同 Temperature 进行两次 VLM 评估。计算两次诊断分类的方差，剔除分类结果发生严重跳变（如从 Class 2 突变为 Class 0）的高不确定性噪声样本。
-    *   *数据量变化*：移除 4,600 对，保留最终的 50,000 对。
-*   **最终入库数据量**：50,000 对极高纯度的 Silver Set 训练数据。
+    *   *逻辑步骤*：对同一图像对使用不同 Temperature 进行两次 VLM 评估。计算两次诊断分类的方差，剔除分类结果发生严重跳变的高不确定性噪声样本。
+    *   *数据量变化*：移除 4,000 对，保留最终的 50,000 对。
+*   **最终入库数据量**：**50,000 对**极高纯度的 Silver Set 训练数据。
 
 *(注：在全面执行上述自动化漏斗前，Teacher VLM 需先在小批量金集上完成**人类基准校准 (Human-in-the-loop Calibration)**，达到 >85% 的人类一致性后，方可启动大规模处理。这种“先考老师，再教学生”的策略从根本上保证了训练分布不偏离人类偏好。)*
 
 ### 3.4 数据集划分策略 (Data Split Strategy)
-为了绝对保证学术诚信（防止数据泄漏）并兼顾最高效的学术 ROI，我们将总计 53,000 条数据（50k 银集 + 3k 金集）进行如下严格划分：
+为了绝对保证学术诚信（防止数据泄漏）并兼顾最高效的学术 ROI，我们将最终保留下来的 **53,000 条数据（50k 银集 + 3k 金集）** 进行如下严格划分：
 
 *   **训练集 (Train Set)：约 50,000 条**
     *   *来源：* 纯自动标注银集 (Silver Set)。
@@ -245,8 +242,30 @@ LENS (Localized Entanglement Navigation and Scoring) 是一个轻量级的指标
 *   **评测规模：** 每个模型生成 800 张图（分布于 $N \in \{2, 4, 6, 8\}$ 各 200 张）。
 *   **总推理量：** 4,800 张图。这只需进行一次极速的 LENS 单图前向推理。
 
-### 4.2 论文核心图表与数据指标 (Metrics for Paper)
-通过收集 LENS 对这 4800 张图的输出（绝对 Preference Score 和 5D 分类向量），我们将在论文的 Experiment 章节呈现四大核心结果：
+### 4.2 最终推理输出格式 (Final Eval Output)
+在 Leaderboard 打榜或日常使用中，当你输入一张测试图像时，LENS 能够直接输出一个高度结构化的 JSON 结果，它完美包含了四个核心要素：
+1. **Prompt** (文本提示)
+2. **Subject References** (参考主体列表)
+3. **Generated Image** (待评估的生成图像)
+4. **Metrics** (独立评估得分：存在性、外观、交互，以及最终的绝对/相对偏好分数)
+
+示例输出：
+```json
+{
+  "prompt": "A photo of [Subject A] and [Subject B] shaking hands.",
+  "subject_refs": ["A_ref.jpg", "B_ref.jpg"],
+  "generated_image": "midjourney_output_001.jpg",
+  "metrics": {
+    "existence": 1,
+    "appearance": 0,
+    "interaction": 1,
+    "preference_score": 0.85
+  }
+}
+```
+
+### 4.3 论文核心图表与数据指标 (Metrics for Paper)
+通过收集 LENS 对这 4800 张图的输出（绝对 Preference Score 和 3D 分类向量），我们将在论文的 Experiment 章节呈现四大核心结果：
 
 1.  **元评估对齐度 (Meta-Evaluation: LENS vs. CLIP/DINO)**
     *   *目标*：证明 LENS 是一把“更好的尺子”。
@@ -265,13 +284,13 @@ LENS (Localized Entanglement Navigation and Scoring) 是一个轻量级的指标
 
 4.  **死因诊断堆叠图 (Diagnostic Error Distribution Stack/Radar)**
     *   *目标*：解释模型为什么会输，提供可解释性洞察。
-    *   *方法*：利用 LENS 独有的 5D 分类向量，统计每个模型在触发错误时，Class 5 到 Class 1 的占比。
-    *   *预期洞察*：揭示深层机制。例如，“SD3 虽然总分不高，但它的错误多集中在 Class 2 (串色)；而 MOSAIC 的错误几乎全是因为 Class 5 (实体缺失)。” 这种**可解释性评价**是本文超越所有黑盒评价模型的核心卖点。
+    *   *方法*：利用 LENS 独有的 3D 分类向量，统计每个模型在触发错误时，各错误维度 (Existence, Appearance, Interaction) 的占比。
+    *   *预期洞察*：揭示深层机制。例如，“SD3 虽然总分不高，但它的错误多集中在 Appearance (独立外观坍塌与特征泄漏)；而 MOSAIC 的错误几乎全是因为 Existence (存在性缺失)。” 这种**可解释性评价**是本文超越所有黑盒评价模型的核心卖点。
 
-### 4.3 定性案例分析 (Qualitative Case Studies)
+### 4.4 定性案例分析 (Qualitative Case Studies)
 在论文的 Appendix 或正文对比图中，挑出 3-4 个经典的“打脸 CLIP”定性案例：
 *   *场景*：展示一张“美国队长穿了钢铁侠红色盔甲”的生成图。
-*   *对比*：标注 CLIP 给了 0.85 的高分（被红蓝颜色和双人标签欺骗），而 LENS 精准给出了 0.2 的低分，并高亮输出了 `Class 2 (Attribute Bleeding) = 1.0`。
+*   *对比*：标注 CLIP 给了 0.85 的高分（被红蓝颜色和双人标签欺骗），而 LENS 精准给出了 0.2 的低分，并高亮输出了 `Appearance (Attribute Bleeding) = 0.0`。
 *   *效果*：视觉冲击力极强，让 Reviewer 瞬间 Get 到你这篇论文的伟大之处。
 
 ---

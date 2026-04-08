@@ -8,15 +8,12 @@ class LENS(nn.Module):
     LENS (Localized Entanglement Navigation and Scoring) Architecture
     - Backbone: Qwen3.5-9B (Frozen or LoRA)
     - Score Head: 1D scalar for preference ranking (Margin Ranking Loss)
-    - Classification Head: 5D logits for diagnostic taxonomy (BCEWithLogitsLoss)
-      * Index 0: Class 5 (Subject Omission & Homogenization)
-      * Index 1: Class 4 (Subject Distortion & Mutilation)
-      * Index 2: Class 3 (Semantic Swapping)
-      * Index 3: Class 2 (Attribute Bleeding)
-      * Index 4: Class 1 (Prompt Misalignment)
-      Note: Class 0 (Perfect Alignment) is implicitly learned when all 5 dimensions are 0.0.
+    - Classification Head: 3D logits for diagnostic taxonomy (BCEWithLogitsLoss)
+      * Index 0: Existence (0=pass, 1=fail)
+      * Index 1: Appearance (0=pass, 1=fail)
+      * Index 2: Interaction (0=pass, 1=fail)
     """
-    def __init__(self, model_name="Qwen/Qwen3.5-9B", num_error_classes=5, mode="head_only"):
+    def __init__(self, model_name="Qwen/Qwen3.5-9B", num_error_classes=3, mode="head_only"):
         super(LENS, self).__init__()
         
         print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode...")

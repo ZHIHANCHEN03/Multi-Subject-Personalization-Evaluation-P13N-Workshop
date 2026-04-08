@@ -11,8 +11,8 @@ def main(args):
     print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
     
     # 1. Load Model (Dual-Head VLM)
-    # Using Qwen3.5-9B as the foundation. 5 error classes for multi-label prediction.
-    model = LENS(model_name="Qwen/Qwen3.5-9B", num_error_classes=5, mode=args.mode)
+    # Using Qwen3.5-9B as the foundation. 3 error classes for multi-label prediction.
+    model = LENS(model_name="Qwen/Qwen3.5-9B", num_error_classes=3, mode=args.mode)
     
     # 2. Extract Trainable Parameters
     # Automatically filters out frozen backbone parameters if mode == "head_only"
@@ -24,13 +24,13 @@ def main(args):
     lr = 2e-5 if args.mode == "lora" else 1e-4
     optimizer = torch.optim.AdamW(trainable_params, lr=lr)
     
-    # 3. Initialize Multi-Task Loss Functions
+    # 4. Initialize Multi-Task Loss Functions
     # The Margin Ranking Loss is for the Score Head (Preference)
-    # We use a soft margin (0.5) to accommodate the continuous preference scores (0.0~1.0)
-    ranking_loss_fn = nn.MarginRankingLoss(margin=0.5)
+    # We use a standard margin (e.g., 1.0) for binary preference learning (A vs B)
+    ranking_loss_fn = nn.MarginRankingLoss(margin=1.0)
     
     # The BCEWithLogitsLoss is for the Classification Head (Diagnostic Taxonomy)
-    # Allows for multi-label and 3-tier continuous soft-labels (0.0, 0.5, 1.0)
+    # Applies binary cross-entropy on the 3 orthogonal diagnostic dimensions (Existence, Appearance, Interaction)
     classification_loss_fn = nn.BCEWithLogitsLoss()
     
     # 4. Load PrismBench Data
@@ -58,23 +58,11 @@ def main(args):
         )
         
         # C. Calculate Ranking Loss (Who won?)
-        # Using preference_score_A and preference_score_B to derive ranking target
-        pref_A = batch["preference_score_A"].to(device)
-        pref_B = batch["preference_score_B"].to(device)
+        # Using binary preference label to derive ranking target
+        labels = batch["preference_label"].to(device).to(torch.bfloat16)
         
-        # 1. Point-wise Regression Loss (MSE) - Anchors absolute scores
-        mse_loss_fn = nn.MSELoss()
-        loss_mse_A = mse_loss_fn(score_A.squeeze(-1), pref_A.squeeze(-1))
-        loss_mse_B = mse_loss_fn(score_B.squeeze(-1), pref_B.squeeze(-1))
-        loss_mse = (loss_mse_A + loss_mse_B) / 2.0
-        
-        # 2. Pair-wise Ranking Loss (Margin) - Enforces relative gap
-        # target = 1 if A > B, else -1 (simplification for MarginRankingLoss)
-        labels = torch.where(pref_A > pref_B, torch.tensor(1.0).to(device), torch.tensor(-1.0).to(device)).to(torch.bfloat16)
-        loss_rank = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
-        
-        # Hybrid Preference Loss
-        loss_pref = loss_mse + loss_rank
+        # Pair-wise Ranking Loss (Margin) - Enforces relative gap
+        loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
         
         # D. Calculate Diagnostic Classification Loss (Why did Image A/B fail?)
         # Apply BCE loss on both branches to penalize diagnostic errors on both images
@@ -92,7 +80,7 @@ def main(args):
         total_loss.backward()
         optimizer.step()
         
-        print(f"Step {step+1}/{len(dataloader)} | Pref Loss: {loss_pref.item():.4f} (MSE: {loss_mse.item():.4f}, Rank: {loss_rank.item():.4f}) | "
+        print(f"Step {step+1}/{len(dataloader)} | Pref Rank Loss: {loss_pref.item():.4f} | "
               f"Cls Loss: {loss_cls.item():.4f} | Total Loss: {total_loss.item():.4f}")
 
     print("Training Step Completed successfully!")
