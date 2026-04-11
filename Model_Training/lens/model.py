@@ -23,9 +23,11 @@ class LENS(nn.Module):
             model_name,
             torch_dtype=torch.bfloat16,
             device_map="auto",
-            trust_remote_code=True,
-            use_cache=False # Disable KV cache during training to save VRAM
+            trust_remote_code=True
         )
+        
+        # Disable KV cache during training to save VRAM (must be set on config, not init)
+        self.base_model.config.use_cache = False
         
         self.mode = mode
         if mode == "lora":
