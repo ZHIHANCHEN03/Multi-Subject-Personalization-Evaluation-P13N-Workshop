@@ -242,8 +242,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
-    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3-VL-8B-Instruct",
-                        help="Backbone model name. Must be a real multimodal VL model if you want image-conditioned scoring.")
+    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3.5-9B-Base",
+                        help="Backbone model name. Use the intended multimodal backbone for image-conditioned scoring.")
     parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "full"], default="lora", 
                         help="Training Mode: 'head_only' (freeze all), 'lora' (PEFT on linear layers), 'partial' (unfreeze top N layers), or 'full' (finetune everything).")
     parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze if mode='partial'")

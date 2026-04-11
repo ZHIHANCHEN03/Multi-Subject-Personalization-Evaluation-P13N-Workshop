@@ -35,7 +35,7 @@ echo "======================================================================"
 echo "⏳ [4/6] EXPERIMENT A: Initiating Joint Training (Layer Unfreezing mode)..."
 echo "======================================================================"
 # Reduce batch size for 9B multi-image training
-python scripts/train.py --model_name Qwen/Qwen3-VL-8B-Instruct --mode partial --unfreeze_layers 4 --batch_size 2 --epochs 5
+python scripts/train.py --model_name Qwen/Qwen3.5-9B-Base --mode partial --unfreeze_layers 4 --batch_size 2 --epochs 5
 echo "✅ [4/6] Training A completed."
 
 echo "⏳ Running Benchmark Evaluation for Experiment A..."
@@ -46,7 +46,7 @@ echo "✅ Evaluation A completed."
 echo "======================================================================"
 echo "⏳ [5/6] EXPERIMENT B: Initiating Joint Training (LoRA mode)..."
 echo "======================================================================"
-python scripts/train.py --model_name Qwen/Qwen3-VL-8B-Instruct --mode lora --batch_size 2 --epochs 5
+python scripts/train.py --model_name Qwen/Qwen3.5-9B-Base --mode lora --batch_size 2 --epochs 5
 echo "✅ [5/6] Training B completed."
 
 echo "⏳ Running Benchmark Evaluation for Experiment B..."

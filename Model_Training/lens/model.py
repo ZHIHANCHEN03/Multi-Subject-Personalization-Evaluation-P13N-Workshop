@@ -17,7 +17,7 @@ class LENS(nn.Module):
       * Index 1: Appearance (0=pass, 1=fail)
       * Index 2: Interaction (0=pass, 1=fail)
     """
-    def __init__(self, model_name="Qwen/Qwen3-VL-8B-Instruct", num_error_classes=3, mode="lora", unfreeze_layers=4):
+    def __init__(self, model_name="Qwen/Qwen3.5-9B-Base", num_error_classes=3, mode="lora", unfreeze_layers=4):
         super(LENS, self).__init__()
         
         print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode on CUDA...")
