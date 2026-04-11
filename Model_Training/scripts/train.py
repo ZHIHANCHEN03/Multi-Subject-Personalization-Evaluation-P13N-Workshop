@@ -1,4 +1,30 @@
 import os
+import sys
+import subprocess
+
+# 1. Auto-check and install dependencies
+def ensure_dependencies():
+    required_packages = {"torch": "torch", "peft": "peft", "PIL": "Pillow"}
+    for module_name, pip_name in required_packages.items():
+        try:
+            __import__(module_name)
+        except ImportError:
+            print(f"Installing missing dependency: {pip_name}...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
+            
+    # Qwen3-VL explicitly requires the bleeding edge dev version of transformers
+    try:
+        import transformers
+        # Simple check, real verification happens at load time
+    except ImportError:
+        print(f"Installing dev version of transformers for Qwen3-VL support...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "git+https://github.com/huggingface/transformers"])
+
+ensure_dependencies()
+
+# 2. Fix Python Path for 'lens' module
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import argparse
 import torch
 import torch.nn as nn
@@ -16,13 +42,22 @@ def main(args):
     print(f"--- Initializing LENS Training Pipeline ---")
     print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    # Enforcing CUDA as requested
+    if not torch.cuda.is_available():
+        print("WARNING: CUDA is not available on this machine. Falling back to CPU for testing purposes only.")
+        device = torch.device("cpu")
+    else:
+        device = torch.device("cuda")
     print(f"Using device: {device}")
     
     # 1. Load Model (Dual-Head VLM)
-    # Using Qwen3.5-9B as the foundation. 3 error classes for multi-label prediction.
-    model = LENS(model_name="Qwen/Qwen3.5-9B", num_error_classes=3, mode=args.mode)
-    model = model.to(device)
+    # Using Qwen3.5-9B-Base as the foundation metric model for early fusion training
+    model = LENS(model_name="Qwen/Qwen3.5-9B-Base", num_error_classes=3, mode=args.mode, unfreeze_layers=args.unfreeze_layers)
+    
+    # Since device_map="auto" handles placement on CUDA, we don't strictly need model.to(device)
+    # But we set the device var to ensure our input tensors go to the correct GPU (e.g. model.backbone.device)
+    if torch.cuda.is_available():
+        device = model.backbone.device
     
     # 2. Extract Trainable Parameters
     # Automatically filters out frozen backbone parameters if mode == "head_only"
@@ -141,8 +176,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
-    parser.add_argument("--mode", type=str, choices=["head_only", "lora"], default="head_only", 
-                        help="Training Mode: 'head_only' (freezes VLM backbone, trains dual heads) or 'lora' (finetunes VLM with LoRA + trains dual heads).")
+    parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "full"], default="lora", 
+                        help="Training Mode: 'head_only' (freeze all), 'lora' (PEFT on linear layers), 'partial' (unfreeze top N layers), or 'full' (finetune everything).")
+    parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze if mode='partial'")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Siamese training")
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")

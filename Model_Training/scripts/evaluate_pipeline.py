@@ -1,4 +1,22 @@
 import os
+import sys
+import subprocess
+
+# 1. Auto-check and install dependencies
+def ensure_dependencies():
+    required_packages = {"torch": "torch", "numpy": "numpy"}
+    for module_name, pip_name in required_packages.items():
+        try:
+            __import__(module_name)
+        except ImportError:
+            print(f"Installing missing dependency: {pip_name}...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
+
+ensure_dependencies()
+
+# 2. Fix Python Path for 'lens' module
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import json
 import torch
 import numpy as np

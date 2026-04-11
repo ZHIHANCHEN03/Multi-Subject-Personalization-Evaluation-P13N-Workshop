@@ -6,47 +6,86 @@ from peft import LoraConfig, get_peft_model, TaskType
 class LENS(nn.Module):
     """
     LENS (Localized Entanglement Navigation and Scoring) Architecture
-    - Backbone: Qwen3.5-9B (Frozen or LoRA)
+    - Backbone: Qwen3.5-9B-Base (Frozen, LoRA, Partial Layers, or Full)
     - Score Head: 1D scalar for preference ranking (Margin Ranking Loss)
     - Classification Head: 3D logits for diagnostic taxonomy (BCEWithLogitsLoss)
       * Index 0: Existence (0=pass, 1=fail)
       * Index 1: Appearance (0=pass, 1=fail)
       * Index 2: Interaction (0=pass, 1=fail)
     """
-    def __init__(self, model_name="Qwen/Qwen3.5-9B", num_error_classes=3, mode="head_only"):
+    def __init__(self, model_name="Qwen/Qwen3.5-9B-Base", num_error_classes=3, mode="lora", unfreeze_layers=4):
         super(LENS, self).__init__()
         
-        print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode...")
-        # device_map="auto" works for CUDA but can cause issues on MPS. 
-        # For cross-platform compatibility, we let the external train.py script handle the .to(device) mapping.
+        print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode on CUDA...")
+        # Since we are fully pivoting to CUDA, device_map="auto" is the absolute best practice
+        # for loading massive models (like 9B parameters) across available VRAM.
         self.base_model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype=torch.bfloat16,
-            device_map=None
+            device_map="auto",
+            trust_remote_code=True
         )
         
         self.mode = mode
         if mode == "lora":
-            print("Injecting LoRA adapters into Qwen3.5...")
+            print("Injecting LoRA adapters into ALL linear layers of Qwen3.5 (Optimal for VLM)...")
             peft_config = LoraConfig(
                 task_type=TaskType.CAUSAL_LM,
                 inference_mode=False,
-                r=16, 
-                lora_alpha=32,
-                lora_dropout=0.1,
+                r=32, 
+                lora_alpha=64,
+                lora_dropout=0.05,
+                # For Qwen architecture, targeting all projection layers maximizes capacity 
+                # without forgetting, crucial for shifting to an evaluation metric.
                 target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
             )
             self.backbone = get_peft_model(self.base_model, peft_config)
             self.backbone.print_trainable_parameters()
-        elif mode == "head_only":
-            print("Freezing Backbone for Head-only training...")
+            
+        elif mode == "partial":
+            print(f"Freezing backbone but UNFREEZING the last {unfreeze_layers} Transformer layers...")
             self.backbone = self.base_model
             for param in self.backbone.parameters():
                 param.requires_grad = False
+                
+            # Attempt to unfreeze the last N layers of the Qwen decoder
+            if hasattr(self.backbone, "model") and hasattr(self.backbone.model, "layers"):
+                layers = self.backbone.model.layers
+                for layer in layers[-unfreeze_layers:]:
+                    for param in layer.parameters():
+                        param.requires_grad = True
+                print(f"Successfully unfroze the last {unfreeze_layers} layers. Total layers: {len(layers)}")
+            else:
+                print("Warning: Could not automatically detect 'model.layers' for partial unfreezing.")
+                
+        elif mode == "head_only":
+            print("Freezing entirely Backbone for Head-only training...")
+            self.backbone = self.base_model
+            for param in self.backbone.parameters():
+                param.requires_grad = False
+                
+        elif mode == "full":
+            print("WARNING: Full Parameter Fine-Tuning (Requires massive VRAM, e.g., multiple A100s).")
+            self.backbone = self.base_model
+            for param in self.backbone.parameters():
+                param.requires_grad = True
+                
         else:
             raise ValueError(f"Unknown training mode: {mode}")
                 
-        hidden_size = self.backbone.config.hidden_size
+        # Robust hidden_size extraction for Early-Fusion Multimodal / New Architectures
+        config = self.backbone.config
+        if hasattr(config, "hidden_size"):
+            hidden_size = config.hidden_size
+        elif hasattr(config, "hidden_dim"):
+            hidden_size = config.hidden_dim
+        elif hasattr(config, "text_config") and hasattr(config.text_config, "hidden_size"):
+            hidden_size = config.text_config.hidden_size
+        else:
+            # Fallback for Qwen3.5-9B-Base according to official specs
+            hidden_size = 4096
+            
+        print(f"Detected backbone hidden dimension: {hidden_size}")
         
         # Dual-Head Architecture (Always Trainable)
         print("Initializing Score Head and Classification Head...")
@@ -54,13 +93,13 @@ class LENS(nn.Module):
             nn.Linear(hidden_size, hidden_size // 2),
             nn.GELU(),
             nn.Linear(hidden_size // 2, 1)
-        ).to(torch.bfloat16)
+        ).to(torch.bfloat16).to(self.backbone.device)
         
         self.classification_head = nn.Sequential(
             nn.Linear(hidden_size, hidden_size // 2),
             nn.GELU(),
             nn.Linear(hidden_size // 2, num_error_classes)
-        ).to(torch.bfloat16)
+        ).to(torch.bfloat16).to(self.backbone.device)
 
     def forward(self, input_ids, attention_mask, pixel_values=None):
         """

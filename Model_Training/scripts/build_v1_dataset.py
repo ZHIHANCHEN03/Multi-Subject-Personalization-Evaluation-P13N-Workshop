@@ -1,4 +1,9 @@
 import os
+import sys
+
+# Fix Python Path for 'lens' module if needed
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import json
 import csv
 from collections import defaultdict
