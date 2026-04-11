@@ -80,8 +80,8 @@ def main(args):
     print(f"Using device: {device}")
     
     # 1. Load Model (Dual-Head VLM)
-    # Using Qwen3.5-9B-Base as the foundation metric model for early fusion training
-    model = LENS(model_name="Qwen/Qwen3.5-9B-Base", num_error_classes=3, mode=args.mode, unfreeze_layers=args.unfreeze_layers)
+    # Use a real multimodal VL backbone so image differences actually affect the scores
+    model = LENS(model_name=args.model_name, num_error_classes=3, mode=args.mode, unfreeze_layers=args.unfreeze_layers)
     
     # Since device_map="auto" handles placement on CUDA, we don't strictly need model.to(device)
     # But we set the device var to ensure our input tensors go to the correct GPU (e.g. model.backbone.device)
@@ -109,7 +109,7 @@ def main(args):
     classification_loss_fn = nn.BCEWithLogitsLoss()
     
     # Load Processor
-    processor = AutoProcessor.from_pretrained("Qwen/Qwen3.5-9B-Base", trust_remote_code=True)
+    processor = AutoProcessor.from_pretrained(args.model_name, trust_remote_code=True)
     if processor.tokenizer.pad_token is None:
         processor.tokenizer.pad_token = processor.tokenizer.eos_token
     
@@ -242,6 +242,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
+    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3-VL-8B-Instruct",
+                        help="Backbone model name. Must be a real multimodal VL model if you want image-conditioned scoring.")
     parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "full"], default="lora", 
                         help="Training Mode: 'head_only' (freeze all), 'lora' (PEFT on linear layers), 'partial' (unfreeze top N layers), or 'full' (finetune everything).")
     parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze if mode='partial'")

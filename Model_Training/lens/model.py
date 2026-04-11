@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
 from transformers import AutoModelForCausalLM
+try:
+    from transformers import AutoModelForImageTextToText
+except ImportError:
+    AutoModelForImageTextToText = None
 from peft import LoraConfig, get_peft_model, TaskType
 
 class LENS(nn.Module):
@@ -13,13 +17,19 @@ class LENS(nn.Module):
       * Index 1: Appearance (0=pass, 1=fail)
       * Index 2: Interaction (0=pass, 1=fail)
     """
-    def __init__(self, model_name="Qwen/Qwen3.5-9B-Base", num_error_classes=3, mode="lora", unfreeze_layers=4):
+    def __init__(self, model_name="Qwen/Qwen3-VL-8B-Instruct", num_error_classes=3, mode="lora", unfreeze_layers=4):
         super(LENS, self).__init__()
         
         print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode on CUDA...")
         # Since we are fully pivoting to CUDA, device_map="auto" is the absolute best practice
         # for loading massive models (like 9B parameters) across available VRAM.
-        self.base_model = AutoModelForCausalLM.from_pretrained(
+        auto_model_cls = AutoModelForCausalLM
+        if "VL" in model_name.upper():
+            if AutoModelForImageTextToText is None:
+                raise ImportError("Your transformers build does not expose AutoModelForImageTextToText. Please upgrade transformers before loading a VL backbone.")
+            auto_model_cls = AutoModelForImageTextToText
+
+        self.base_model = auto_model_cls.from_pretrained(
             model_name,
             torch_dtype=torch.bfloat16,
             device_map="auto",
