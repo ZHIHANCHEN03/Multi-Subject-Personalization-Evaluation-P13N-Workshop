@@ -125,8 +125,9 @@ class LENS(nn.Module):
         last_hidden_state = outputs.hidden_states[-1][torch.arange(batch_size, device=input_ids.device), sequence_lengths, :]
         
         # Pass through the two heads
-        score = self.score_head(last_hidden_state)
-        logits = self.classification_head(last_hidden_state)
+        # Force float32 for loss calculation to prevent underflow in bfloat16 causing identical scores
+        score = self.score_head(last_hidden_state).to(torch.float32)
+        logits = self.classification_head(last_hidden_state).to(torch.float32)
         
         return score, logits
 

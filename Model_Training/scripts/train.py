@@ -100,8 +100,9 @@ def main(args):
     
     # 4. Initialize Multi-Task Loss Functions
     # The Margin Ranking Loss is for the Score Head (Preference)
-    # We use a standard margin (e.g., 1.0) for binary preference learning (A vs B)
-    ranking_loss_fn = nn.MarginRankingLoss(margin=1.0)
+    # We use a standard margin (e.g., 0.1) for binary preference learning (A vs B)
+    # A smaller margin helps the model push the scores apart more easily when using bfloat16
+    ranking_loss_fn = nn.MarginRankingLoss(margin=0.1)
     
     # The BCEWithLogitsLoss is for the Classification Head (Diagnostic Taxonomy)
     # Applies binary cross-entropy on the 3 orthogonal diagnostic dimensions (Existence, Appearance, Interaction)
@@ -171,6 +172,9 @@ def main(args):
             loss_value = total_loss.item()
             pref_val = loss_pref.item()
             cls_val = loss_cls.item()
+            score_A_mean = score_A.mean().item()
+            score_B_mean = score_B.mean().item()
+            score_gap_mean = (score_A.squeeze(-1) - score_B.squeeze(-1)).abs().mean().item()
             
             total_loss.backward()
             optimizer.step()
@@ -181,7 +185,8 @@ def main(args):
             epoch_loss += loss_value
             
             print(f"Step {step+1}/{len(train_loader)} | Pref Rank Loss: {pref_val:.4f} | "
-                  f"Cls Loss: {cls_val:.4f} | Total Loss: {loss_value:.4f}")
+                  f"Cls Loss: {cls_val:.4f} | Total Loss: {loss_value:.4f} | "
+                  f"ScoreA: {score_A_mean:.4f} | ScoreB: {score_B_mean:.4f} | Gap: {score_gap_mean:.4f}")
 
         avg_train_loss = epoch_loss / len(train_loader)
         
