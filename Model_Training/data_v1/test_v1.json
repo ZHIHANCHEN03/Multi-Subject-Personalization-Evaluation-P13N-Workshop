@@ -1,0 +1,543 @@
+[
+  {
+    "task_id": "combo_004",
+    "prompt": "In the foreground, a Middle Eastern woman in her thirties wearing a hijab [h09] stands facing forward, slightly turned to her left. Immediately behind her, in the midground, a middle-aged Black man in his mid-forties [h02] stands. The man [h02] gently embraces the woman [h09]; his left arm extends around her upper back, and his right hand rests softly on her right shoulder. The woman [h09] leans back against the man [h02], and her left hand rests on the man's [h02] right forearm. This connected cluster of individuals is presented against a clean white background, devoid of any environmental details, floor textures, or additional props.",
+    "subject_count": 2,
+    "subject_refs": [
+      {
+        "id": "h02",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h02.jpg"
+      },
+      {
+        "id": "h09",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h09.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_004.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_004.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "all_human"
+    }
+  },
+  {
+    "task_id": "combo_029",
+    "prompt": "In the foreground, a young East Asian woman in her mid-twenties [h01] holds a black DSLR camera [o07] in her right hand, bringing it up to eye level as if taking a photo. Behind her, a young Hispanic man in his late twenties [h04] stands in the midground, gently embracing the young East Asian woman [h01] from behind; his right arm rests over her left shoulder, and his left hand touches her waist. The young Hispanic man [h04] leans his back against the frame of a blue city bicycle [o06], which stands in the background. All subjects form one connected cluster. The scene is set against a clean white background with no environment details, no floor texture, and no props beyond the listed subjects.",
+    "subject_count": 4,
+    "subject_refs": [
+      {
+        "id": "h04",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h04.jpg"
+      },
+      {
+        "id": "h01",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h01.jpg"
+      },
+      {
+        "id": "o06",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o06.jpg"
+      },
+      {
+        "id": "o07",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o07.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_029.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_029.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 1
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 1
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "equal"
+    }
+  },
+  {
+    "task_id": "combo_085",
+    "prompt": "In the foreground, an elderly Black man [h07] and a young white woman [h06] are arranged. The elderly Black man [h07] sits on a wooden dining chair [o04], which occupies the midground. The young white woman [h06] stands to his left, embracing him by wrapping her left arm around the shoulder of the elderly Black man [h07]. He holds the young white woman's [h06] right hand with his own left hand. Her right hand, in turn, securely holds the black DSLR camera [o07]. An open silver laptop [o02] rests on the lap of the elderly Black man [h07], with a white coffee mug [o05] resting on its keyboard. In the midground, a blue city bicycle [o06] leans against the backrest of the wooden dining chair [o04]. A small succulent plant in a terracotta pot [o08] stands on the floor to the right of the wooden dining chair [o04]. The entire scene unfolds against a clean white, plain background.",
+    "subject_count": 8,
+    "subject_refs": [
+      {
+        "id": "h07",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h07.jpg"
+      },
+      {
+        "id": "h06",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h06.jpg"
+      },
+      {
+        "id": "o06",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o06.jpg"
+      },
+      {
+        "id": "o07",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o07.jpg"
+      },
+      {
+        "id": "o02",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o02.jpg"
+      },
+      {
+        "id": "o04",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o04.jpg"
+      },
+      {
+        "id": "o05",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o05.jpg"
+      },
+      {
+        "id": "o08",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o08.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_085.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_085.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "object_heavy"
+    }
+  },
+  {
+    "task_id": "combo_090",
+    "prompt": "A wooden dining chair [o04] stands in the background, set against a clean white/plain background. In the midground, a colorful skateboard [o09] leans against the chair's [o04] backrest. A red canvas backpack [o01] leans against the colorful skateboard [o09]. An orange basketball [o03] leans against the red canvas backpack [o01]. In the foreground, an open silver laptop [o02] rests on top of the orange basketball [o03]. A small succulent plant in a terracotta pot [o08] rests on the left side of the open silver laptop's [o02] keyboard. A black DSLR camera [o07] leans against the open silver laptop's [o02] right side. Finally, a white coffee mug [o05] rests on top of the black DSLR camera [o07].",
+    "subject_count": 8,
+    "subject_refs": [
+      {
+        "id": "o01",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o01.jpg"
+      },
+      {
+        "id": "o05",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o05.jpg"
+      },
+      {
+        "id": "o09",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o09.jpg"
+      },
+      {
+        "id": "o02",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o02.jpg"
+      },
+      {
+        "id": "o04",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o04.jpg"
+      },
+      {
+        "id": "o08",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o08.jpg"
+      },
+      {
+        "id": "o03",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o03.jpg"
+      },
+      {
+        "id": "o07",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o07.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_090.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_090.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "all_object"
+    }
+  },
+  {
+    "task_id": "combo_006",
+    "prompt": "A young East Asian woman in her mid-twenties [h01] stands prominently in the foreground. She uses her left arm to firmly hold the red canvas backpack [o01], pressing it gently against her front. The red canvas backpack [o01] is positioned in the midground, directly behind the woman's [h01] left arm, and rests against her torso. The woman's [h01] right hand is relaxed at her side. All subjects form a singular, connected cluster set against a clean white background, completely devoid of any environmental details, floor textures, or additional props.",
+    "subject_count": 2,
+    "subject_refs": [
+      {
+        "id": "h01",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h01.jpg"
+      },
+      {
+        "id": "o01",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o01.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_006.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_006.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "equal"
+    }
+  },
+  {
+    "task_id": "combo_024",
+    "prompt": "In the foreground, a young white woman in her early twenties [h06] stands, facing slightly right. She extends her right arm backwards, embracing the man behind her, with her hand resting on his lower back. Immediately behind her in the midground, a middle-aged East Asian man in his fifties [h08] stands, facing forward. He embraces the young white woman [h06], with his left arm around her left shoulder and his right hand resting on her right hip. In the background, an elderly white woman in her seventies [h03] stands to the middle-aged East Asian man's [h08] left. She shakes hands with the middle-aged East Asian man [h08] using her right hand to grasp his left hand. A blue city bicycle [o06] stands to the elderly white woman's [h03] right, leaning against her; its handlebars rest against her right arm and its front wheel leans against her right thigh. The entire scene is set against a clean, plain white background.",
+    "subject_count": 4,
+    "subject_refs": [
+      {
+        "id": "h08",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h08.jpg"
+      },
+      {
+        "id": "h06",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h06.jpg"
+      },
+      {
+        "id": "h03",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h03.jpg"
+      },
+      {
+        "id": "o06",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o06.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_024.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_024.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 1
+        }
+      },
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "human_heavy"
+    }
+  },
+  {
+    "task_id": "combo_010",
+    "prompt": "A Middle Eastern woman in her thirties wearing a hijab [h09] sits in the foreground, with her back firmly resting against the top rail of a wooden dining chair [o04], which stands directly behind her in the midground. Her right hand grasps the wooden dining chair's [o04] own left back leg, establishing clear contact. Her left hand rests on her own left thigh. The wooden dining chair [o04] provides stable support. The entire scene is set against a clean white background, devoid of any other details, floor texture, or additional props.",
+    "subject_count": 2,
+    "subject_refs": [
+      {
+        "id": "h09",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h09.jpg"
+      },
+      {
+        "id": "o04",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o04.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_010.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_010.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "equal"
+    }
+  },
+  {
+    "task_id": "combo_041",
+    "prompt": "Against a plain white background with no environment details or floor texture, a group of people forms a connected cluster. In the foreground, the white European boy around six years old [h10] faces slightly left. The young white woman in her early twenties [h06] stands behind and left of the white European boy [h10], her left hand resting gently on his right shoulder. In the midground, the elderly Black man in his mid-seventies [h07] stands behind and right of the young white woman [h06], holding her left elbow with his right hand. The young East Asian woman in her mid-twenties [h01] stands left of the elderly Black man [h07], embracing him with her left arm around his waist and her right hand holding his left hand. In the background, the middle-aged East Asian man in his fifties [h08] stands behind the young East Asian woman [h01], placing his right hand on her right shoulder. The elderly white woman in her seventies [h03] stands right of the middle-aged East Asian man [h08] and behind the elderly Black man [h07]. Her left arm is around the middle-aged East Asian man's left arm, and her right hand rests on the elderly Black man's left shoulder.",
+    "subject_count": 6,
+    "subject_refs": [
+      {
+        "id": "h03",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h03.jpg"
+      },
+      {
+        "id": "h08",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h08.jpg"
+      },
+      {
+        "id": "h01",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h01.jpg"
+      },
+      {
+        "id": "h06",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h06.jpg"
+      },
+      {
+        "id": "h07",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h07.jpg"
+      },
+      {
+        "id": "h10",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h10.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_041.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_041.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "all_human"
+    }
+  },
+  {
+    "task_id": "combo_062",
+    "prompt": "In the background, a wooden dining chair [o04] stands. A brown acoustic guitar [o10] leans against the wooden dining chair [o04]'s right side, its headstock resting against the chair's backrest. To the left of the chair and slightly closer to the viewer, a blue city bicycle [o06] stands. A colorful skateboard [o09] leans against the blue city bicycle [o06]'s frame, with its tail touching the bicycle's front tire. In the foreground, a small succulent plant in a terracotta pot [o08] rests centrally on the seat of the wooden dining chair [o04]. A white coffee mug [o05] sits immediately to the right of the small succulent plant in a terracotta pot [o08], its rim touching the pot's terracotta edge. All subjects are arranged against a clean white background.",
+    "subject_count": 6,
+    "subject_refs": [
+      {
+        "id": "o05",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o05.jpg"
+      },
+      {
+        "id": "o08",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o08.jpg"
+      },
+      {
+        "id": "o10",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o10.jpg"
+      },
+      {
+        "id": "o04",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o04.jpg"
+      },
+      {
+        "id": "o06",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o06.jpg"
+      },
+      {
+        "id": "o09",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o09.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_062.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_062.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "yuhuan.zhao@bytedance.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 1
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "all_object"
+    }
+  }
+]

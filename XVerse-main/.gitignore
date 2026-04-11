@@ -1,8 +1,0 @@
-assets/XVerseBench/animal/*
-assets/XVerseBench/object/*
-__pycache__
-checkpoints/*
-!checkpoints/download_ckpts.sh
-generated_*
-tmp
-*.png

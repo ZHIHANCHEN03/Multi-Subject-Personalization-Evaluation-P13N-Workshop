@@ -1,0 +1,13 @@
+\section{Experiments and Results Placeholder}
+
+This section is intentionally left as a structured placeholder so that the paper can be drafted before full-scale experiments finish. The current plan is to complete the section with the following components:
+
+\begin{itemize}
+    \item \textbf{Meta-evaluation against human judgment}: Kendall-Tau, Spearman, and pairwise accuracy on the golden set.
+    \item \textbf{High-subject-count separability}: score gap and overlap analysis between strong and weak generators for $N \in \{2,4,6,8\}$.
+    \item \textbf{Leaderboard evaluation}: average score and diagnostic distributions across multiple generators.
+    \item \textbf{Ablations}: ranking-only versus multi-task training, with and without teacher agreement filtering.
+    \item \textbf{Qualitative case studies}: examples where CLIP or DINO fail to preserve ranking while LENS succeeds.
+\end{itemize}
+
+The central experimental claim to validate is that existing metrics lose score separability as subject count increases, whereas LENS remains discriminative and better aligned with human preference.

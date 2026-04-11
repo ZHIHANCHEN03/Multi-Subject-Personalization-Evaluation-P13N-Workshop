@@ -1,0 +1,20 @@
+\section{Problem Setup and Taxonomy}
+
+\subsection{Reference-Conditioned Multi-Subject Evaluation}
+Each evaluation task contains a text prompt, a set of $N$ reference subjects, and two generated images produced under the same prompt and references. The goal of the metric is to determine which generated image is better aligned with the full task specification. Unlike standard text-to-image evaluation, the metric must verify not only prompt plausibility but also identity-specific preservation across multiple subjects.
+
+\subsection{Why Global Metrics Fail}
+In high-subject-count settings, a model may partially satisfy the prompt while violating the core identity constraints that matter to users. For example, a scene may contain the correct number of figures only approximately, merge several identities into generic lookalikes, or swap actions and props across subjects. Global similarity metrics compress these distinct outcomes into one embedding comparison, which often erases the local evidence needed to preserve ranking separability.
+
+\subsection{Three Diagnostic Dimensions}
+We decompose multi-subject failure into three orthogonal image-level dimensions:
+\begin{itemize}
+    \item \textbf{Existence}: whether all requested reference subjects are present without omission, cloning, or severe unidentifiable collapse.
+    \item \textbf{Appearance}: whether the generated image preserves correct physical structure and local appearance for the requested reference subjects, without severe distortion or cross-subject feature bleeding.
+    \item \textbf{Interaction}: whether subject-to-subject relations, actions, and prop assignments are aligned with the prompt.
+\end{itemize}
+
+Each dimension is annotated as a binary image-level variable. A score of $1$ indicates no observed failure on that dimension, while $0$ indicates that the image fails the dimension in a noticeable way. This choice is intentionally minimalist: it reduces ambiguity for annotators while still supplying a strong diagnostic regularizer during training.
+
+\subsection{Preference as a Continuous Severity Proxy}
+Binary diagnosis alone cannot distinguish all severity levels. In particular, an image missing one subject and an image missing several subjects may both receive Existence$=0$. We address this by treating pairwise preference as the channel through which severity becomes learnable. The diagnostic head provides categorical structure, while the ranking head learns a continuous latent score that places more severe failures lower whenever annotators systematically prefer the less damaged image. This combination preserves annotation simplicity without discarding score granularity.

@@ -1,0 +1,31 @@
+\section{Training Protocol}
+
+\subsection{Ranking Objective}
+For each task, the model receives Image A and Image B generated under the same prompt and the same reference subjects. The scalar outputs of the score head are optimized with a pairwise ranking loss so that the preferred image receives a higher score than the rejected image. This setup directly matches the final use case of the metric: relative comparison under fixed task conditions.
+
+\subsection{Diagnostic Objective}
+In parallel, the classification head is trained with binary cross-entropy over the three diagnostic dimensions for both images. This auxiliary supervision is critical because it prevents the shared representation from collapsing into a purely aesthetic ranking signal. Instead, the model is pushed to attend to concrete image-level failure modes that are meaningful to users and reviewers.
+
+\subsection{Multi-Task Loss}
+The overall training loss is
+\[
+\mathcal{L}_{\text{total}} = \lambda_{\text{rank}}\mathcal{L}_{\text{rank}} + \lambda_{\text{cls}}\mathcal{L}_{\text{cls}}.
+\]
+The ranking term teaches global ordering, while the classification term supplies interpretable structure. In practice, the two terms should be tuned so that diagnostic supervision is strong enough to regularize the backbone, but not so dominant that the scalar ranking head loses sensitivity.
+
+\subsection{Why This Should Recover Score Separability}
+The training design is explicitly targeted at the failure mode of existing metrics. Global similarity methods lose separability because localized identity errors are averaged into a coarse representation. LENS instead receives repeated supervision that says: under identical prompts and references, one image is better, and the reason is linked to Existence, Appearance, or Interaction. Over many pairs, this teaches the model to build a score surface aligned with human preference in the high-subject regime.
+
+\subsection{Data Filtering}
+The silver pipeline applies several quality filters before training:
+\begin{enumerate}
+    \item invalid reasoning or malformed outputs are removed,
+    \item teacher disagreement pairs are removed,
+    \item pairs with no ranking gradient are removed,
+    \item unstable self-consistency cases are removed.
+\end{enumerate}
+
+This filtering stage is necessary because ranking models are sensitive to noisy pair labels. A smaller but cleaner silver set is preferable to a larger set with ambiguous preference signals.
+
+\subsection{Validation Strategy}
+Training is performed on the silver set, while model selection is driven by the golden set. A small validation split from the golden labels is used for checkpoint selection and hyperparameter tuning. Final reported numbers are reserved for a held-out golden test split. This preserves the distinction between teacher-derived supervision and human-grounded evaluation.

@@ -1,0 +1,540 @@
+[
+  {
+    "task_id": "combo_058",
+    "prompt": "A scene against a clean white background features an arrangement of people and objects. In the midground, an `elderly white woman in her seventies [h03]` stands, gently resting her left hand on the backrest of a `wooden dining chair [o04]` positioned to her left. A `colorful skateboard [o09]` leans against the front right leg of the `wooden dining chair [o04]`, towards the background. In the foreground, a `South Asian girl around eight years old [h05]` stands in front of and slightly to the left of the `elderly white woman [h03]`. The woman's right arm embraces the girl's left shoulder. The `South Asian girl [h05]` holds an `open silver laptop [o02]` in her hands, resting it against her midsection. A `small succulent plant in a terracotta pot [o08]` rests on the open keyboard of the `open silver laptop [o02]`. All subjects are directly connected, forming a coherent cluster.",
+    "subject_count": 6,
+    "subject_refs": [
+      {
+        "id": "h03",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h03.jpg"
+      },
+      {
+        "id": "h05",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h05.jpg"
+      },
+      {
+        "id": "o08",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o08.jpg"
+      },
+      {
+        "id": "o04",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o04.jpg"
+      },
+      {
+        "id": "o02",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o02.jpg"
+      },
+      {
+        "id": "o09",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o09.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_058.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_058.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      },
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "object_heavy"
+    }
+  },
+  {
+    "task_id": "combo_046",
+    "prompt": "In the foreground, a white European boy around six years old [h10] holds an open silver laptop [o02] with both hands, the screen facing forward. In the midground, the middle-aged Black man in his mid-forties [h02] stands directly behind the boy [h10], gently resting his right hand on the boy's [h10] left shoulder. A colorful skateboard [o09] leans against the middle-aged Black man's [h02] left leg. Further back, in the background, the middle-aged East Asian man in his fifties [h08] embraces the elderly Black man in his mid-seventies [h07]. The East Asian man [h08] has his left arm around the elderly Black man's [h07] shoulders, while the elderly Black man [h07] rests his right hand on the East Asian man's [h08] forearm. The entire group stands against a clean, plain white background with no other environment details or props.",
+    "subject_count": 6,
+    "subject_refs": [
+      {
+        "id": "h02",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h02.jpg"
+      },
+      {
+        "id": "h10",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h10.jpg"
+      },
+      {
+        "id": "h08",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h08.jpg"
+      },
+      {
+        "id": "h07",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h07.jpg"
+      },
+      {
+        "id": "o02",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o02.jpg"
+      },
+      {
+        "id": "o09",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o09.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_046.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_046.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "yuhuan.zhao@bytedance.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "human_heavy"
+    }
+  },
+  {
+    "task_id": "combo_080",
+    "prompt": "In the foreground, the elderly white woman in her seventies [h03] gently embraces the young white woman in her early twenties [h06]. The young white woman [h06] holds the white coffee mug [o05] in her right hand. Standing slightly behind and to the young white woman's [h06] left, the middle-aged East Asian man in his fifties [h08] extends his left arm around [h06]'s shoulders, lightly touching [h06]'s left shoulder. The middle-aged East Asian man [h08] holds the black DSLR camera [o07] in his right hand. Further back, the elderly Black man in his mid-seventies [h07] stands, resting his left hand on the middle-aged East Asian man's [h08] right shoulder. The elderly Black man's [h07] back gently leans against the wooden dining chair's [o04] backrest, which is positioned directly behind him. The orange basketball [o03] rests on the seat of the wooden dining chair [o04]. A clean white background completely surrounds all subjects, with no other objects or environment details.",
+    "subject_count": 8,
+    "subject_refs": [
+      {
+        "id": "h03",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h03.jpg"
+      },
+      {
+        "id": "h06",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h06.jpg"
+      },
+      {
+        "id": "h07",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h07.jpg"
+      },
+      {
+        "id": "h08",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h08.jpg"
+      },
+      {
+        "id": "o04",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o04.jpg"
+      },
+      {
+        "id": "o05",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o05.jpg"
+      },
+      {
+        "id": "o03",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o03.jpg"
+      },
+      {
+        "id": "o07",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o07.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_080.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_080.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "yuhuan.zhao@bytedance.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        },
+        "category_scores_B": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "equal"
+    }
+  },
+  {
+    "task_id": "combo_073",
+    "prompt": "Against a clean white/plain background, a blue city bicycle [o06] leans in the background. In the midground, the elderly Black man [h07] stands directly in front of the blue city bicycle [o06], resting his left hand on its seat. The middle-aged East Asian man [h08] stands immediately in front of the elderly Black man [h07], placing his right hand on the elderly Black man [h07]'s right shoulder. To the middle-aged East Asian man [h08]'s left, the elderly white woman [h03] stands, embracing the middle-aged East Asian man [h08] with her right arm around his left arm. To the middle-aged East Asian man [h08]'s right, the middle-aged Black man [h02] stands, shaking the middle-aged East Asian man [h08]'s right hand with his left hand. In the foreground, the South Asian girl [h05] stands in front of the elderly white woman [h03], holding the elderly white woman [h03]'s left hand with her right hand. A wooden dining chair [o04] is positioned in front of the middle-aged Black man [h02], who rests his right hand on its back. The Middle Eastern woman [h09] sits on the wooden dining chair [o04], and the South Asian girl [h05] extends her left hand to touch the Middle Eastern woman [h09]'s right knee.",
+    "subject_count": 8,
+    "subject_refs": [
+      {
+        "id": "h02",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h02.jpg"
+      },
+      {
+        "id": "h09",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h09.jpg"
+      },
+      {
+        "id": "h03",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h03.jpg"
+      },
+      {
+        "id": "h08",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h08.jpg"
+      },
+      {
+        "id": "h07",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h07.jpg"
+      },
+      {
+        "id": "h05",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h05.jpg"
+      },
+      {
+        "id": "o04",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o04.jpg"
+      },
+      {
+        "id": "o06",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o06.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_073.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_073.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "yuhuan.zhao@bytedance.com",
+        "preference": "A",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        },
+        "category_scores_B": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "human_heavy"
+    }
+  },
+  {
+    "task_id": "combo_036",
+    "prompt": "In the foreground, an open silver laptop [o02] is visible. A red canvas backpack [o01] rests directly on top of the open silver laptop [o02], with its base making contact with the laptop's screen and keyboard. In the midground, an orange basketball [o03] stands upright. The open silver laptop [o02] leans against the front side of the orange basketball [o03], with its closed lid resting firmly against the ball. In the background, a blue city bicycle [o06] is positioned. The orange basketball [o03] leans against the rear wheel and lower frame of the blue city bicycle [o06]. All subjects form one connected cluster against a clean white plain background with no environment details, no floor texture, and no additional props.",
+    "subject_count": 4,
+    "subject_refs": [
+      {
+        "id": "o01",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o01.jpg"
+      },
+      {
+        "id": "o02",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o02.jpg"
+      },
+      {
+        "id": "o03",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o03.jpg"
+      },
+      {
+        "id": "o06",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o06.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/nano_banana/combo_036.jpg",
+    "image_B_path": "./data_v1/round2/mosaic/combo_036.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "yuhuan.zhao@bytedance.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "all_object"
+    }
+  },
+  {
+    "task_id": "combo_039",
+    "prompt": "In the foreground, a white coffee mug [o05] stands, its left side leaning against the lower right corner of the open silver laptop [o02]'s screen. The open silver laptop [o02] sits in the midground, its screen upright. A black DSLR camera [o07] rests on the laptop's keyboard, positioned to the laptop's right, with its lens facing towards the mug. Behind the laptop and camera, the red canvas backpack [o01] stands, its front surface pressing firmly against the back of the laptop's screen, slightly to its left. All subjects are arranged on a clean, plain white background with no other environment details.",
+    "subject_count": 4,
+    "subject_refs": [
+      {
+        "id": "o01",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o01.jpg"
+      },
+      {
+        "id": "o02",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o02.jpg"
+      },
+      {
+        "id": "o05",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o05.jpg"
+      },
+      {
+        "id": "o07",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o07.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_039.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_039.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "ejzhu2025@oultook.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      },
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "all_object"
+    }
+  },
+  {
+    "task_id": "combo_077",
+    "prompt": "A young white woman in her early twenties [h06] stands in the foreground, holding a white coffee mug [o05] in her left hand. An orange basketball [o03] rests against her right leg. In the midground, to her right, a young Hispanic man in his late twenties [h04] embraces the young white woman [h06], his left arm around her shoulders. He holds a brown acoustic guitar [o10] with his right hand, the guitar leaning against his right side. To the young white woman's [h06] left, a Middle Eastern woman in her thirties wearing a hijab [h09] extends her right hand, shaking hands with the young white woman's [h06] right hand. A red canvas backpack [o01] leans against the Middle Eastern woman's [h09] left leg. In the background, an elderly white woman in her seventies [h03] rests her left hand on the young Hispanic man's [h04] right shoulder and her right hand gently touches the Middle Eastern woman's [h09] left shoulder. The scene is set against a clean white, plain background, with no environmental details, floor textures, or additional props.",
+    "subject_count": 8,
+    "subject_refs": [
+      {
+        "id": "h06",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h06.jpg"
+      },
+      {
+        "id": "h09",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h09.jpg"
+      },
+      {
+        "id": "h03",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h03.jpg"
+      },
+      {
+        "id": "h04",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h04.jpg"
+      },
+      {
+        "id": "o03",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o03.jpg"
+      },
+      {
+        "id": "o01",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o01.jpg"
+      },
+      {
+        "id": "o05",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o05.jpg"
+      },
+      {
+        "id": "o10",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o10.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_077.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_077.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "yaoxyok@gmail.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        }
+      },
+      {
+        "annotator_id": "yuhuan.zhao@bytedance.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "equal"
+    }
+  },
+  {
+    "task_id": "combo_083",
+    "prompt": "In the midground, a middle-aged Black man in his mid-forties [h02] embraces a South Asian girl around eight years old [h05], his right arm around her shoulders. The girl [h05] holds a black DSLR camera [o07] in her left hand. The man [h02] holds a brown acoustic guitar [o10] against his left side, his left hand on its neck. A blue city bicycle [o06] leans against the man [h02]'s right leg. A white coffee mug [o05] rests on the bicycle [o06]'s saddle. In the foreground, a colorful skateboard [o09] leans against the bicycle [o06]'s front wheel, with an orange basketball [o03] resting on top of the skateboard [o09]. The scene is against a clean white background.",
+    "subject_count": 8,
+    "subject_refs": [
+      {
+        "id": "h02",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h02.jpg"
+      },
+      {
+        "id": "h05",
+        "image_path": "./data_v1/contact-bench-assets/references/humans/h05.jpg"
+      },
+      {
+        "id": "o06",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o06.jpg"
+      },
+      {
+        "id": "o09",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o09.jpg"
+      },
+      {
+        "id": "o07",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o07.jpg"
+      },
+      {
+        "id": "o10",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o10.jpg"
+      },
+      {
+        "id": "o05",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o05.jpg"
+      },
+      {
+        "id": "o03",
+        "image_path": "./data_v1/contact-bench-assets/references/objects/o03.jpg"
+      }
+    ],
+    "image_A_path": "./data_v1/round2/mosaic/combo_083.jpg",
+    "image_B_path": "./data_v1/round2/nano_banana/combo_083.jpg",
+    "annotator_results": [
+      {
+        "annotator_id": "jensen@icloud.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 1,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      },
+      {
+        "annotator_id": "yuhuan.zhao@bytedance.com",
+        "preference": "B",
+        "category_scores_A": {
+          "existence": 0,
+          "appearance": 0,
+          "interaction": 0
+        },
+        "category_scores_B": {
+          "existence": 1,
+          "appearance": 1,
+          "interaction": 1
+        }
+      }
+    ],
+    "metadata": {
+      "source": "Human Annotation V1",
+      "ratio_type": "object_heavy"
+    }
+  }
+]

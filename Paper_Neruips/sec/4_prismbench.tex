@@ -1,0 +1,30 @@
+\section{PrismBench}
+
+\subsection{Dataset Overview}
+PrismBench is designed as a stress-test benchmark for multi-subject personalized generation. The benchmark spans subject counts $N \in \{2,4,6,8\}$ and scene difficulty categories that include neutral layouts, occlusion-heavy layouts, and explicit physical interactions. For each task, the same prompt and the same reference subjects are used to produce two generated images, enabling controlled pairwise comparison.
+
+\subsection{Controlled Paired Generation}
+The benchmark uses a strong generator and a weaker baseline strategy to create paired outputs under identical task conditions. This is essential for reducing nuisance variance. Because both generated images share the same prompt and subject references, differences in the final labels are more likely to reflect subject-level alignment quality rather than unrelated background content. This paired design also makes the ranking supervision natural: annotators are asked which image is better for the same task, not which image is absolutely good in isolation.
+
+\subsection{Scale}
+The benchmark follows a two-level annotation strategy:
+\begin{itemize}
+    \item \textbf{Silver Set}: approximately 65,000 candidate pairs are labeled by two independent teacher VLMs. After quality filtering and agreement filtering, 50,000 pairs are retained for training.
+    \item \textbf{Golden Set}: approximately 4,000 candidate pairs are labeled by two independent human annotators under a double-blind protocol. After consistency filtering and conflict removal, 3,000 pairs are retained for validation and testing.
+\end{itemize}
+
+\subsection{Label Schema}
+Each stored sample contains the prompt, the reference subject list, the path to Image A and Image B, and a list of annotator outputs. For each annotator, the label consists of:
+\begin{itemize}
+    \item a binary preference decision between Image A and Image B,
+    \item a three-dimensional binary diagnostic vector for Image A,
+    \item a three-dimensional binary diagnostic vector for Image B.
+\end{itemize}
+
+The schema intentionally remains image-level. We do not require annotators to count the exact number of missing subjects or assign per-subject severity levels. This choice improves annotation stability and allows the model to learn severity through pairwise ranking instead of forcing humans to provide brittle fine-grained judgments.
+
+\subsection{Annotation Protocol}
+Golden labels are collected with a strict double-blind process. Two annotators independently inspect the same pair without seeing each other's decisions. Agreement statistics provide an estimate of annotation reliability, while conflict cases are removed or reserved for downstream analysis. Silver labels follow the same logical schema, but the two annotators are teacher VLMs rather than humans. Only samples with sufficiently aligned teacher outputs survive the silver filtering stage.
+
+\subsection{Why PrismBench Matters}
+PrismBench is not simply another paired preference set. Its core purpose is to isolate the exact evaluation regime where existing metrics fail: shared prompt, shared references, multiple requested subjects, and controlled comparison between two generated images. This is the setting required to measure whether a metric still has discriminative power after identity complexity grows.

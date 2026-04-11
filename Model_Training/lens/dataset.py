@@ -1,7 +1,10 @@
 import json
+import os
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
+
+from lens.utils.image_processing import resize_and_pad_image
 
 class PrismBenchDataset(Dataset):
     """
@@ -72,16 +75,34 @@ class PrismBenchDataset(Dataset):
         if not annotator_results:
             return item
 
-        first = annotator_results[0]
+        # Check preference consistency
+        first_pref = annotator_results[0].get("preference")
         for current in annotator_results[1:]:
-            if current.get("preference") != first.get("preference"):
+            if current.get("preference") != first_pref:
                 raise ValueError(f"Inconsistent preference labels found for task_id={item.get('task_id', 'unknown')}")
-            if current.get("category_scores_A") != first.get("category_scores_A"):
-                raise ValueError(f"Inconsistent category_scores_A found for task_id={item.get('task_id', 'unknown')}")
-            if current.get("category_scores_B") != first.get("category_scores_B"):
-                raise ValueError(f"Inconsistent category_scores_B found for task_id={item.get('task_id', 'unknown')}")
 
-        return first
+        # Average category scores across all annotators
+        avg_scores_A = {"existence": 0.0, "appearance": 0.0, "interaction": 0.0}
+        avg_scores_B = {"existence": 0.0, "appearance": 0.0, "interaction": 0.0}
+        num_anns = len(annotator_results)
+
+        for ann in annotator_results:
+            cat_A = ann.get("category_scores_A", {})
+            cat_B = ann.get("category_scores_B", {})
+            
+            for key in avg_scores_A:
+                avg_scores_A[key] += float(cat_A.get(key, 0))
+                avg_scores_B[key] += float(cat_B.get(key, 0))
+                
+        for key in avg_scores_A:
+            avg_scores_A[key] /= num_anns
+            avg_scores_B[key] /= num_anns
+
+        return {
+            "preference": first_pref,
+            "category_scores_A": avg_scores_A,
+            "category_scores_B": avg_scores_B
+        }
 
     def __getitem__(self, idx):
         item = self.data[idx]
@@ -115,12 +136,23 @@ class PrismBenchDataset(Dataset):
         image_B_path = item.get("image_B_path", "")
         subject_count = item.get("subject_count", len(subject_refs))
         
-        # Simulated Output from Qwen AutoProcessor (seq_len=32)
-        # In reality, this will involve:
-        # 1. Loading reference images: [Image.open(ref["image_path"]) for ref in subject_refs]
-        # 2. Loading generated image A/B: Image.open(image_A_path), Image.open(image_B_path)
-        # 3. Formatting text: "<image> " * subject_count + " (References) " + "<image> (Generated) " + prompt
-        # 4. processor(text=text, images=images_A, return_tensors="pt")
+        # 4. Standardized Image Processing (Resized & Padded to 512x512)
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        def load_and_norm(rel_path):
+            abs_path = os.path.join(base_dir, rel_path)
+            # This utility handles >512 downscaling, <512 skipping upscale, and white padding
+            return resize_and_pad_image(abs_path, target_size=(512, 512))
+
+        # IMPORTANT: Once processor is injected, replace this dummy section with real processing:
+        # ref_images = [load_and_norm(ref["image_path"]) for ref in subject_refs]
+        # img_A = load_and_norm(image_A_path)
+        # img_B = load_and_norm(image_B_path)
+        # 
+        # text_prompt = "<image> " * subject_count + " (References) " + "<image> (Generated) " + prompt
+        # inputs_A = self.processor(text=text_prompt, images=ref_images + [img_A], return_tensors="pt")
+        # inputs_B = self.processor(text=text_prompt, images=ref_images + [img_B], return_tensors="pt")
+
         seq_len = 32
         
         return {

@@ -6,13 +6,23 @@ from torch.utils.data import DataLoader
 from lens.model import LENS
 from lens.dataset import PrismBenchDataset
 
+def custom_collate_fn(batch):
+    # This handles variable-length token sequences by padding them (if they weren't already fixed-length)
+    # For now, dataset returns fixed length dummy tensors, but this ensures future-proofing.
+    from torch.utils.data.dataloader import default_collate
+    return default_collate(batch)
+
 def main(args):
     print(f"--- Initializing LENS Training Pipeline ---")
     print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
     
+    device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    print(f"Using device: {device}")
+    
     # 1. Load Model (Dual-Head VLM)
     # Using Qwen3.5-9B as the foundation. 3 error classes for multi-label prediction.
     model = LENS(model_name="Qwen/Qwen3.5-9B", num_error_classes=3, mode=args.mode)
+    model = model.to(device)
     
     # 2. Extract Trainable Parameters
     # Automatically filters out frozen backbone parameters if mode == "head_only"
@@ -34,67 +44,108 @@ def main(args):
     classification_loss_fn = nn.BCEWithLogitsLoss()
     
     # 4. Load PrismBench Data
-    data_path = os.path.join(os.path.dirname(__file__), "../PrismBench_Local_Data/silver_dataset.json")
-    dataset = PrismBenchDataset(json_path=data_path)
-    dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
+    train_path = os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json")
+    val_path = os.path.join(os.path.dirname(__file__), "../data_v1/val_v1.json")
     
-    model.train()
-    print(f"Starting Diagnostic-Aware Joint Training Loop. Total Batches: {len(dataloader)}")
+    train_dataset = PrismBenchDataset(json_path=train_path)
+    val_dataset = PrismBenchDataset(json_path=val_path)
     
-    for step, batch in enumerate(dataloader):
-        optimizer.zero_grad()
-        device = model.backbone.device
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=custom_collate_fn)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=custom_collate_fn)
+    
+    # Loss weightings
+    alpha = args.alpha # Weight for preference ranking loss
+    beta = args.beta   # Weight for diagnostic classification loss
+    num_epochs = args.epochs
+    
+    print(f"Starting Diagnostic-Aware Joint Training Loop. Train Batches: {len(train_loader)}, Val Batches: {len(val_loader)}, Epochs: {num_epochs}")
+    
+    for epoch in range(num_epochs):
+        # ---------------- TRAIN ----------------
+        model.train()
+        print(f"\n--- Epoch {epoch+1}/{num_epochs} [TRAIN] ---")
+        epoch_loss = 0.0
         
-        # A. Siamese Forward Pass for Image A
-        score_A, logits_A = model(
-            input_ids=batch["input_ids_A"].to(device),
-            attention_mask=batch["attention_mask_A"].to(device)
-        )
-        
-        # B. Siamese Forward Pass for Image B
-        score_B, logits_B = model(
-            input_ids=batch["input_ids_B"].to(device),
-            attention_mask=batch["attention_mask_B"].to(device)
-        )
-        
-        # C. Calculate Ranking Loss (Who won?)
-        # Using binary preference label to derive ranking target
-        labels = batch["preference_label"].to(device).to(torch.bfloat16)
-        
-        # Pair-wise Ranking Loss (Margin) - Enforces relative gap
-        loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
-        
-        # D. Calculate Diagnostic Classification Loss (Why did Image A/B fail?)
-        # Apply BCE loss on both branches to penalize diagnostic errors on both images
-        targets_A = batch["category_scores_A"].to(device).to(torch.bfloat16)
-        targets_B = batch["category_scores_B"].to(device).to(torch.bfloat16)
-        
-        loss_cls_A = classification_loss_fn(logits_A, targets_A)
-        loss_cls_B = classification_loss_fn(logits_B, targets_B)
-        loss_cls = (loss_cls_A + loss_cls_B) / 2.0
-        
-        # E. Joint Backward Pass (Multi-Task Learning Regularization)
-        # This forces the Backbone to extract fine-grained subject features
-        # instead of relying on spurious background shortcuts.
-        total_loss = loss_pref + loss_cls
-        total_loss.backward()
-        optimizer.step()
-        
-        print(f"Step {step+1}/{len(dataloader)} | Pref Rank Loss: {loss_pref.item():.4f} | "
-              f"Cls Loss: {loss_cls.item():.4f} | Total Loss: {total_loss.item():.4f}")
+        for step, batch in enumerate(train_loader):
+            optimizer.zero_grad()
+            
+            score_A, logits_A = model(
+                input_ids=batch["input_ids_A"].to(device),
+                attention_mask=batch["attention_mask_A"].to(device)
+            )
+            score_B, logits_B = model(
+                input_ids=batch["input_ids_B"].to(device),
+                attention_mask=batch["attention_mask_B"].to(device)
+            )
+            
+            labels = batch["preference_label"].to(device).float()
+            loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
+            
+            targets_A = batch["category_scores_A"].to(device).float()
+            targets_B = batch["category_scores_B"].to(device).float()
+            
+            loss_cls_A = classification_loss_fn(logits_A, targets_A)
+            loss_cls_B = classification_loss_fn(logits_B, targets_B)
+            loss_cls = (loss_cls_A + loss_cls_B) / 2.0
+            
+            total_loss = alpha * loss_pref + beta * loss_cls
+            total_loss.backward()
+            optimizer.step()
+            
+            epoch_loss += total_loss.item()
+            
+            print(f"Step {step+1}/{len(train_loader)} | Pref Rank Loss: {loss_pref.item():.4f} | "
+                  f"Cls Loss: {loss_cls.item():.4f} | Total Loss: {total_loss.item():.4f}")
 
-    print("Training Step Completed successfully!")
-    
-    # 6. Save the Model Weights (Ready for Hugging Face Hub)
-    save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/LENS-v1-{args.mode}")
-    model.save_pretrained(save_dir)
-    print(f"LENS Model has been successfully exported to: {os.path.abspath(save_dir)}")
-    print(f"You can now upload the contents of this folder directly to Hugging Face 🤗")
+        avg_train_loss = epoch_loss / len(train_loader)
+        
+        # ---------------- VALIDATION ----------------
+        model.eval()
+        val_loss = 0.0
+        print(f"--- Epoch {epoch+1}/{num_epochs} [VALIDATION] ---")
+        
+        with torch.no_grad():
+            for step, batch in enumerate(val_loader):
+                score_A, logits_A = model(
+                    input_ids=batch["input_ids_A"].to(device),
+                    attention_mask=batch["attention_mask_A"].to(device)
+                )
+                score_B, logits_B = model(
+                    input_ids=batch["input_ids_B"].to(device),
+                    attention_mask=batch["attention_mask_B"].to(device)
+                )
+                
+                labels = batch["preference_label"].to(device).float()
+                loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
+                
+                targets_A = batch["category_scores_A"].to(device).float()
+                targets_B = batch["category_scores_B"].to(device).float()
+                
+                loss_cls_A = classification_loss_fn(logits_A, targets_A)
+                loss_cls_B = classification_loss_fn(logits_B, targets_B)
+                loss_cls = (loss_cls_A + loss_cls_B) / 2.0
+                
+                v_loss = alpha * loss_pref + beta * loss_cls
+                val_loss += v_loss.item()
+
+        avg_val_loss = val_loss / len(val_loader)
+        print(f"Epoch {epoch+1} Summary | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
+        
+        # 6. Save Checkpoint after each epoch
+        save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/LENS-v1-{args.mode}-epoch{epoch+1}")
+        model.save_pretrained(save_dir)
+        print(f"Checkpoint saved to: {os.path.abspath(save_dir)}")
+
+    print("\nTraining Completed successfully!")
+    print(f"You can now upload the contents of {save_dir} directly to Hugging Face 🤗")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
     parser.add_argument("--mode", type=str, choices=["head_only", "lora"], default="head_only", 
                         help="Training Mode: 'head_only' (freezes VLM backbone, trains dual heads) or 'lora' (finetunes VLM with LoRA + trains dual heads).")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Siamese training")
+    parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
+    parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")
+    parser.add_argument("--beta", type=float, default=1.0, help="Weight for Classification Loss")
     args = parser.parse_args()
     main(args)

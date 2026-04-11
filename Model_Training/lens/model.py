@@ -17,10 +17,12 @@ class LENS(nn.Module):
         super(LENS, self).__init__()
         
         print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode...")
+        # device_map="auto" works for CUDA but can cause issues on MPS. 
+        # For cross-platform compatibility, we let the external train.py script handle the .to(device) mapping.
         self.base_model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype=torch.bfloat16,
-            device_map="auto"
+            device_map=None
         )
         
         self.mode = mode
