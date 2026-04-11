@@ -155,8 +155,18 @@ def main(args):
             if "image_grid_thw_B" in batch:
                 kwargs_B["image_grid_thw"] = batch["image_grid_thw_B"].to(device)
 
+            # #region debug-point A:pre-forward-input-compare
+            if step < 3:
+                import json, urllib.request; _p=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".dbg", "ranking-gap-zero.env"); _u,_s='http://127.0.0.1:7777/event','ranking-gap-zero'; exec("try:\n with open(_p) as f: c=f.read(); _u=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SERVER_URL=')),_u); _s=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SESSION_ID=')),_s)\nexcept: pass"); urllib.request.urlopen(urllib.request.Request(_u, data=json.dumps({"sessionId":_s,"runId":"pre-fix","hypothesisId":"A","location":"scripts/train.py:pre-forward","msg":"[DEBUG] Pre-forward A/B input comparison","data":{"step":step,"task_ids":batch["task_id"],"input_ids_equal":bool(torch.equal(batch["input_ids_A"], batch["input_ids_B"])),"attention_equal":bool(torch.equal(batch["attention_mask_A"], batch["attention_mask_B"])),"pixel_abs_mean_diff":float((batch["pixel_values_A"].float()-batch["pixel_values_B"].float()).abs().mean().item()),"pixel_abs_max_diff":float((batch["pixel_values_A"].float()-batch["pixel_values_B"].float()).abs().max().item())},"ts":int(torch.tensor(0).new_empty(()).cpu().item() if False else __import__('time').time()*1000)}).encode(), headers={"Content-Type":"application/json"})).read()
+            # #endregion
+
             score_A, logits_A = model(**kwargs_A)
             score_B, logits_B = model(**kwargs_B)
+
+            # #region debug-point B:post-forward-output-compare
+            if step < 3:
+                import json, urllib.request; _p=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".dbg", "ranking-gap-zero.env"); _u,_s='http://127.0.0.1:7777/event','ranking-gap-zero'; exec("try:\n with open(_p) as f: c=f.read(); _u=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SERVER_URL=')),_u); _s=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SESSION_ID=')),_s)\nexcept: pass"); urllib.request.urlopen(urllib.request.Request(_u, data=json.dumps({"sessionId":_s,"runId":"pre-fix","hypothesisId":"B","location":"scripts/train.py:post-forward","msg":"[DEBUG] Post-forward A/B output comparison","data":{"step":step,"score_a_mean":float(score_A.mean().item()),"score_b_mean":float(score_B.mean().item()),"score_gap_mean":float((score_A.squeeze(-1)-score_B.squeeze(-1)).abs().mean().item()),"logit_gap_mean":float((logits_A-logits_B).abs().mean().item()),"logit_gap_max":float((logits_A-logits_B).abs().max().item())},"ts":int(torch.tensor(0).new_empty(()).cpu().item() if False else __import__('time').time()*1000)}).encode(), headers={"Content-Type":"application/json"})).read()
+            # #endregion
             
             labels = batch["preference_label"].to(device).float()
             loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
