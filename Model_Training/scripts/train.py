@@ -64,6 +64,10 @@ def custom_collate_fn(batch):
     return out
 
 def main(args):
+    import gc
+    torch.cuda.empty_cache()
+    gc.collect()
+
     print(f"--- Initializing LENS Training Pipeline ---")
     print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
     
@@ -162,13 +166,20 @@ def main(args):
             loss_cls = (loss_cls_A + loss_cls_B) / 2.0
             
             total_loss = alpha * loss_pref + beta * loss_cls
+            loss_value = total_loss.item()
+            pref_val = loss_pref.item()
+            cls_val = loss_cls.item()
+            
             total_loss.backward()
             optimizer.step()
             
-            epoch_loss += total_loss.item()
+            # Explicitly clear batch tensors to free up VRAM during loop
+            del kwargs_A, kwargs_B, score_A, score_B, logits_A, logits_B, loss_pref, loss_cls_A, loss_cls_B, loss_cls, total_loss
             
-            print(f"Step {step+1}/{len(train_loader)} | Pref Rank Loss: {loss_pref.item():.4f} | "
-                  f"Cls Loss: {loss_cls.item():.4f} | Total Loss: {total_loss.item():.4f}")
+            epoch_loss += loss_value
+            
+            print(f"Step {step+1}/{len(train_loader)} | Pref Rank Loss: {pref_val:.4f} | "
+                  f"Cls Loss: {cls_val:.4f} | Total Loss: {loss_value:.4f}")
 
         avg_train_loss = epoch_loss / len(train_loader)
         

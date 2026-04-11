@@ -23,26 +23,30 @@ class LENS(nn.Module):
             model_name,
             torch_dtype=torch.bfloat16,
             device_map="auto",
-            trust_remote_code=True
+            trust_remote_code=True,
+            use_cache=False # Disable KV cache during training to save VRAM
         )
         
         self.mode = mode
         if mode == "lora":
-            print("Injecting LoRA adapters into ALL linear layers of Qwen3.5 (Optimal for VLM)...")
+            # Enable gradient checkpointing to drastically reduce VRAM usage
+            self.base_model.gradient_checkpointing_enable()
+            print("Injecting LoRA adapters into Qwen3.5 (Optimal for VLM)...")
             peft_config = LoraConfig(
                 task_type=TaskType.CAUSAL_LM,
                 inference_mode=False,
-                r=32, 
-                lora_alpha=64,
+                r=16, 
+                lora_alpha=32,
                 lora_dropout=0.05,
-                # For Qwen architecture, targeting all projection layers maximizes capacity 
-                # without forgetting, crucial for shifting to an evaluation metric.
-                target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+                # Reduce targeted modules slightly to save VRAM on 9B model
+                target_modules=["q_proj", "k_proj", "v_proj", "o_proj"]
             )
             self.backbone = get_peft_model(self.base_model, peft_config)
             self.backbone.print_trainable_parameters()
             
         elif mode == "partial":
+            # Enable gradient checkpointing
+            self.base_model.gradient_checkpointing_enable()
             print(f"Freezing backbone but UNFREEZING the last {unfreeze_layers} Transformer layers...")
             self.backbone = self.base_model
             for param in self.backbone.parameters():

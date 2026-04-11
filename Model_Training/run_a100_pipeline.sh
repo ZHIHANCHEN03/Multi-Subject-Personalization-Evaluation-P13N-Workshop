@@ -27,11 +27,15 @@ echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
 python scripts/build_v1_dataset.py
 echo "✅ [3/5] Dataset built successfully."
 
+# Enable gradient checkpointing and memory expansion for massive VLM training
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 # 4. Model Training & Eval: EXPERIMENT A (Layer Unfreezing)
 echo "======================================================================"
 echo "⏳ [4/6] EXPERIMENT A: Initiating Joint Training (Layer Unfreezing mode)..."
 echo "======================================================================"
-python scripts/train.py --mode partial --unfreeze_layers 8 --batch_size 8 --epochs 5
+# Reduce batch size for 9B multi-image training
+python scripts/train.py --mode partial --unfreeze_layers 4 --batch_size 2 --epochs 5
 echo "✅ [4/6] Training A completed."
 
 echo "⏳ Running Benchmark Evaluation for Experiment A..."
@@ -42,7 +46,7 @@ echo "✅ Evaluation A completed."
 echo "======================================================================"
 echo "⏳ [5/6] EXPERIMENT B: Initiating Joint Training (LoRA mode)..."
 echo "======================================================================"
-python scripts/train.py --mode lora --batch_size 8 --epochs 5
+python scripts/train.py --mode lora --batch_size 2 --epochs 5
 echo "✅ [5/6] Training B completed."
 
 echo "⏳ Running Benchmark Evaluation for Experiment B..."
