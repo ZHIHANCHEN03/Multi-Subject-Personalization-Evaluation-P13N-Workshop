@@ -29,14 +29,39 @@ import argparse
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from transformers import AutoProcessor
 from lens.model import LENS
 from lens.dataset import PrismBenchDataset
 
 def custom_collate_fn(batch):
-    # This handles variable-length token sequences by padding them (if they weren't already fixed-length)
-    # For now, dataset returns fixed length dummy tensors, but this ensures future-proofing.
-    from torch.utils.data.dataloader import default_collate
-    return default_collate(batch)
+    # This handles variable-length token sequences by padding them
+    from torch.nn.utils.rnn import pad_sequence
+    
+    # We must custom collate because image sizes and text sequences might differ slightly
+    out = {}
+    
+    out["task_id"] = [b["task_id"] for b in batch]
+    out["preference_label"] = torch.stack([b["preference_label"] for b in batch])
+    out["category_scores_A"] = torch.stack([b["category_scores_A"] for b in batch])
+    out["category_scores_B"] = torch.stack([b["category_scores_B"] for b in batch])
+    
+    # Pad sequences
+    out["input_ids_A"] = pad_sequence([b["input_ids_A"] for b in batch], batch_first=True, padding_value=0)
+    out["attention_mask_A"] = pad_sequence([b["attention_mask_A"] for b in batch], batch_first=True, padding_value=0)
+    out["input_ids_B"] = pad_sequence([b["input_ids_B"] for b in batch], batch_first=True, padding_value=0)
+    out["attention_mask_B"] = pad_sequence([b["attention_mask_B"] for b in batch], batch_first=True, padding_value=0)
+    
+    # Concat pixel values (typically batched directly if images are resized identically, else list)
+    # Qwen-VL processor typically outputs flat pixel_values, so we can concatenate them.
+    # Let's concatenate them since that's what the model expects.
+    out["pixel_values_A"] = torch.cat([b["pixel_values_A"] for b in batch], dim=0)
+    out["pixel_values_B"] = torch.cat([b["pixel_values_B"] for b in batch], dim=0)
+    
+    if "image_grid_thw_A" in batch[0]:
+        out["image_grid_thw_A"] = torch.cat([b["image_grid_thw_A"] for b in batch], dim=0)
+        out["image_grid_thw_B"] = torch.cat([b["image_grid_thw_B"] for b in batch], dim=0)
+        
+    return out
 
 def main(args):
     print(f"--- Initializing LENS Training Pipeline ---")
@@ -78,12 +103,15 @@ def main(args):
     # Applies binary cross-entropy on the 3 orthogonal diagnostic dimensions (Existence, Appearance, Interaction)
     classification_loss_fn = nn.BCEWithLogitsLoss()
     
+    # Load Processor
+    processor = AutoProcessor.from_pretrained("Qwen/Qwen3.5-9B-Base", trust_remote_code=True)
+    
     # 4. Load PrismBench Data
     train_path = os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json")
     val_path = os.path.join(os.path.dirname(__file__), "../data_v1/val_v1.json")
     
-    train_dataset = PrismBenchDataset(json_path=train_path)
-    val_dataset = PrismBenchDataset(json_path=val_path)
+    train_dataset = PrismBenchDataset(json_path=train_path, processor=processor)
+    val_dataset = PrismBenchDataset(json_path=val_path, processor=processor)
     
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=custom_collate_fn)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=custom_collate_fn)
@@ -104,14 +132,24 @@ def main(args):
         for step, batch in enumerate(train_loader):
             optimizer.zero_grad()
             
-            score_A, logits_A = model(
-                input_ids=batch["input_ids_A"].to(device),
-                attention_mask=batch["attention_mask_A"].to(device)
-            )
-            score_B, logits_B = model(
-                input_ids=batch["input_ids_B"].to(device),
-                attention_mask=batch["attention_mask_B"].to(device)
-            )
+            kwargs_A = {
+                "input_ids": batch["input_ids_A"].to(device),
+                "attention_mask": batch["attention_mask_A"].to(device),
+                "pixel_values": batch["pixel_values_A"].to(device).to(torch.bfloat16)
+            }
+            if "image_grid_thw_A" in batch:
+                kwargs_A["image_grid_thw"] = batch["image_grid_thw_A"].to(device)
+                
+            kwargs_B = {
+                "input_ids": batch["input_ids_B"].to(device),
+                "attention_mask": batch["attention_mask_B"].to(device),
+                "pixel_values": batch["pixel_values_B"].to(device).to(torch.bfloat16)
+            }
+            if "image_grid_thw_B" in batch:
+                kwargs_B["image_grid_thw"] = batch["image_grid_thw_B"].to(device)
+
+            score_A, logits_A = model(**kwargs_A)
+            score_B, logits_B = model(**kwargs_B)
             
             labels = batch["preference_label"].to(device).float()
             loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
@@ -141,14 +179,24 @@ def main(args):
         
         with torch.no_grad():
             for step, batch in enumerate(val_loader):
-                score_A, logits_A = model(
-                    input_ids=batch["input_ids_A"].to(device),
-                    attention_mask=batch["attention_mask_A"].to(device)
-                )
-                score_B, logits_B = model(
-                    input_ids=batch["input_ids_B"].to(device),
-                    attention_mask=batch["attention_mask_B"].to(device)
-                )
+                kwargs_A = {
+                    "input_ids": batch["input_ids_A"].to(device),
+                    "attention_mask": batch["attention_mask_A"].to(device),
+                    "pixel_values": batch["pixel_values_A"].to(device).to(torch.bfloat16)
+                }
+                if "image_grid_thw_A" in batch:
+                    kwargs_A["image_grid_thw"] = batch["image_grid_thw_A"].to(device)
+                    
+                kwargs_B = {
+                    "input_ids": batch["input_ids_B"].to(device),
+                    "attention_mask": batch["attention_mask_B"].to(device),
+                    "pixel_values": batch["pixel_values_B"].to(device).to(torch.bfloat16)
+                }
+                if "image_grid_thw_B" in batch:
+                    kwargs_B["image_grid_thw"] = batch["image_grid_thw_B"].to(device)
+    
+                score_A, logits_A = model(**kwargs_A)
+                score_B, logits_B = model(**kwargs_B)
                 
                 labels = batch["preference_label"].to(device).float()
                 loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)

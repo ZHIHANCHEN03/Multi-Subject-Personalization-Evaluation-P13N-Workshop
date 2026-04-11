@@ -101,19 +101,16 @@ class LENS(nn.Module):
             nn.Linear(hidden_size // 2, num_error_classes)
         ).to(torch.bfloat16).to(self.backbone.device)
 
-    def forward(self, input_ids, attention_mask, pixel_values=None):
+    def forward(self, input_ids, attention_mask, **kwargs):
         """
         Extracts global contextual feature from the VLM and passes it to both heads.
         """
-        kwargs = {
-            "input_ids": input_ids, 
-            "attention_mask": attention_mask, 
-            "output_hidden_states": True
-        }
-        if pixel_values is not None:
-            kwargs["pixel_values"] = pixel_values
-            
-        outputs = self.backbone(**kwargs)
+        outputs = self.backbone(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            output_hidden_states=True,
+            **kwargs
+        )
         
         # Extract the hidden state of the LAST token (aggregates the multimodal context)
         last_hidden_state = outputs.hidden_states[-1][:, -1, :] 

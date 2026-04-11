@@ -144,24 +144,36 @@ class PrismBenchDataset(Dataset):
             # This utility handles >512 downscaling, <512 skipping upscale, and white padding
             return resize_and_pad_image(abs_path, target_size=(512, 512))
 
-        # IMPORTANT: Once processor is injected, replace this dummy section with real processing:
-        # ref_images = [load_and_norm(ref["image_path"]) for ref in subject_refs]
-        # img_A = load_and_norm(image_A_path)
-        # img_B = load_and_norm(image_B_path)
-        # 
-        # text_prompt = "<image> " * subject_count + " (References) " + "<image> (Generated) " + prompt
-        # inputs_A = self.processor(text=text_prompt, images=ref_images + [img_A], return_tensors="pt")
-        # inputs_B = self.processor(text=text_prompt, images=ref_images + [img_B], return_tensors="pt")
+        if self.processor is None:
+            raise ValueError("Processor must be provided to PrismBenchDataset to load images. Please pass processor=AutoProcessor.from_pretrained(...)")
 
-        seq_len = 32
+        ref_images = [load_and_norm(ref["image_path"]) for ref in subject_refs]
+        img_A = load_and_norm(image_A_path)
+        img_B = load_and_norm(image_B_path)
         
-        return {
+        # Standard Vision-Language prompt format
+        # If Qwen2-VL, it might require specific tags, but processor typically handles it if we use standard text+images
+        text_prompt = "<image>" * (len(ref_images) + 1) + f" (References) (Generated) {prompt}"
+        
+        inputs_A = self.processor(text=text_prompt, images=ref_images + [img_A], return_tensors="pt")
+        inputs_B = self.processor(text=text_prompt, images=ref_images + [img_B], return_tensors="pt")
+
+        out = {
             "task_id": item.get("task_id", ""),
-            "input_ids_A": torch.randint(0, 1000, (seq_len,)),
-            "attention_mask_A": torch.ones(seq_len),
-            "input_ids_B": torch.randint(0, 1000, (seq_len,)),
-            "attention_mask_B": torch.ones(seq_len),
+            "input_ids_A": inputs_A["input_ids"].squeeze(0),
+            "attention_mask_A": inputs_A["attention_mask"].squeeze(0),
+            "pixel_values_A": inputs_A["pixel_values"],
+            "input_ids_B": inputs_B["input_ids"].squeeze(0),
+            "attention_mask_B": inputs_B["attention_mask"].squeeze(0),
+            "pixel_values_B": inputs_B["pixel_values"],
             "preference_label": torch.tensor(pref_label, dtype=torch.float32),
             "category_scores_A": torch.tensor(target_A, dtype=torch.float32),
             "category_scores_B": torch.tensor(target_B, dtype=torch.float32)
         }
+        
+        # Include image_grid_thw if the processor generates it (e.g. for Qwen2-VL architecture)
+        if "image_grid_thw" in inputs_A:
+            out["image_grid_thw_A"] = inputs_A["image_grid_thw"]
+            out["image_grid_thw_B"] = inputs_B["image_grid_thw"]
+            
+        return out
