@@ -8,8 +8,11 @@ import json
 import csv
 from collections import defaultdict
 
-# paths
-base_dir = "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/Model_Training/data_v1"
+# 动态获取相对于当前脚本的路径 (Dynamic relative paths)
+# 这样无论代码被 clone 到什么操作系统的什么目录下（比如 Mac 或 Linux 服务器），都不会报错。
+current_dir = os.path.dirname(os.path.abspath(__file__))
+base_dir = os.path.abspath(os.path.join(current_dir, "..", "data_v1"))
+
 csv_path = os.path.join(base_dir, "annotations_20260409.csv")
 prompts_json_path = os.path.join(base_dir, "contact-bench-assets", "prompts.json")
 output_path = os.path.join(base_dir, "train_ready.json")
