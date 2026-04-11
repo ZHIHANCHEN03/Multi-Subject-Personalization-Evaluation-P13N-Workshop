@@ -146,6 +146,10 @@ class PrismBenchDataset(Dataset):
 
         if self.processor is None:
             raise ValueError("Processor must be provided to PrismBenchDataset to load images. Please pass processor=AutoProcessor.from_pretrained(...)")
+        
+        # Make sure the processor has a pad_token assigned, otherwise padding="max_length" will crash
+        if getattr(self.processor, "tokenizer", None) and self.processor.tokenizer.pad_token is None:
+            self.processor.tokenizer.pad_token = self.processor.tokenizer.eos_token
 
         ref_images = [load_and_norm(ref["image_path"]) for ref in subject_refs]
         img_A = load_and_norm(image_A_path)
@@ -155,8 +159,12 @@ class PrismBenchDataset(Dataset):
         # If Qwen2-VL, it might require specific tags, but processor typically handles it if we use standard text+images
         text_prompt = "<image>" * (len(ref_images) + 1) + f" (References) (Generated) {prompt}"
         
-        inputs_A = self.processor(text=text_prompt, images=ref_images + [img_A], return_tensors="pt")
-        inputs_B = self.processor(text=text_prompt, images=ref_images + [img_B], return_tensors="pt")
+        # Apply padding explicitly to inputs
+        # The Qwen processor returns input_ids without padding by default.
+        # We manually pad them to a fixed max length so custom_collate_fn behaves predictably
+        # Or let the processor pad it:
+        inputs_A = self.processor(text=[text_prompt], images=ref_images + [img_A], return_tensors="pt", padding="max_length", max_length=1024, truncation=True)
+        inputs_B = self.processor(text=[text_prompt], images=ref_images + [img_B], return_tensors="pt", padding="max_length", max_length=1024, truncation=True)
 
         out = {
             "task_id": item.get("task_id", ""),

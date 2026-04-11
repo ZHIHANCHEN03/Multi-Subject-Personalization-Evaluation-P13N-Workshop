@@ -118,8 +118,11 @@ class LENS(nn.Module):
             **kwargs
         )
         
-        # Extract the hidden state of the LAST token (aggregates the multimodal context)
-        last_hidden_state = outputs.hidden_states[-1][:, -1, :] 
+        # Extract the hidden state of the LAST VALID token (aggregates the multimodal context)
+        # We must use attention_mask to find the true last token, avoiding PAD tokens
+        batch_size = input_ids.shape[0]
+        sequence_lengths = attention_mask.sum(dim=1).long() - 1
+        last_hidden_state = outputs.hidden_states[-1][torch.arange(batch_size, device=input_ids.device), sequence_lengths, :]
         
         # Pass through the two heads
         score = self.score_head(last_hidden_state)

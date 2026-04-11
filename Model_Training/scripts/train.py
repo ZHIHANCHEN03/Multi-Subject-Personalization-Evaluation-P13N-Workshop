@@ -109,6 +109,8 @@ def main(args):
     
     # Load Processor
     processor = AutoProcessor.from_pretrained("Qwen/Qwen3.5-9B-Base", trust_remote_code=True)
+    if processor.tokenizer.pad_token is None:
+        processor.tokenizer.pad_token = processor.tokenizer.eos_token
     
     # 4. Load PrismBench Data
     train_path = os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json")
