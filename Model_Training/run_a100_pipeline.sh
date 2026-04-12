@@ -11,6 +11,26 @@ echo "======================================================================"
 echo "🚀 Initializing LENS Pipeline on A100 Server..."
 echo "======================================================================"
 
+# 0. Backbone Option
+# Usage examples:
+#   bash run_a100_pipeline.sh
+#   MODEL_NAME=Qwen/Qwen3.5-4B-Base bash run_a100_pipeline.sh
+#   MODEL_NAME=Qwen/Qwen3.5-2B-Base BATCH_SIZE=8 bash run_a100_pipeline.sh
+MODEL_NAME="${MODEL_NAME:-Qwen/Qwen3.5-9B-Base}"
+
+if [ -z "${BATCH_SIZE:-}" ]; then
+  case "$MODEL_NAME" in
+    "Qwen/Qwen3.5-0.8B-Base") BATCH_SIZE=16 ;;
+    "Qwen/Qwen3.5-2B-Base")   BATCH_SIZE=8 ;;
+    "Qwen/Qwen3.5-4B-Base")   BATCH_SIZE=4 ;;
+    "Qwen/Qwen3.5-9B-Base")   BATCH_SIZE=2 ;;
+    *)                        BATCH_SIZE=2 ;;
+  esac
+fi
+
+echo "✅ [0/5] Selected backbone: $MODEL_NAME"
+echo "✅ [0/5] Selected batch size: $BATCH_SIZE"
+
 # 1. Environment Setup (Safe Cache Storage)
 # IMPORTANT:
 # Some RunPod environments expose /workspace with large capacity in `df -h`,
@@ -41,8 +61,8 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True # Limits threads to prev
 echo "======================================================================"
 echo "⏳ [4/6] EXPERIMENT A: Initiating Joint Training (Layer Unfreezing mode)..."
 echo "======================================================================"
-# Reduce batch size for 9B multi-image training
-python scripts/train.py --model_name Qwen/Qwen3.5-9B-Base --mode partial --unfreeze_layers 4 --batch_size 2 --epochs 5
+# Reduce batch size as backbone grows; can be overridden via BATCH_SIZE=...
+python scripts/train.py --model_name "$MODEL_NAME" --mode partial --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --epochs 5
 echo "✅ [4/6] Training A completed."
 
 echo "⏳ Running Benchmark Evaluation for Experiment A..."
@@ -53,7 +73,7 @@ echo "✅ Evaluation A completed."
 echo "======================================================================"
 echo "⏳ [5/6] EXPERIMENT B: Initiating Joint Training (LoRA mode)..."
 echo "======================================================================"
-python scripts/train.py --model_name Qwen/Qwen3.5-9B-Base --mode lora --batch_size 2 --epochs 5
+python scripts/train.py --model_name "$MODEL_NAME" --mode lora --batch_size "$BATCH_SIZE" --epochs 5
 echo "✅ [5/6] Training B completed."
 
 echo "⏳ Running Benchmark Evaluation for Experiment B..."

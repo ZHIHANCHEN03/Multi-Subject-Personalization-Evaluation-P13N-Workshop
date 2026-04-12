@@ -41,6 +41,53 @@ from transformers import AutoProcessor
 from lens.model import LENS
 from lens.dataset import PrismBenchDataset
 
+
+#region debug-point helper: fail-open debug reporting
+def _try_debug_event(hypothesis_id, location, msg, data):
+    try:
+        import json
+        import time
+        import urllib.request
+
+        env_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            ".dbg",
+            "ranking-gap-zero.env",
+        )
+        url = "http://127.0.0.1:7777/event"
+        session_id = "ranking-gap-zero"
+
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                content = f.read().splitlines()
+            for line in content:
+                if line.startswith("DEBUG_SERVER_URL="):
+                    url = line.split("=", 1)[1]
+                elif line.startswith("DEBUG_SESSION_ID="):
+                    session_id = line.split("=", 1)[1]
+        except OSError:
+            pass
+
+        payload = {
+            "sessionId": session_id,
+            "runId": "pre-fix",
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "msg": msg,
+            "data": data,
+            "ts": int(time.time() * 1000),
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=1).read()
+    except Exception:
+        # Debug reporting must never block or crash training.
+        pass
+#endregion
+
 def custom_collate_fn(batch):
     # This handles variable-length token sequences by padding them
     from torch.nn.utils.rnn import pad_sequence
@@ -165,7 +212,19 @@ def main(args):
 
             # #region debug-point A:pre-forward-input-compare
             if step < 3:
-                import json, urllib.request; _p=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".dbg", "ranking-gap-zero.env"); _u,_s='http://127.0.0.1:7777/event','ranking-gap-zero'; exec("try:\n with open(_p) as f: c=f.read(); _u=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SERVER_URL=')),_u); _s=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SESSION_ID=')),_s)\nexcept: pass"); urllib.request.urlopen(urllib.request.Request(_u, data=json.dumps({"sessionId":_s,"runId":"pre-fix","hypothesisId":"A","location":"scripts/train.py:pre-forward","msg":"[DEBUG] Pre-forward A/B input comparison","data":{"step":step,"task_ids":batch["task_id"],"input_ids_equal":bool(torch.equal(batch["input_ids_A"], batch["input_ids_B"])),"attention_equal":bool(torch.equal(batch["attention_mask_A"], batch["attention_mask_B"])),"pixel_abs_mean_diff":float((batch["pixel_values_A"].float()-batch["pixel_values_B"].float()).abs().mean().item()),"pixel_abs_max_diff":float((batch["pixel_values_A"].float()-batch["pixel_values_B"].float()).abs().max().item())},"ts":int(torch.tensor(0).new_empty(()).cpu().item() if False else __import__('time').time()*1000)}).encode(), headers={"Content-Type":"application/json"})).read()
+                _try_debug_event(
+                    "A",
+                    "scripts/train.py:pre-forward",
+                    "[DEBUG] Pre-forward A/B input comparison",
+                    {
+                        "step": step,
+                        "task_ids": batch["task_id"],
+                        "input_ids_equal": bool(torch.equal(batch["input_ids_A"], batch["input_ids_B"])),
+                        "attention_equal": bool(torch.equal(batch["attention_mask_A"], batch["attention_mask_B"])),
+                        "pixel_abs_mean_diff": float((batch["pixel_values_A"].float() - batch["pixel_values_B"].float()).abs().mean().item()),
+                        "pixel_abs_max_diff": float((batch["pixel_values_A"].float() - batch["pixel_values_B"].float()).abs().max().item()),
+                    },
+                )
             # #endregion
 
             score_A, logits_A = model(**kwargs_A)
@@ -173,7 +232,19 @@ def main(args):
 
             # #region debug-point B:post-forward-output-compare
             if step < 3:
-                import json, urllib.request; _p=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".dbg", "ranking-gap-zero.env"); _u,_s='http://127.0.0.1:7777/event','ranking-gap-zero'; exec("try:\n with open(_p) as f: c=f.read(); _u=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SERVER_URL=')),_u); _s=next((l.split('=',1)[1] for l in c.split('\\n') if l.startswith('DEBUG_SESSION_ID=')),_s)\nexcept: pass"); urllib.request.urlopen(urllib.request.Request(_u, data=json.dumps({"sessionId":_s,"runId":"pre-fix","hypothesisId":"B","location":"scripts/train.py:post-forward","msg":"[DEBUG] Post-forward A/B output comparison","data":{"step":step,"score_a_mean":float(score_A.mean().item()),"score_b_mean":float(score_B.mean().item()),"score_gap_mean":float((score_A.squeeze(-1)-score_B.squeeze(-1)).abs().mean().item()),"logit_gap_mean":float((logits_A-logits_B).abs().mean().item()),"logit_gap_max":float((logits_A-logits_B).abs().max().item())},"ts":int(torch.tensor(0).new_empty(()).cpu().item() if False else __import__('time').time()*1000)}).encode(), headers={"Content-Type":"application/json"})).read()
+                _try_debug_event(
+                    "B",
+                    "scripts/train.py:post-forward",
+                    "[DEBUG] Post-forward A/B output comparison",
+                    {
+                        "step": step,
+                        "score_a_mean": float(score_A.mean().item()),
+                        "score_b_mean": float(score_B.mean().item()),
+                        "score_gap_mean": float((score_A.squeeze(-1) - score_B.squeeze(-1)).abs().mean().item()),
+                        "logit_gap_mean": float((logits_A - logits_B).abs().mean().item()),
+                        "logit_gap_max": float((logits_A - logits_B).abs().max().item()),
+                    },
+                )
             # #endregion
             
             labels = batch["preference_label"].to(device).float()

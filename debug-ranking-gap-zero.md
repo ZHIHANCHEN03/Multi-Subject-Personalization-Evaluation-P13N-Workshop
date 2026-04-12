@@ -18,7 +18,9 @@
 | D | The current pooling/feature extraction path produces the same representation for both A and B because the selected token does not encode the generated-image difference. | Medium | Low | Pending |
 
 ## Log Evidence
-- Pending instrumentation.
+- Evidence 1: Training crashed before model comparison due to `urllib.error.URLError: <urlopen error [Errno 111] Connection refused>`.
+- Conclusion from Evidence 1: Debug instrumentation was fail-closed and incorrectly depended on a running local Debug Server. This blocked normal server-side training before any A/B comparison evidence could be collected.
+- Fix in progress: make instrumentation fail-open so training proceeds even when Debug Server is absent.
 
 ## Verification Conclusion
 - Pending.
