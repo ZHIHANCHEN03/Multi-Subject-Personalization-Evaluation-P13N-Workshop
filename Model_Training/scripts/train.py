@@ -2,6 +2,14 @@ import os
 import sys
 import subprocess
 
+# Safe default Hugging Face cache settings for server-side training.
+# This prevents quota issues from /workspace-backed Xet storage and
+# keeps manual `python scripts/train.py ...` runs consistent.
+os.environ.setdefault("HF_HOME", "/root/huggingface_cache")
+os.environ.setdefault("HUGGINGFACE_HUB_CACHE", os.path.join(os.environ["HF_HOME"], "hub"))
+os.environ.setdefault("TRANSFORMERS_CACHE", os.path.join(os.environ["HF_HOME"], "transformers"))
+os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
+
 # 1. Auto-check and install dependencies
 def ensure_dependencies():
     required_packages = {"torch": "torch", "peft": "peft", "PIL": "Pillow"}

@@ -12,10 +12,17 @@ echo "🚀 Initializing LENS Pipeline on A100 Server..."
 echo "======================================================================"
 
 # 1. Environment Setup (Safe Cache Storage)
-# We map HuggingFace downloads to /workspace to prevent filling up the root overlay
-# and to ensure weights persist across instance restarts.
-export HF_HOME="/workspace/huggingface_cache"
-echo "✅ [1/5] Environment Variable HF_HOME set to: $HF_HOME"
+# IMPORTANT:
+# Some RunPod environments expose /workspace with large capacity in `df -h`,
+# but Hugging Face Xet downloads can still fail there with "Disk quota exceeded".
+# We therefore default to the local overlay disk, which has ample free space.
+export HF_HOME="/root/huggingface_cache"
+export HUGGINGFACE_HUB_CACHE="$HF_HOME/hub"
+export TRANSFORMERS_CACHE="$HF_HOME/transformers"
+export HF_HUB_DISABLE_XET=1
+mkdir -p "$HF_HOME" "$HUGGINGFACE_HUB_CACHE" "$TRANSFORMERS_CACHE"
+echo "✅ [1/5] HF cache directory set to: $HF_HOME"
+echo "✅ [1/5] Xet disabled via HF_HUB_DISABLE_XET=1"
 
 # 2. Dependency Management
 echo "⏳ [2/5] Updating transformers to development branch (required for Qwen3.5/Qwen3-VL)..."
