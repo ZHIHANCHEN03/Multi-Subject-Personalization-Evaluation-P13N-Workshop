@@ -12,13 +12,16 @@ os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
 
 # 1. Auto-check and install dependencies
 def ensure_dependencies():
-    required_packages = {"torch": "torch", "peft": "peft", "PIL": "Pillow"}
+    required_packages = {"torch": "torch", "peft": "peft", "PIL": "Pillow", "unsloth": "unsloth"}
     for module_name, pip_name in required_packages.items():
         try:
             __import__(module_name)
         except ImportError:
             print(f"Installing missing dependency: {pip_name}...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
+            if pip_name == "unsloth":
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "unsloth", "unsloth_zoo"])
+            else:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
             
     # Qwen3-VL explicitly requires the bleeding edge dev version of transformers
     try:
@@ -318,7 +321,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
-    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3.5-0.8B",
+    parser.add_argument("--model_name", type=str, default="unsloth/Qwen3.5-0.8B",
                         help="Backbone model name. Use the intended multimodal backbone for image-conditioned scoring.")
     parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "full"], default="lora", 
                         help="Training Mode: 'head_only' (freeze all), 'lora' (PEFT on linear layers), 'partial' (unfreeze top N layers), or 'full' (finetune everything).")

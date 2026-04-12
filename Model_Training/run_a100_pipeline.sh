@@ -14,17 +14,17 @@ echo "======================================================================"
 # 0. Backbone Option
 # Usage examples:
 #   bash run_a100_pipeline.sh
-#   MODEL_NAME=Qwen/Qwen3.5-4B bash run_a100_pipeline.sh
-#   MODEL_NAME=Qwen/Qwen3.5-2B BATCH_SIZE=8 bash run_a100_pipeline.sh
-MODEL_NAME="${MODEL_NAME:-Qwen/Qwen3.5-0.8B}"
+#   MODEL_NAME=unsloth/Qwen3.5-4B bash run_a100_pipeline.sh
+#   MODEL_NAME=unsloth/Qwen3.5-2B BATCH_SIZE=8 bash run_a100_pipeline.sh
+MODEL_NAME="${MODEL_NAME:-unsloth/Qwen3.5-0.8B}"
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
-    "Qwen/Qwen3.5-0.8B") BATCH_SIZE=16 ;;
-    "Qwen/Qwen3.5-2B")   BATCH_SIZE=8 ;;
-    "Qwen/Qwen3.5-4B")   BATCH_SIZE=4 ;;
-    "Qwen/Qwen3.5-9B")   BATCH_SIZE=2 ;;
-    *)                   BATCH_SIZE=2 ;;
+    "unsloth/Qwen3.5-0.8B") BATCH_SIZE=16 ;;
+    "unsloth/Qwen3.5-2B")   BATCH_SIZE=8 ;;
+    "unsloth/Qwen3.5-4B")   BATCH_SIZE=4 ;;
+    "unsloth/Qwen3.5-9B")   BATCH_SIZE=2 ;;
+    *)                      BATCH_SIZE=2 ;;
   esac
 fi
 

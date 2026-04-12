@@ -1,62 +1,47 @@
 import torch
 import torch.nn as nn
-from transformers import AutoModelForCausalLM
-try:
-    from transformers import AutoModelForImageTextToText
-except ImportError:
-    AutoModelForImageTextToText = None
-from peft import LoraConfig, get_peft_model, TaskType
+from peft import TaskType
 
 class LENS(nn.Module):
     """
     LENS (Localized Entanglement Navigation and Scoring) Architecture
-    - Backbone: Qwen3.5-9B-Base (Frozen, LoRA, Partial Layers, or Full)
+    - Backbone: Qwen3.5-0.8B (via Unsloth for correct Vision-Language forward pass)
     - Score Head: 1D scalar for preference ranking (Margin Ranking Loss)
     - Classification Head: 3D logits for diagnostic taxonomy (BCEWithLogitsLoss)
-      * Index 0: Existence (0=pass, 1=fail)
-      * Index 1: Appearance (0=pass, 1=fail)
-      * Index 2: Interaction (0=pass, 1=fail)
     """
-    def __init__(self, model_name="Qwen/Qwen3.5-9B-Base", num_error_classes=3, mode="lora", unfreeze_layers=4):
+    def __init__(self, model_name="unsloth/Qwen3.5-0.8B", num_error_classes=3, mode="lora", unfreeze_layers=4):
         super(LENS, self).__init__()
         
-        from transformers import AutoModelForCausalLM, AutoModelForImageTextToText
+        print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode using Unsloth on CUDA...")
         
-        print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode on CUDA...")
-        
-        # Determine the correct Auto class based on the model name
-        if "VL" in model_name.upper():
-            auto_model_cls = AutoModelForImageTextToText
-        else:
-            auto_model_cls = AutoModelForCausalLM
-            print("WARNING: Using AutoModelForCausalLM. If this model has a vision encoder, ensure pixel_values are not ignored.")
-            
-        self.base_model = auto_model_cls.from_pretrained(
+        # We must use FastVisionModel for Qwen3.5 multimodal capabilities in Unsloth
+        try:
+            from unsloth import FastVisionModel
+        except ImportError:
+            raise ImportError("Unsloth is not installed. Please run: pip install unsloth unsloth_zoo")
+
+        # Load base model via Unsloth (handles multi-modal correctly and saves 50% VRAM)
+        self.base_model, self.tokenizer = FastVisionModel.from_pretrained(
             model_name,
-            torch_dtype=torch.bfloat16,
-            device_map="auto",
-            trust_remote_code=True,
-            low_cpu_mem_usage=True
+            load_in_4bit=False,      # Don't use 4bit for Qwen3.5 per Unsloth docs
+            load_in_16bit=True,      # Use bf16/16bit
+            use_gradient_checkpointing="unsloth", # Use unsloth's optimized checkpointing
         )
-        
-        # Disable KV cache during training to save VRAM (must be set on config, not init)
-        self.base_model.config.use_cache = False
         
         self.mode = mode
         if mode == "lora":
-            # Enable gradient checkpointing to drastically reduce VRAM usage
-            self.base_model.gradient_checkpointing_enable()
-            print("Injecting LoRA adapters into Qwen3.5 (Optimal for VLM)...")
-            peft_config = LoraConfig(
-                task_type=TaskType.CAUSAL_LM,
-                inference_mode=False,
-                r=16, 
+            print("Injecting LoRA adapters via Unsloth (Optimized for VLM)...")
+            self.backbone = FastVisionModel.get_peft_model(
+                self.base_model,
+                finetune_vision=True,     # Essential: Allow vision encoder to train
+                finetune_language=True,   # Essential: Allow language model to train
+                finetune_attention_modules=True,
+                finetune_mlp_modules=True,
+                r=16,
                 lora_alpha=32,
                 lora_dropout=0.05,
-                # Reduce targeted modules slightly to save VRAM on 9B model
-                target_modules=["q_proj", "k_proj", "v_proj", "o_proj"]
+                bias="none",
             )
-            self.backbone = get_peft_model(self.base_model, peft_config)
             self.backbone.print_trainable_parameters()
             
         elif mode == "partial":
@@ -67,13 +52,13 @@ class LENS(nn.Module):
             for param in self.backbone.parameters():
                 param.requires_grad = False
                 
-            # Attempt to unfreeze the last N layers of the Qwen decoder
+            # Unfreeze the last N layers
             if hasattr(self.backbone, "model") and hasattr(self.backbone.model, "layers"):
                 layers = self.backbone.model.layers
                 for layer in layers[-unfreeze_layers:]:
                     for param in layer.parameters():
                         param.requires_grad = True
-                print(f"Successfully unfroze the last {unfreeze_layers} layers. Total layers: {len(layers)}")
+                print(f"Successfully unfroze the last {unfreeze_layers} layers.")
             else:
                 print("Warning: Could not automatically detect 'model.layers' for partial unfreezing.")
                 
@@ -84,7 +69,7 @@ class LENS(nn.Module):
                 param.requires_grad = False
                 
         elif mode == "full":
-            print("WARNING: Full Parameter Fine-Tuning (Requires massive VRAM, e.g., multiple A100s).")
+            print("WARNING: Full Parameter Fine-Tuning.")
             self.backbone = self.base_model
             for param in self.backbone.parameters():
                 param.requires_grad = True
