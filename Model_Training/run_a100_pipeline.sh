@@ -14,17 +14,17 @@ echo "======================================================================"
 # 0. Backbone Option
 # Usage examples:
 #   bash run_a100_pipeline.sh
-#   MODEL_NAME=Qwen/Qwen3.5-4B-Base bash run_a100_pipeline.sh
-#   MODEL_NAME=Qwen/Qwen3.5-2B-Base BATCH_SIZE=8 bash run_a100_pipeline.sh
-MODEL_NAME="${MODEL_NAME:-Qwen/Qwen3.5-9B-Base}"
+#   MODEL_NAME=Qwen/Qwen3.5-4B bash run_a100_pipeline.sh
+#   MODEL_NAME=Qwen/Qwen3.5-2B BATCH_SIZE=8 bash run_a100_pipeline.sh
+MODEL_NAME="${MODEL_NAME:-Qwen/Qwen3.5-0.8B}"
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
-    "Qwen/Qwen3.5-0.8B-Base") BATCH_SIZE=16 ;;
-    "Qwen/Qwen3.5-2B-Base")   BATCH_SIZE=8 ;;
-    "Qwen/Qwen3.5-4B-Base")   BATCH_SIZE=4 ;;
-    "Qwen/Qwen3.5-9B-Base")   BATCH_SIZE=2 ;;
-    *)                        BATCH_SIZE=2 ;;
+    "Qwen/Qwen3.5-0.8B") BATCH_SIZE=16 ;;
+    "Qwen/Qwen3.5-2B")   BATCH_SIZE=8 ;;
+    "Qwen/Qwen3.5-4B")   BATCH_SIZE=4 ;;
+    "Qwen/Qwen3.5-9B")   BATCH_SIZE=2 ;;
+    *)                   BATCH_SIZE=2 ;;
   esac
 fi
 
@@ -36,7 +36,7 @@ echo "✅ [0/5] Selected batch size: $BATCH_SIZE"
 # Some RunPod environments expose /workspace with large capacity in `df -h`,
 # but Hugging Face Xet downloads can still fail there with "Disk quota exceeded".
 # We therefore default to the local overlay disk, which has ample free space.
-export HF_HOME="/root/huggingface_cache"
+export HF_HOME="$HOME/huggingface_cache"
 export HUGGINGFACE_HUB_CACHE="$HF_HOME/hub"
 export TRANSFORMERS_CACHE="$HF_HOME/transformers"
 export HF_HUB_DISABLE_XET=1

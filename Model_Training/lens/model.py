@@ -20,20 +20,23 @@ class LENS(nn.Module):
     def __init__(self, model_name="Qwen/Qwen3.5-9B-Base", num_error_classes=3, mode="lora", unfreeze_layers=4):
         super(LENS, self).__init__()
         
+        from transformers import AutoModelForCausalLM, AutoModelForImageTextToText
+        
         print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode on CUDA...")
-        # Since we are fully pivoting to CUDA, device_map="auto" is the absolute best practice
-        # for loading massive models (like 9B parameters) across available VRAM.
-        auto_model_cls = AutoModelForCausalLM
+        
+        # Determine the correct Auto class based on the model name
         if "VL" in model_name.upper():
-            if AutoModelForImageTextToText is None:
-                raise ImportError("Your transformers build does not expose AutoModelForImageTextToText. Please upgrade transformers before loading a VL backbone.")
             auto_model_cls = AutoModelForImageTextToText
-
+        else:
+            auto_model_cls = AutoModelForCausalLM
+            print("WARNING: Using AutoModelForCausalLM. If this model has a vision encoder, ensure pixel_values are not ignored.")
+            
         self.base_model = auto_model_cls.from_pretrained(
             model_name,
             torch_dtype=torch.bfloat16,
             device_map="auto",
-            trust_remote_code=True
+            trust_remote_code=True,
+            low_cpu_mem_usage=True
         )
         
         # Disable KV cache during training to save VRAM (must be set on config, not init)

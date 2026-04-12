@@ -5,7 +5,7 @@ import subprocess
 # Safe default Hugging Face cache settings for server-side training.
 # This prevents quota issues from /workspace-backed Xet storage and
 # keeps manual `python scripts/train.py ...` runs consistent.
-os.environ.setdefault("HF_HOME", "/root/huggingface_cache")
+os.environ.setdefault("HF_HOME", os.path.expanduser("~/huggingface_cache"))
 os.environ.setdefault("HUGGINGFACE_HUB_CACHE", os.path.join(os.environ["HF_HOME"], "hub"))
 os.environ.setdefault("TRANSFORMERS_CACHE", os.path.join(os.environ["HF_HOME"], "transformers"))
 os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
@@ -201,7 +201,7 @@ def main(args):
             }
             if "image_grid_thw_A" in batch:
                 kwargs_A["image_grid_thw"] = batch["image_grid_thw_A"].to(device)
-                
+            
             kwargs_B = {
                 "input_ids": batch["input_ids_B"].to(device),
                 "attention_mask": batch["attention_mask_B"].to(device),
@@ -209,25 +209,11 @@ def main(args):
             }
             if "image_grid_thw_B" in batch:
                 kwargs_B["image_grid_thw"] = batch["image_grid_thw_B"].to(device)
-
-            # #region debug-point A:pre-forward-input-compare
-            if step < 3:
-                _try_debug_event(
-                    "A",
-                    "scripts/train.py:pre-forward",
-                    "[DEBUG] Pre-forward A/B input comparison",
-                    {
-                        "step": step,
-                        "task_ids": batch["task_id"],
-                        "input_ids_equal": bool(torch.equal(batch["input_ids_A"], batch["input_ids_B"])),
-                        "attention_equal": bool(torch.equal(batch["attention_mask_A"], batch["attention_mask_B"])),
-                        "pixel_abs_mean_diff": float((batch["pixel_values_A"].float() - batch["pixel_values_B"].float()).abs().mean().item()),
-                        "pixel_abs_max_diff": float((batch["pixel_values_A"].float() - batch["pixel_values_B"].float()).abs().max().item()),
-                    },
-                )
-            # #endregion
-
+            
+            # Forward Pass A (Pass kwargs directly to model)
             score_A, logits_A = model(**kwargs_A)
+            
+            # Forward Pass B (Pass kwargs directly to model)
             score_B, logits_B = model(**kwargs_B)
 
             # #region debug-point B:post-forward-output-compare
@@ -293,7 +279,7 @@ def main(args):
                 }
                 if "image_grid_thw_A" in batch:
                     kwargs_A["image_grid_thw"] = batch["image_grid_thw_A"].to(device)
-                    
+                
                 kwargs_B = {
                     "input_ids": batch["input_ids_B"].to(device),
                     "attention_mask": batch["attention_mask_B"].to(device),
@@ -302,6 +288,7 @@ def main(args):
                 if "image_grid_thw_B" in batch:
                     kwargs_B["image_grid_thw"] = batch["image_grid_thw_B"].to(device)
     
+                # Forward Pass A & B
                 score_A, logits_A = model(**kwargs_A)
                 score_B, logits_B = model(**kwargs_B)
                 
@@ -331,7 +318,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
-    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3.5-9B-Base",
+    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3.5-0.8B",
                         help="Backbone model name. Use the intended multimodal backbone for image-conditioned scoring.")
     parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "full"], default="lora", 
                         help="Training Mode: 'head_only' (freeze all), 'lora' (PEFT on linear layers), 'partial' (unfreeze top N layers), or 'full' (finetune everything).")
