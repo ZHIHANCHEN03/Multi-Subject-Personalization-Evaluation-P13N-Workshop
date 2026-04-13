@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from peft import TaskType
 
 class LENS(nn.Module):
     """

@@ -1,6 +1,5 @@
 import os
 import sys
-import subprocess
 
 # Safe default Hugging Face cache settings for server-side training.
 # This prevents quota issues from /workspace-backed Xet storage and
@@ -10,23 +9,10 @@ os.environ.setdefault("HUGGINGFACE_HUB_CACHE", os.path.join(os.environ["HF_HOME"
 os.environ.setdefault("TRANSFORMERS_CACHE", os.path.join(os.environ["HF_HOME"], "transformers"))
 os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
 
-# 1. Auto-check and install dependencies
-def ensure_dependencies():
-    # Because run_a100_pipeline.sh already handles the complex version alignment for Unsloth,
-    # we just do a simple fallback check here to avoid breaking the delicate environment.
-    required_packages = {"torch": "torch", "peft": "peft", "PIL": "Pillow", "unsloth": "unsloth"}
-    for module_name, pip_name in required_packages.items():
-        try:
-            __import__(module_name)
-        except ImportError:
-            print(f"Warning: Missing {pip_name}. For perfect alignment, please run via run_a100_pipeline.sh")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
-
-ensure_dependencies()
-
 # 2. Fix Python Path for 'lens' module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import unsloth
 import argparse
 import torch
 import torch.nn as nn
@@ -34,53 +20,6 @@ from torch.utils.data import DataLoader
 from transformers import AutoProcessor
 from lens.model import LENS
 from lens.dataset import PrismBenchDataset
-
-
-#region debug-point helper: fail-open debug reporting
-def _try_debug_event(hypothesis_id, location, msg, data):
-    try:
-        import json
-        import time
-        import urllib.request
-
-        env_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            ".dbg",
-            "ranking-gap-zero.env",
-        )
-        url = "http://127.0.0.1:7777/event"
-        session_id = "ranking-gap-zero"
-
-        try:
-            with open(env_path, "r", encoding="utf-8") as f:
-                content = f.read().splitlines()
-            for line in content:
-                if line.startswith("DEBUG_SERVER_URL="):
-                    url = line.split("=", 1)[1]
-                elif line.startswith("DEBUG_SESSION_ID="):
-                    session_id = line.split("=", 1)[1]
-        except OSError:
-            pass
-
-        payload = {
-            "sessionId": session_id,
-            "runId": "pre-fix",
-            "hypothesisId": hypothesis_id,
-            "location": location,
-            "msg": msg,
-            "data": data,
-            "ts": int(time.time() * 1000),
-        }
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode(),
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req, timeout=1).read()
-    except Exception:
-        # Debug reporting must never block or crash training.
-        pass
-#endregion
 
 def custom_collate_fn(batch):
     # This handles variable-length token sequences by padding them
@@ -210,23 +149,6 @@ def main(args):
             # Forward Pass B (Pass kwargs directly to model)
             score_B, logits_B = model(**kwargs_B)
 
-            # #region debug-point B:post-forward-output-compare
-            if step < 3:
-                _try_debug_event(
-                    "B",
-                    "scripts/train.py:post-forward",
-                    "[DEBUG] Post-forward A/B output comparison",
-                    {
-                        "step": step,
-                        "score_a_mean": float(score_A.mean().item()),
-                        "score_b_mean": float(score_B.mean().item()),
-                        "score_gap_mean": float((score_A.squeeze(-1) - score_B.squeeze(-1)).abs().mean().item()),
-                        "logit_gap_mean": float((logits_A - logits_B).abs().mean().item()),
-                        "logit_gap_max": float((logits_A - logits_B).abs().max().item()),
-                    },
-                )
-            # #endregion
-            
             labels = batch["preference_label"].to(device).float()
             loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
             

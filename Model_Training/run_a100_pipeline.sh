@@ -45,16 +45,16 @@ echo "✅ [1/5] HF cache directory set to: $HF_HOME"
 echo "✅ [1/5] Xet disabled via HF_HUB_DISABLE_XET=1"
 
 # 2. Dependency Management
-echo "⏳ [2/5] Force aligning PyTorch and Unsloth ecosystem..."
-# 1. Align core torch ecosystem to 2.4.0 with CU121
-pip install -q torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
-# 2. Install correct xformers and torchao for unsloth 2026.4.4
-pip install -q xformers==0.0.27.post2 torchao==0.13.0
-# 3. Install stable transformers (avoiding the bleeding edge 5.6.0.dev0 that breaks unsloth)
-pip install -q transformers==5.5.0
-# 4. Install unsloth
-pip install -q unsloth unsloth_zoo
-echo "✅ [2/5] Environment aligned and ready."
+echo "⏳ [2/5] Creating isolated A100 training environment..."
+VENV_DIR="${VENV_DIR:-$PWD/.venv-a100-unsloth}"
+python3 -m venv "$VENV_DIR"
+source "$VENV_DIR/bin/activate"
+python -m pip install -q --upgrade pip setuptools wheel
+python -m pip install -q --upgrade --force-reinstall --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+python -m pip install -q --upgrade --force-reinstall --no-cache-dir transformers==5.5.0 peft pillow
+python -m pip install -q --upgrade --force-reinstall --no-cache-dir unsloth unsloth_zoo
+python -m pip check
+echo "✅ [2/5] Isolated environment is ready at: $VENV_DIR"
 
 # 3. Data Preparation
 echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
