@@ -45,14 +45,16 @@ echo "✅ [1/5] HF cache directory set to: $HF_HOME"
 echo "✅ [1/5] Xet disabled via HF_HUB_DISABLE_XET=1"
 
 # 2. Dependency Management
-echo "⏳ [2/5] Force aligning PyTorch ecosystem to v2.4.0+cu121 for Unsloth compatibility..."
+echo "⏳ [2/5] Force aligning PyTorch and Unsloth ecosystem..."
+# 1. Align core torch ecosystem to 2.4.0 with CU121
 pip install -q torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
-pip install -q xformers==0.0.27.post2
-pip install -q --no-deps unsloth unsloth_zoo
-
-echo "⏳ [2/5] Updating transformers to development branch (required for Qwen3.5/Qwen3-VL)..."
-pip install -q git+https://github.com/huggingface/transformers.git
-echo "✅ [2/5] Environment aligned and Transformers updated."
+# 2. Install correct xformers and torchao for unsloth 2026.4.4
+pip install -q xformers==0.0.27.post2 torchao==0.13.0
+# 3. Install stable transformers (avoiding the bleeding edge 5.6.0.dev0 that breaks unsloth)
+pip install -q transformers==5.5.0
+# 4. Install unsloth
+pip install -q unsloth unsloth_zoo
+echo "✅ [2/5] Environment aligned and ready."
 
 # 3. Data Preparation
 echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."

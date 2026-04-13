@@ -12,24 +12,15 @@ os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
 
 # 1. Auto-check and install dependencies
 def ensure_dependencies():
+    # Because run_a100_pipeline.sh already handles the complex version alignment for Unsloth,
+    # we just do a simple fallback check here to avoid breaking the delicate environment.
     required_packages = {"torch": "torch", "peft": "peft", "PIL": "Pillow", "unsloth": "unsloth"}
     for module_name, pip_name in required_packages.items():
         try:
             __import__(module_name)
         except ImportError:
-            print(f"Installing missing dependency: {pip_name}...")
-            if pip_name == "unsloth":
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "unsloth", "unsloth_zoo"])
-            else:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
-            
-    # Qwen3-VL explicitly requires the bleeding edge dev version of transformers
-    try:
-        import transformers
-        # Simple check, real verification happens at load time
-    except ImportError:
-        print(f"Installing dev version of transformers for Qwen3-VL support...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "git+https://github.com/huggingface/transformers"])
+            print(f"Warning: Missing {pip_name}. For perfect alignment, please run via run_a100_pipeline.sh")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
 
 ensure_dependencies()
 
