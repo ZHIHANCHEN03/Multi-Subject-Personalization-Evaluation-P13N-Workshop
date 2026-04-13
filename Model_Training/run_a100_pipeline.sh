@@ -47,12 +47,34 @@ echo "✅ [1/5] Xet disabled via HF_HUB_DISABLE_XET=1"
 # 2. Dependency Management
 echo "⏳ [2/5] Creating isolated A100 training environment..."
 VENV_DIR="${VENV_DIR:-$PWD/.venv-a100-unsloth}"
+if [ -d "$VENV_DIR" ]; then
+  echo "🧹 [2/5] Removing stale virtualenv: $VENV_DIR"
+  rm -rf "$VENV_DIR"
+fi
+echo "🧱 [2/5] Creating fresh virtualenv at: $VENV_DIR"
 python3 -m venv "$VENV_DIR"
 source "$VENV_DIR/bin/activate"
-python -m pip install -q --upgrade pip setuptools wheel
-python -m pip install -q --upgrade --force-reinstall --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
-python -m pip install -q --upgrade --force-reinstall --no-cache-dir transformers==5.5.0 peft pillow
-python -m pip install -q --upgrade --force-reinstall --no-cache-dir unsloth unsloth_zoo
+echo "🐍 [2/5] Using python: $(which python)"
+echo "📦 [2/5] Using pip: $(which pip)"
+python --version
+pip --version
+echo "⬆️  [2/5] Upgrading pip/setuptools/wheel..."
+python -m pip install --upgrade pip setuptools wheel
+echo "🔥 [2/5] Installing torch/torchvision/torchaudio for A100 target..."
+python -m pip install --upgrade --force-reinstall --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+echo "🧩 [2/5] Installing transformers/peft/pillow..."
+python -m pip install --upgrade --force-reinstall --no-cache-dir transformers==5.5.0 peft pillow
+echo "🦥 [2/5] Installing unsloth and unsloth_zoo without touching pinned torch stack..."
+python -m pip install --upgrade --force-reinstall --no-cache-dir --no-deps unsloth unsloth_zoo
+echo "🔎 [2/5] Verifying final package versions..."
+python - <<'PY'
+import importlib
+packages = ["torch", "torchvision", "torchaudio", "transformers", "peft", "unsloth", "unsloth_zoo"]
+for name in packages:
+    mod = importlib.import_module(name)
+    print(f"   - {name}: {getattr(mod, '__version__', 'unknown')}")
+PY
+echo "🩺 [2/5] Running pip check..."
 python -m pip check
 echo "✅ [2/5] Isolated environment is ready at: $VENV_DIR"
 
