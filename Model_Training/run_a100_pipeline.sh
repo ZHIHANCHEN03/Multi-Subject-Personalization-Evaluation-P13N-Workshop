@@ -60,27 +60,24 @@ python --version
 pip --version
 echo "⬆️  [2/5] Upgrading pip/setuptools/wheel..."
 python -m pip install --upgrade pip setuptools wheel
-echo "🦥 [2/5] Installing Unsloth stack first, following Qwen3.5 guidance..."
-python -m pip install --upgrade --force-reinstall --no-cache-dir unsloth unsloth_zoo transformers==5.5.0 peft pillow
-echo "🔥 [2/5] Detecting torch/CUDA selected by Unsloth..."
-TORCH_CUDA_TAG="$(python - <<'PY'
-import torch
-print(f"cu{torch.version.cuda.replace('.', '')}")
-PY
-)"
-echo "✅ [2/5] Torch selected by resolver:"
-python - <<'PY'
-import torch
-print(f"   - torch: {torch.__version__}")
-print(f"   - cuda: {torch.version.cuda}")
-print(f"   - cuda_available: {torch.cuda.is_available()}")
-PY
-echo "🧩 [2/5] Installing matching torchvision/torchaudio from: https://download.pytorch.org/whl/${TORCH_CUDA_TAG}"
-python -m pip install --upgrade --force-reinstall --no-cache-dir torchvision torchaudio --index-url "https://download.pytorch.org/whl/${TORCH_CUDA_TAG}"
+echo "🧱 [2/5] Writing A100 training constraints..."
+cat > "$VENV_DIR/constraints-a100.txt" <<'EOF'
+torch==2.10.0
+torchvision==0.25.0
+torchaudio==2.10.0
+transformers==5.5.0
+fsspec==2025.9.0
+EOF
+echo "🔥 [2/5] Installing pinned torch stack for A100 training (cu128)..."
+python -m pip install --upgrade --force-reinstall --no-cache-dir torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cu128
+echo "🧩 [2/5] Installing pinned Python stack..."
+python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/constraints-a100.txt" transformers==5.5.0 peft pillow fsspec==2025.9.0
+echo "🦥 [2/5] Installing Unsloth under the same constraints..."
+python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/constraints-a100.txt" unsloth unsloth_zoo
 echo "🔎 [2/5] Verifying final package versions..."
 python - <<'PY'
 import importlib
-packages = ["torch", "torchvision", "torchaudio", "transformers", "peft", "unsloth", "unsloth_zoo"]
+packages = ["torch", "torchvision", "torchaudio", "transformers", "peft", "unsloth", "unsloth_zoo", "fsspec"]
 for name in packages:
     mod = importlib.import_module(name)
     print(f"   - {name}: {getattr(mod, '__version__', 'unknown')}")
