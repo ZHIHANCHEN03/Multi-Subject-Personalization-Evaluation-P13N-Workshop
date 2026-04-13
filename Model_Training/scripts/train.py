@@ -108,8 +108,8 @@ def main(args):
     train_path = os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json")
     val_path = os.path.join(os.path.dirname(__file__), "../data_v1/val_v1.json")
     
-    train_dataset = PrismBenchDataset(json_path=train_path, processor=processor)
-    val_dataset = PrismBenchDataset(json_path=val_path, processor=processor)
+    train_dataset = PrismBenchDataset(json_path=train_path, processor=processor, image_size=args.image_size)
+    val_dataset = PrismBenchDataset(json_path=val_path, processor=processor, image_size=args.image_size)
     
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=custom_collate_fn)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=custom_collate_fn)
@@ -251,6 +251,7 @@ if __name__ == "__main__":
                         help="Training Mode: 'layer_only' (only unfreeze the top N layers), 'lora_layer' (LoRA plus top N layers), 'lora', 'head_only', 'partial' (alias of layer_only), or 'full'.")
     parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze for layer_only / lora_layer / partial")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Siamese training")
+    parser.add_argument("--image_size", type=int, default=512, help="Square image size used for resize-and-pad before processor encoding")
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")
     parser.add_argument("--beta", type=float, default=1.0, help="Weight for Classification Loss")

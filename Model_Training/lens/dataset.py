@@ -13,8 +13,9 @@ class PrismBenchDataset(Dataset):
     - Extracts binary preference label (A or B) for MarginRankingLoss (1.0 for A, -1.0 for B)
     - Extracts 3D Category Scores (0 or 1) for BCEWithLogitsLoss (Existence, Appearance, Interaction)
     """
-    def __init__(self, json_path, processor=None):
+    def __init__(self, json_path, processor=None, image_size=512):
         self.processor = processor
+        self.image_size = image_size
         try:
             with open(json_path, 'r') as f:
                 self.data = json.load(f)
@@ -134,13 +135,12 @@ class PrismBenchDataset(Dataset):
         image_A_path = item.get("image_A_path", "")
         image_B_path = item.get("image_B_path", "")
         
-        # 4. Standardized Image Processing (Resized & Padded to 512x512)
+        # 4. Standardized Image Processing
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
         def load_and_norm(rel_path):
             abs_path = os.path.join(base_dir, rel_path)
-            # This utility handles >512 downscaling, <512 skipping upscale, and white padding
-            return resize_and_pad_image(abs_path, target_size=(512, 512))
+            return resize_and_pad_image(abs_path, target_size=(self.image_size, self.image_size))
 
         if self.processor is None:
             raise ValueError("Processor must be provided to PrismBenchDataset to load images. Please pass processor=AutoProcessor.from_pretrained(...)")
