@@ -2,7 +2,6 @@ import json
 import os
 import torch
 from torch.utils.data import Dataset
-from PIL import Image
 
 from lens.utils.image_processing import resize_and_pad_image
 
@@ -134,7 +133,6 @@ class PrismBenchDataset(Dataset):
         subject_refs = item.get("subject_refs", [])
         image_A_path = item.get("image_A_path", "")
         image_B_path = item.get("image_B_path", "")
-        subject_count = item.get("subject_count", len(subject_refs))
         
         # 4. Standardized Image Processing (Resized & Padded to 512x512)
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -155,16 +153,46 @@ class PrismBenchDataset(Dataset):
         img_A = load_and_norm(image_A_path)
         img_B = load_and_norm(image_B_path)
         
-        # Standard Vision-Language prompt format
-        # If Qwen2-VL, it might require specific tags, but processor typically handles it if we use standard text+images
-        text_prompt = "<image>" * (len(ref_images) + 1) + f" (References) (Generated) {prompt}"
-        
-        # Apply padding explicitly to inputs
-        # The Qwen processor returns input_ids without padding by default.
-        # We manually pad them to a fixed max length so custom_collate_fn behaves predictably
-        # Or let the processor pad it:
-        inputs_A = self.processor(text=[text_prompt], images=ref_images + [img_A], return_tensors="pt", padding="max_length", max_length=1024, truncation=True)
-        inputs_B = self.processor(text=[text_prompt], images=ref_images + [img_B], return_tensors="pt", padding="max_length", max_length=1024, truncation=True)
+        # Qwen3.5 expects multimodal placeholders to come from the chat template.
+        # Raw "<image>" text can leave the model with zero image tokens even when pixel_values exist.
+        def build_text_prompt():
+            content = []
+            for _ in ref_images:
+                content.append({"type": "image"})
+            content.append({"type": "image"})
+            content.append({
+                "type": "text",
+                "text": (
+                    "You are evaluating a multi-subject personalization result. "
+                    "The first images are subject references. The last image is the generated candidate. "
+                    f"Prompt: {prompt}"
+                ),
+            })
+            messages = [{"role": "user", "content": content}]
+            return self.processor.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=False,
+            )
+
+        text_prompt = build_text_prompt()
+
+        inputs_A = self.processor(
+            text=[text_prompt],
+            images=ref_images + [img_A],
+            return_tensors="pt",
+            padding="max_length",
+            max_length=1024,
+            truncation=True,
+        )
+        inputs_B = self.processor(
+            text=[text_prompt],
+            images=ref_images + [img_B],
+            return_tensors="pt",
+            padding="max_length",
+            max_length=1024,
+            truncation=True,
+        )
 
         out = {
             "task_id": item.get("task_id", ""),
