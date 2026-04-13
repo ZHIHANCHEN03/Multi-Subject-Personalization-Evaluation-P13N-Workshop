@@ -107,7 +107,7 @@ if [ "$RUN_LAYER_ONLY" = "1" ]; then
   echo "✅ [4/6] Training A completed."
 
   echo "⏳ Running Benchmark Evaluation for Experiment A..."
-  python scripts/evaluate_pipeline.py
+  python scripts/evaluate_pipeline.py --mode layer_only --image_size "$IMAGE_SIZE"
   echo "✅ Evaluation A completed."
 else
   echo "⏭️  [4/6] Skipping layer-only experiment. Set RUN_LAYER_ONLY=1 to enable."
@@ -126,7 +126,7 @@ fi
 
 if [ "$RUN_LORA_LAYER" = "1" ]; then
   echo "⏳ Running Benchmark Evaluation for Experiment B..."
-  python scripts/evaluate_pipeline.py
+  python scripts/evaluate_pipeline.py --mode lora_layer --image_size "$IMAGE_SIZE"
   echo "✅ Evaluation B completed."
 fi
 

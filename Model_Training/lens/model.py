@@ -10,6 +10,7 @@ class LENS(nn.Module):
     """
     def __init__(self, model_name="unsloth/Qwen3.5-0.8B", num_error_classes=3, mode="lora", unfreeze_layers=4):
         super(LENS, self).__init__()
+        self.unfreeze_layers = unfreeze_layers
         
         print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode using Unsloth on CUDA...")
         
@@ -226,12 +227,26 @@ class LENS(nn.Module):
             # PEFT has a built-in method to save only the LoRA weights, not the 9B base model
             self.backbone.save_pretrained(os.path.join(save_directory, "lora_adapter"))
             print("- Saved LoRA Adapters (lora_adapter/)")
+
+        # 3. Save directly trained backbone weights (required for layer_only and lora_layer).
+        # For lora_layer, this captures the unfrozen backbone layers while LoRA adapters are stored separately.
+        trainable_backbone = {}
+        for name, param in self.backbone.named_parameters():
+            if not param.requires_grad:
+                continue
+            if "lora_" in name:
+                continue
+            trainable_backbone[name] = param.detach().cpu()
+        if trainable_backbone:
+            torch.save(trainable_backbone, os.path.join(save_directory, "trainable_backbone.pt"))
+            print("- Saved Trainable Backbone Weights (trainable_backbone.pt)")
             
-        # 3. Save Config for Inference
+        # 4. Save Config for Inference
         config = {
             "base_model_name": self.base_model.name_or_path,
             "mode": self.mode,
-            "num_error_classes": self.classification_head[-1].out_features
+            "num_error_classes": self.classification_head[-1].out_features,
+            "unfreeze_layers": self.unfreeze_layers,
         }
         import json
         with open(os.path.join(save_directory, "lens_config.json"), "w") as f:
