@@ -20,11 +20,12 @@ class LENS(nn.Module):
             raise ImportError("Unsloth is not installed. Please run: pip install unsloth unsloth_zoo")
 
         # Load base model via Unsloth (handles multi-modal correctly and saves 50% VRAM)
+        use_gc = "unsloth" if mode in {"lora", "lora_layer", "full"} else False
         self.base_model, self.tokenizer = FastVisionModel.from_pretrained(
             model_name,
             load_in_4bit=False,      # Don't use 4bit for Qwen3.5 per Unsloth docs
             load_in_16bit=True,      # Use bf16/16bit
-            use_gradient_checkpointing="unsloth", # Use unsloth's optimized checkpointing
+            use_gradient_checkpointing=use_gc,
         )
 
         def locate_transformer_layers(module_root):
@@ -74,6 +75,10 @@ class LENS(nn.Module):
             return True
         
         self.mode = mode
+        self.backbone_dtype = next(
+            (p.dtype for p in self.base_model.parameters() if p.is_floating_point()),
+            torch.bfloat16,
+        )
         if mode == "lora":
             print("Injecting LoRA adapters via Unsloth (Optimized for VLM)...")
             self.backbone = FastVisionModel.get_peft_model(
@@ -90,7 +95,6 @@ class LENS(nn.Module):
             self.backbone.print_trainable_parameters()
             
         elif mode in {"partial", "layer_only"}:
-            self.base_model.gradient_checkpointing_enable()
             print(f"Freezing backbone and unfreezing the last {unfreeze_layers} Transformer layers only...")
             self.backbone = self.base_model
             for param in self.backbone.parameters():
@@ -142,6 +146,7 @@ class LENS(nn.Module):
             hidden_size = 4096
             
         print(f"Detected backbone hidden dimension: {hidden_size}")
+        print(f"Detected backbone dtype: {self.backbone_dtype}")
         
         # Dual-Head Architecture (Always Trainable)
         print("Initializing Score Head and Classification Head...")
@@ -149,24 +154,38 @@ class LENS(nn.Module):
             nn.Linear(hidden_size, hidden_size // 2),
             nn.GELU(),
             nn.Linear(hidden_size // 2, 1)
-        ).to(torch.bfloat16).to(self.backbone.device)
+        ).to(torch.float32).to(self.backbone.device)
         
         self.classification_head = nn.Sequential(
             nn.Linear(hidden_size, hidden_size // 2),
             nn.GELU(),
             nn.Linear(hidden_size // 2, num_error_classes)
-        ).to(torch.bfloat16).to(self.backbone.device)
+        ).to(torch.float32).to(self.backbone.device)
 
     def forward(self, input_ids, attention_mask, **kwargs):
         """
         Extracts global contextual feature from the VLM and passes it to both heads.
         """
-        outputs = self.backbone(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            output_hidden_states=True,
-            **kwargs
-        )
+        if "pixel_values" in kwargs:
+            kwargs["pixel_values"] = kwargs["pixel_values"].to(dtype=self.backbone_dtype)
+        if "pixel_values_videos" in kwargs:
+            kwargs["pixel_values_videos"] = kwargs["pixel_values_videos"].to(dtype=self.backbone_dtype)
+
+        if input_ids.is_cuda and self.backbone_dtype in {torch.float16, torch.bfloat16}:
+            with torch.autocast(device_type="cuda", dtype=self.backbone_dtype):
+                outputs = self.backbone(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    output_hidden_states=True,
+                    **kwargs
+                )
+        else:
+            outputs = self.backbone(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                output_hidden_states=True,
+                **kwargs
+            )
         
         # Extract the hidden state of the LAST VALID token (aggregates the multimodal context)
         # We must use attention_mask to find the true last token, avoiding PAD tokens
@@ -176,8 +195,9 @@ class LENS(nn.Module):
         
         # Pass through the two heads
         # Force float32 for loss calculation to prevent underflow in bfloat16 causing identical scores
-        score = self.score_head(last_hidden_state).to(torch.float32)
-        logits = self.classification_head(last_hidden_state).to(torch.float32)
+        last_hidden_state = last_hidden_state.to(torch.float32)
+        score = self.score_head(last_hidden_state)
+        logits = self.classification_head(last_hidden_state)
         
         return score, logits
 
