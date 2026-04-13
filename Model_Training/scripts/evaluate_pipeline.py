@@ -157,6 +157,7 @@ def load_pil_image(base_dir: str, rel_path: str, image_size: int = 512):
 
 def main(args):
     print("--- Starting REAL Pipeline Evaluation (LENS vs Baselines) ---")
+    print(f"Running script: {os.path.abspath(__file__)}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
@@ -179,6 +180,8 @@ def main(args):
     print(f"Loading CLIP baseline: {args.clip_model}")
     clip_model = CLIPModel.from_pretrained(args.clip_model).to(device).eval()
     clip_processor = CLIPProcessor.from_pretrained(args.clip_model)
+    clip_max_length = int(clip_model.config.text_config.max_position_embeddings)
+    print(f"CLIP text truncation enabled with max_length={clip_max_length}")
 
     print(f"Loading DINO baseline: {args.dino_model}")
     dino_model = AutoModel.from_pretrained(args.dino_model).to(device).eval()
@@ -214,7 +217,14 @@ def main(args):
         img_B = load_pil_image(base_dir, item["image_B_path"], args.image_size)
 
         with torch.no_grad():
-            clip_text = clip_processor(text=[prompt], return_tensors="pt", padding=True).to(device)
+            # Use the tokenizer directly so max_length is applied explicitly.
+            clip_text = clip_processor.tokenizer(
+                text=[prompt],
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=clip_max_length,
+            ).to(device)
             clip_imgs = clip_processor(images=[img_A, img_B], return_tensors="pt").to(device)
             text_feat = clip_model.get_text_features(**clip_text)
             image_feat = clip_model.get_image_features(pixel_values=clip_imgs["pixel_values"])
