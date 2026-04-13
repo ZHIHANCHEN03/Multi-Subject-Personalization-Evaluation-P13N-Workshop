@@ -206,6 +206,10 @@ class PrismBenchDataset(Dataset):
             "category_scores_A": torch.tensor(target_A, dtype=torch.float32),
             "category_scores_B": torch.tensor(target_B, dtype=torch.float32)
         }
+
+        if "mm_token_type_ids" in inputs_A:
+            out["mm_token_type_ids_A"] = inputs_A["mm_token_type_ids"].squeeze(0)
+            out["mm_token_type_ids_B"] = inputs_B["mm_token_type_ids"].squeeze(0)
         
         # Include image_grid_thw if the processor generates it (e.g. for Qwen2-VL architecture)
         if "image_grid_thw" in inputs_A:

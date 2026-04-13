@@ -26,6 +26,52 @@ class LENS(nn.Module):
             load_in_16bit=True,      # Use bf16/16bit
             use_gradient_checkpointing="unsloth", # Use unsloth's optimized checkpointing
         )
+
+        def locate_transformer_layers(module_root):
+            candidate_paths = [
+                "model.layers",
+                "model.model.layers",
+                "language_model.layers",
+                "language_model.model.layers",
+                "layers",
+            ]
+
+            def resolve_attr_path(obj, path):
+                cur = obj
+                for part in path.split("."):
+                    if not hasattr(cur, part):
+                        return None
+                    cur = getattr(cur, part)
+                return cur
+
+            for path in candidate_paths:
+                layers = resolve_attr_path(module_root, path)
+                if isinstance(layers, nn.ModuleList) and len(layers) > 0:
+                    return layers, path
+
+            module_lists = []
+            for name, submodule in module_root.named_modules():
+                if isinstance(submodule, nn.ModuleList) and len(submodule) > 0:
+                    module_lists.append((name, submodule))
+            if module_lists:
+                module_lists.sort(key=lambda item: len(item[1]), reverse=True)
+                return module_lists[0][1], module_lists[0][0]
+
+            return None, None
+
+        def unfreeze_last_layers(module_root, num_layers):
+            layers, layer_path = locate_transformer_layers(module_root)
+            if layers is None:
+                print("Warning: Could not automatically detect transformer layers for selective unfreezing.")
+                return False
+
+            actual_num_layers = min(num_layers, len(layers))
+            for layer in layers[-actual_num_layers:]:
+                for param in layer.parameters():
+                    param.requires_grad = True
+
+            print(f"Successfully unfroze the last {actual_num_layers} layers via `{layer_path}`.")
+            return True
         
         self.mode = mode
         if mode == "lora":
@@ -43,23 +89,30 @@ class LENS(nn.Module):
             )
             self.backbone.print_trainable_parameters()
             
-        elif mode == "partial":
-            # Enable gradient checkpointing
+        elif mode in {"partial", "layer_only"}:
             self.base_model.gradient_checkpointing_enable()
-            print(f"Freezing backbone but UNFREEZING the last {unfreeze_layers} Transformer layers...")
+            print(f"Freezing backbone and unfreezing the last {unfreeze_layers} Transformer layers only...")
             self.backbone = self.base_model
             for param in self.backbone.parameters():
                 param.requires_grad = False
-                
-            # Unfreeze the last N layers
-            if hasattr(self.backbone, "model") and hasattr(self.backbone.model, "layers"):
-                layers = self.backbone.model.layers
-                for layer in layers[-unfreeze_layers:]:
-                    for param in layer.parameters():
-                        param.requires_grad = True
-                print(f"Successfully unfroze the last {unfreeze_layers} layers.")
-            else:
-                print("Warning: Could not automatically detect 'model.layers' for partial unfreezing.")
+
+            unfreeze_last_layers(self.backbone, unfreeze_layers)
+
+        elif mode == "lora_layer":
+            print(f"Injecting LoRA adapters and unfreezing the last {unfreeze_layers} Transformer layers...")
+            self.backbone = FastVisionModel.get_peft_model(
+                self.base_model,
+                finetune_vision=True,
+                finetune_language=True,
+                finetune_attention_modules=True,
+                finetune_mlp_modules=True,
+                r=16,
+                lora_alpha=32,
+                lora_dropout=0.05,
+                bias="none",
+            )
+            unfreeze_last_layers(self.backbone, unfreeze_layers)
+            self.backbone.print_trainable_parameters()
                 
         elif mode == "head_only":
             print("Freezing entirely Backbone for Head-only training...")
@@ -149,7 +202,7 @@ class LENS(nn.Module):
         print("- Saved Custom MLP Heads (lens_heads.pt)")
         
         # 2. Save the LoRA Weights (If applicable)
-        if self.mode == "lora":
+        if self.mode in {"lora", "lora_layer"}:
             # PEFT has a built-in method to save only the LoRA weights, not the 9B base model
             self.backbone.save_pretrained(os.path.join(save_directory, "lora_adapter"))
             print("- Saved LoRA Adapters (lora_adapter/)")

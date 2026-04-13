@@ -38,6 +38,9 @@ def custom_collate_fn(batch):
     out["attention_mask_A"] = pad_sequence([b["attention_mask_A"] for b in batch], batch_first=True, padding_value=0)
     out["input_ids_B"] = pad_sequence([b["input_ids_B"] for b in batch], batch_first=True, padding_value=0)
     out["attention_mask_B"] = pad_sequence([b["attention_mask_B"] for b in batch], batch_first=True, padding_value=0)
+    if "mm_token_type_ids_A" in batch[0]:
+        out["mm_token_type_ids_A"] = pad_sequence([b["mm_token_type_ids_A"] for b in batch], batch_first=True, padding_value=0)
+        out["mm_token_type_ids_B"] = pad_sequence([b["mm_token_type_ids_B"] for b in batch], batch_first=True, padding_value=0)
     
     # Concat pixel values (typically batched directly if images are resized identically, else list)
     # Qwen-VL processor typically outputs flat pixel_values, so we can concatenate them.
@@ -83,7 +86,7 @@ def main(args):
     # Adjust learning rate based on Phase
     # LoRA on Backbone requires a smaller LR (2e-5) to avoid catastrophic forgetting
     # Training Heads only from scratch requires a larger LR (1e-4)
-    lr = 2e-5 if args.mode == "lora" else 1e-4
+    lr = 2e-5 if args.mode in {"lora", "lora_layer"} else 5e-5
     optimizer = torch.optim.AdamW(trainable_params, lr=lr)
     
     # 4. Initialize Multi-Task Loss Functions
@@ -134,6 +137,8 @@ def main(args):
             }
             if "image_grid_thw_A" in batch:
                 kwargs_A["image_grid_thw"] = batch["image_grid_thw_A"].to(device)
+            if "mm_token_type_ids_A" in batch:
+                kwargs_A["mm_token_type_ids"] = batch["mm_token_type_ids_A"].to(device)
             
             kwargs_B = {
                 "input_ids": batch["input_ids_B"].to(device),
@@ -142,6 +147,8 @@ def main(args):
             }
             if "image_grid_thw_B" in batch:
                 kwargs_B["image_grid_thw"] = batch["image_grid_thw_B"].to(device)
+            if "mm_token_type_ids_B" in batch:
+                kwargs_B["mm_token_type_ids"] = batch["mm_token_type_ids_B"].to(device)
             
             # Forward Pass A (Pass kwargs directly to model)
             score_A, logits_A = model(**kwargs_A)
@@ -195,6 +202,8 @@ def main(args):
                 }
                 if "image_grid_thw_A" in batch:
                     kwargs_A["image_grid_thw"] = batch["image_grid_thw_A"].to(device)
+                if "mm_token_type_ids_A" in batch:
+                    kwargs_A["mm_token_type_ids"] = batch["mm_token_type_ids_A"].to(device)
                 
                 kwargs_B = {
                     "input_ids": batch["input_ids_B"].to(device),
@@ -203,6 +212,8 @@ def main(args):
                 }
                 if "image_grid_thw_B" in batch:
                     kwargs_B["image_grid_thw"] = batch["image_grid_thw_B"].to(device)
+                if "mm_token_type_ids_B" in batch:
+                    kwargs_B["mm_token_type_ids"] = batch["mm_token_type_ids_B"].to(device)
     
                 # Forward Pass A & B
                 score_A, logits_A = model(**kwargs_A)
@@ -236,9 +247,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
     parser.add_argument("--model_name", type=str, default="unsloth/Qwen3.5-0.8B",
                         help="Backbone model name. Use the intended multimodal backbone for image-conditioned scoring.")
-    parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "full"], default="lora", 
-                        help="Training Mode: 'head_only' (freeze all), 'lora' (PEFT on linear layers), 'partial' (unfreeze top N layers), or 'full' (finetune everything).")
-    parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze if mode='partial'")
+    parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "layer_only", "lora_layer", "full"], default="lora", 
+                        help="Training Mode: 'layer_only' (only unfreeze the top N layers), 'lora_layer' (LoRA plus top N layers), 'lora', 'head_only', 'partial' (alias of layer_only), or 'full'.")
+    parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze for layer_only / lora_layer / partial")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Siamese training")
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")

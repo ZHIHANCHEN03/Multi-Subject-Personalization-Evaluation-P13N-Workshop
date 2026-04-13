@@ -17,6 +17,8 @@ echo "======================================================================"
 #   MODEL_NAME=unsloth/Qwen3.5-4B bash run_a100_pipeline.sh
 #   MODEL_NAME=unsloth/Qwen3.5-2B BATCH_SIZE=8 bash run_a100_pipeline.sh
 MODEL_NAME="${MODEL_NAME:-unsloth/Qwen3.5-0.8B}"
+RUN_LAYER_ONLY="${RUN_LAYER_ONLY:-1}"
+RUN_LORA_LAYER="${RUN_LORA_LAYER:-1}"
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
@@ -94,28 +96,37 @@ echo "✅ [3/5] Dataset built successfully."
 # Enable gradient checkpointing and memory expansion for massive VLM training
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True # Limits threads to prevent CPU RAM OOM during compilation/loading
 
-# 4. Model Training & Eval: EXPERIMENT A (Layer Unfreezing)
-echo "======================================================================"
-echo "⏳ [4/6] EXPERIMENT A: Initiating Joint Training (Layer Unfreezing mode)..."
-echo "======================================================================"
-# Reduce batch size as backbone grows; can be overridden via BATCH_SIZE=...
-python scripts/train.py --model_name "$MODEL_NAME" --mode partial --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --epochs 5
-echo "✅ [4/6] Training A completed."
+# 4. EXPERIMENT A: Layer-only
+if [ "$RUN_LAYER_ONLY" = "1" ]; then
+  echo "======================================================================"
+  echo "⏳ [4/6] EXPERIMENT A: Initiating Joint Training (Layer-only mode)..."
+  echo "======================================================================"
+  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --epochs 5
+  echo "✅ [4/6] Training A completed."
 
-echo "⏳ Running Benchmark Evaluation for Experiment A..."
-python scripts/evaluate_pipeline.py
-echo "✅ Evaluation A completed."
+  echo "⏳ Running Benchmark Evaluation for Experiment A..."
+  python scripts/evaluate_pipeline.py
+  echo "✅ Evaluation A completed."
+else
+  echo "⏭️  [4/6] Skipping layer-only experiment. Set RUN_LAYER_ONLY=1 to enable."
+fi
 
-# 5. Model Training & Eval: EXPERIMENT B (LoRA Adapters)
+# 5. EXPERIMENT B: LoRA + Layer
 echo "======================================================================"
-echo "⏳ [5/6] EXPERIMENT B: Initiating Joint Training (LoRA mode)..."
+echo "⏳ [5/6] EXPERIMENT B: Initiating Joint Training (LoRA + Layer mode)..."
 echo "======================================================================"
-python scripts/train.py --model_name "$MODEL_NAME" --mode lora --batch_size "$BATCH_SIZE" --epochs 5
-echo "✅ [5/6] Training B completed."
+if [ "$RUN_LORA_LAYER" = "1" ]; then
+  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --epochs 5
+  echo "✅ [5/6] Training B completed."
+else
+  echo "⏭️  [5/6] Skipping LoRA + Layer experiment. Set RUN_LORA_LAYER=1 to enable."
+fi
 
-echo "⏳ Running Benchmark Evaluation for Experiment B..."
-python scripts/evaluate_pipeline.py
-echo "✅ Evaluation B completed."
+if [ "$RUN_LORA_LAYER" = "1" ]; then
+  echo "⏳ Running Benchmark Evaluation for Experiment B..."
+  python scripts/evaluate_pipeline.py
+  echo "✅ Evaluation B completed."
+fi
 
 echo "======================================================================"
 echo "🎉 Pipeline finished successfully! Check terminal output for Ablation metrics."
