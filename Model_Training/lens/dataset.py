@@ -177,21 +177,21 @@ class PrismBenchDataset(Dataset):
 
         text_prompt = build_text_prompt()
 
+        # Qwen3.5 multimodal prompts can contain a large number of image placeholder tokens.
+        # Truncating here can delete part of those placeholders and break alignment with pixel_values.
         inputs_A = self.processor(
             text=[text_prompt],
             images=ref_images + [img_A],
             return_tensors="pt",
-            padding="max_length",
-            max_length=1024,
-            truncation=True,
+            padding=False,
+            truncation=False,
         )
         inputs_B = self.processor(
             text=[text_prompt],
             images=ref_images + [img_B],
             return_tensors="pt",
-            padding="max_length",
-            max_length=1024,
-            truncation=True,
+            padding=False,
+            truncation=False,
         )
 
         out = {
