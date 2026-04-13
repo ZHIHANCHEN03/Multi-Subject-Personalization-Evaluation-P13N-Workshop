@@ -60,12 +60,23 @@ python --version
 pip --version
 echo "⬆️  [2/5] Upgrading pip/setuptools/wheel..."
 python -m pip install --upgrade pip setuptools wheel
-echo "🔥 [2/5] Installing torch/torchvision/torchaudio for A100 target..."
-python -m pip install --upgrade --force-reinstall --no-cache-dir torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
-echo "🧩 [2/5] Installing transformers/peft/pillow..."
-python -m pip install --upgrade --force-reinstall --no-cache-dir transformers==5.5.0 peft pillow
-echo "🦥 [2/5] Installing unsloth and unsloth_zoo without touching pinned torch stack..."
-python -m pip install --upgrade --force-reinstall --no-cache-dir --no-deps unsloth unsloth_zoo
+echo "🦥 [2/5] Installing Unsloth stack first, following Qwen3.5 guidance..."
+python -m pip install --upgrade --force-reinstall --no-cache-dir unsloth unsloth_zoo transformers==5.5.0 peft pillow
+echo "🔥 [2/5] Detecting torch/CUDA selected by Unsloth..."
+TORCH_CUDA_TAG="$(python - <<'PY'
+import torch
+print(f"cu{torch.version.cuda.replace('.', '')}")
+PY
+)"
+echo "✅ [2/5] Torch selected by resolver:"
+python - <<'PY'
+import torch
+print(f"   - torch: {torch.__version__}")
+print(f"   - cuda: {torch.version.cuda}")
+print(f"   - cuda_available: {torch.cuda.is_available()}")
+PY
+echo "🧩 [2/5] Installing matching torchvision/torchaudio from: https://download.pytorch.org/whl/${TORCH_CUDA_TAG}"
+python -m pip install --upgrade --force-reinstall --no-cache-dir torchvision torchaudio --index-url "https://download.pytorch.org/whl/${TORCH_CUDA_TAG}"
 echo "🔎 [2/5] Verifying final package versions..."
 python - <<'PY'
 import importlib
