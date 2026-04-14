@@ -23,16 +23,16 @@ IMAGE_SIZE="${IMAGE_SIZE:-512}"
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
-    "unsloth/Qwen3.5-0.8B") BATCH_SIZE=1 ;;
-    "unsloth/Qwen3.5-2B")   BATCH_SIZE=1 ;;
-    "unsloth/Qwen3.5-4B")   BATCH_SIZE=1 ;;
-    "unsloth/Qwen3.5-9B")   BATCH_SIZE=2 ;;
-    *)                      BATCH_SIZE=2 ;;
+    "unsloth/Qwen3.5-0.8B") BATCH_SIZE=4 ;;  # VRAM Limit on A100 80GB
+    "unsloth/Qwen3.5-2B")   BATCH_SIZE=2 ;;  # VRAM Limit
+    "unsloth/Qwen3.5-4B")   BATCH_SIZE=1 ;;  # VRAM Limit
+    "unsloth/Qwen3.5-9B")   BATCH_SIZE=1 ;;  # VRAM Limit
+    *)                      BATCH_SIZE=1 ;;
   esac
 fi
 
 echo "✅ [0/5] Selected backbone: $MODEL_NAME"
-echo "✅ [0/5] Selected batch size: $BATCH_SIZE"
+echo "✅ [0/5] Selected physical batch size: $BATCH_SIZE (Effective Batch Size & Epochs will be AUTO-SCALED)"
 echo "✅ [0/5] Selected image size: ${IMAGE_SIZE}x${IMAGE_SIZE}"
 
 # 1. Environment Setup (Safe Cache Storage)
@@ -103,7 +103,7 @@ if [ "$RUN_LAYER_ONLY" = "1" ]; then
   echo "======================================================================"
   echo "⏳ [4/6] EXPERIMENT A: Initiating Joint Training (Layer-only mode)..."
   echo "======================================================================"
-  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --epochs 5
+  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --auto_scale
   echo "✅ [4/6] Training A completed."
 
   echo "⏳ Running Benchmark Evaluation for Experiment A..."
@@ -118,7 +118,7 @@ echo "======================================================================"
 echo "⏳ [5/6] EXPERIMENT B: Initiating Joint Training (LoRA + Layer mode)..."
 echo "======================================================================"
 if [ "$RUN_LORA_LAYER" = "1" ]; then
-  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --epochs 5
+  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --auto_scale
   echo "✅ [5/6] Training B completed."
 else
   echo "⏭️  [5/6] Skipping LoRA + Layer experiment. Set RUN_LORA_LAYER=1 to enable."

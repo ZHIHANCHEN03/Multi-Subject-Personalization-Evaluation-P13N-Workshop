@@ -114,6 +114,60 @@ def main(args):
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=custom_collate_fn)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=custom_collate_fn)
     
+    # 5. Auto-Scale Logic (Optional)
+    train_size = len(train_dataset)
+    val_size = len(val_dataset)
+    
+    if args.auto_scale:
+        # Determine model size category based on name
+        is_large_model = "9b" in args.model_name.lower() or "4b" in args.model_name.lower()
+        is_medium_model = "2b" in args.model_name.lower()
+        
+        # Base target effective batch size on dataset size
+        if train_size < 2000:
+            target_ebs = 8
+        elif train_size < 10000:
+            target_ebs = 16
+        else:
+            target_ebs = 32
+            
+        # Adjust target EBS for larger models (they often need larger batches to smooth gradients and smaller learning rates)
+        # Also prevents excessive accumulation steps which can cause precision issues in bf16 over many steps
+        if is_large_model:
+            target_ebs = min(64, target_ebs * 2) # e.g. 4B/9B on 40k data will aim for EBS 64
+        
+        args.grad_accum_steps = max(1, target_ebs // args.batch_size)
+        actual_ebs = args.batch_size * args.grad_accum_steps
+        
+        # Determine target update steps based on model size and mode
+        # Larger models / LoRA need more steps to converge than small models / head-only
+        base_target_steps = 3000
+        if is_large_model:
+            base_target_steps = 5000
+        elif is_medium_model:
+            base_target_steps = 4000
+            
+        if args.mode in {"lora", "lora_layer"}:
+            base_target_steps = int(base_target_steps * 1.5) # LoRA needs more iterations
+            
+        steps_per_epoch = max(1, train_size // actual_ebs)
+        
+        # Calculate epochs, bounding between reasonable limits
+        calculated_epochs = base_target_steps // steps_per_epoch
+        args.epochs = max(3, min(20, calculated_epochs))
+        
+        print("\n" + "="*50)
+        print(f"📊 AUTO-SCALING TRIGGERED")
+        print(f"   - Model               : {args.model_name} (Large: {is_large_model}, Medium: {is_medium_model})")
+        print(f"   - Dataset Size        : {train_size} train, {val_size} val")
+        print(f"   - Physical Batch Size : {args.batch_size} (VRAM constraint)")
+        print(f"   - Target Effective BS : {target_ebs}")
+        print(f"   - Grad Accum Steps    : {args.grad_accum_steps}")
+        print(f"   - Actual Effective BS : {actual_ebs}")
+        print(f"   - Target Updates      : ~{base_target_steps}")
+        print(f"   - Epochs Calculated   : {args.epochs} (Total Updates: {args.epochs * steps_per_epoch})")
+        print("="*50 + "\n")
+    
     # Loss weightings
     alpha = args.alpha # Weight for preference ranking loss
     beta = args.beta   # Weight for diagnostic classification loss
@@ -268,6 +322,7 @@ if __name__ == "__main__":
     parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze for layer_only / lora_layer / partial")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Siamese training")
     parser.add_argument("--grad_accum_steps", type=int, default=8, help="Gradient accumulation steps to simulate larger batch size")
+    parser.add_argument("--auto_scale", action="store_true", help="Dynamically scale grad_accum_steps and epochs based on dataset size")
     parser.add_argument("--image_size", type=int, default=512, help="Square image size used for resize-and-pad before processor encoding")
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")
