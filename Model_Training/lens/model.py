@@ -229,17 +229,19 @@ class LENS(nn.Module):
             print("- Saved LoRA Adapters (lora_adapter/)")
 
         # 3. Save directly trained backbone weights (required for layer_only and lora_layer).
-        # For lora_layer, this captures the unfrozen backbone layers while LoRA adapters are stored separately.
-        trainable_backbone = {}
-        for name, param in self.backbone.named_parameters():
-            if not param.requires_grad:
-                continue
-            if "lora_" in name:
-                continue
-            trainable_backbone[name] = param.detach().cpu()
-        if trainable_backbone:
-            torch.save(trainable_backbone, os.path.join(save_directory, "trainable_backbone.pt"))
-            print("- Saved Trainable Backbone Weights (trainable_backbone.pt)")
+        if self.mode in {"layer_only", "lora_layer", "partial", "full"}:
+            # For lora_layer, this captures the unfrozen backbone layers while LoRA adapters are stored separately.
+            trainable_backbone = {}
+            for name, param in self.backbone.named_parameters():
+                if not param.requires_grad:
+                    continue
+                if "lora_" in name:
+                    continue
+                # Important: we save them as float32 to avoid dtype casting issues when reloading later
+                trainable_backbone[name] = param.detach().cpu().to(torch.float32)
+            if trainable_backbone:
+                torch.save(trainable_backbone, os.path.join(save_directory, "trainable_backbone.pt"))
+                print("- Saved Trainable Backbone Weights (trainable_backbone.pt)")
             
         # 4. Save Config for Inference
         config = {

@@ -302,8 +302,11 @@ def main(args):
         avg_val_loss = val_loss / len(val_loader)
         print(f"Epoch {epoch+1} Summary | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
         
+        # Determine base name for saving outputs dynamically
+        safe_model_name = args.model_name.replace("/", "_")
+        
         # 6. Save Checkpoint after each epoch
-        save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/LENS-v1-{args.mode}-epoch{epoch+1}")
+        save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/{safe_model_name}-{args.mode}-epoch{epoch+1}")
         model.save_pretrained(save_dir)
         print(f"Checkpoint saved to: {os.path.abspath(save_dir)}")
         
@@ -311,7 +314,7 @@ def main(args):
         if avg_val_loss < best_val_loss:
             print(f"🌟 New Best Validation Loss: {avg_val_loss:.4f} (Previous: {best_val_loss:.4f})")
             best_val_loss = avg_val_loss
-            best_dir = os.path.join(os.path.dirname(__file__), f"../outputs/LENS-v1-{args.mode}-best")
+            best_dir = os.path.join(os.path.dirname(__file__), f"../outputs/{safe_model_name}-{args.mode}-best")
             model.save_pretrained(best_dir)
             print(f"🌟 Best checkpoint updated at: {os.path.abspath(best_dir)}")
 

@@ -52,14 +52,16 @@ def generate_lens_explanation(pred_choice: str, logits_A: torch.Tensor, logits_B
     return f"  └─ LENS Diagnostic: Chose {pred_choice}. Reason: [{rejected}] {weakest_name} weak (score={weakest_score:.3f})"
 
 
-def find_latest_checkpoint(outputs_dir: str, mode: str) -> str:
+def find_latest_checkpoint(outputs_dir: str, model_name: str, mode: str) -> str:
+    safe_model_name = model_name.replace("/", "_")
+    
     # First, check if a "-best" checkpoint exists
-    best_path = os.path.join(outputs_dir, f"LENS-v1-{mode}-best")
+    best_path = os.path.join(outputs_dir, f"{safe_model_name}-{mode}-best")
     if os.path.isdir(best_path):
         print(f"Detected '-best' checkpoint: {best_path}")
         return best_path
 
-    prefix = f"LENS-v1-{mode}-epoch"
+    prefix = f"{safe_model_name}-{mode}-epoch"
     candidates = []
     if not os.path.isdir(outputs_dir):
         raise FileNotFoundError(f"Outputs directory not found: {outputs_dir}")
@@ -190,7 +192,7 @@ def main(args):
         test_data = json.load(f)
     print(f"Loaded {len(test_data)} test samples.")
 
-    checkpoint_dir = args.checkpoint_dir or find_latest_checkpoint(outputs_dir, args.mode)
+    checkpoint_dir = args.checkpoint_dir or find_latest_checkpoint(outputs_dir, args.model_name, args.mode)
     print(f"Loading LENS checkpoint from: {checkpoint_dir}")
     lens_model, lens_processor, lens_cfg = load_lens_checkpoint(checkpoint_dir, device)
     lens_dataset = PrismBenchDataset(json_path=test_path, processor=lens_processor, image_size=args.image_size)
@@ -278,6 +280,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Real evaluation for LENS, CLIP, and DINO baselines.")
+    parser.add_argument("--model_name", type=str, default="unsloth/Qwen3.5-0.8B", help="Backbone model name used during training")
     parser.add_argument("--mode", type=str, default="layer_only", help="Checkpoint mode prefix used under outputs/.")
     parser.add_argument("--checkpoint_dir", type=str, default=None, help="Optional explicit checkpoint directory.")
     parser.add_argument("--image_size", type=int, default=512, help="Resize-and-pad size used during evaluation.")
