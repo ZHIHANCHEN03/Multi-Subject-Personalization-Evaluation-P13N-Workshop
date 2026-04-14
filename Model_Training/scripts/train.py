@@ -62,6 +62,11 @@ def main(args):
     print(f"--- Initializing LENS Training Pipeline ---")
     print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
     
+    # PyTorch performance optimizations
+    torch.backends.cudnn.benchmark = True
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     # Enforcing CUDA as requested
     if not torch.cuda.is_available():
         print("WARNING: CUDA is not available on this machine. Falling back to CPU for testing purposes only.")
@@ -111,8 +116,8 @@ def main(args):
     train_dataset = PrismBenchDataset(json_path=train_path, processor=processor, image_size=args.image_size)
     val_dataset = PrismBenchDataset(json_path=val_path, processor=processor, image_size=args.image_size)
     
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=custom_collate_fn)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=custom_collate_fn)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=custom_collate_fn, num_workers=4, pin_memory=True, prefetch_factor=2)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=custom_collate_fn, num_workers=4, pin_memory=True, prefetch_factor=2)
     
     # 5. Auto-Scale Logic (Optional)
     train_size = len(train_dataset)

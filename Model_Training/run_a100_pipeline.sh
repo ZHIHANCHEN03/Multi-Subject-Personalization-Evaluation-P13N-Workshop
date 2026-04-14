@@ -78,6 +78,8 @@ echo "🧩 [2/5] Installing pinned Python stack..."
 python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/constraints-a100.txt" transformers==5.5.0 peft pillow fsspec==2025.9.0
 echo "🦥 [2/5] Installing Unsloth under the same constraints..."
 python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/constraints-a100.txt" unsloth unsloth_zoo
+echo "⚡ [2/5] Installing Flash Attention 2 for ultimate VRAM & Speed optimization..."
+python -m pip install flash-attn --no-build-isolation
 echo "🔎 [2/5] Verifying final package versions..."
 python - <<'PY'
 import importlib
