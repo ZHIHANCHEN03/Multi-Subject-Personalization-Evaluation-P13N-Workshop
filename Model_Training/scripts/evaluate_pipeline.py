@@ -150,6 +150,18 @@ def cosine_similarity(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     return (a * b).sum(dim=-1)
 
 
+def get_clip_text_embedding(clip_model: CLIPModel, clip_text: Dict[str, torch.Tensor]) -> torch.Tensor:
+    text_outputs = clip_model.text_model(**clip_text)
+    pooled = text_outputs.pooler_output
+    return clip_model.text_projection(pooled)
+
+
+def get_clip_image_embedding(clip_model: CLIPModel, pixel_values: torch.Tensor) -> torch.Tensor:
+    vision_outputs = clip_model.vision_model(pixel_values=pixel_values)
+    pooled = vision_outputs.pooler_output
+    return clip_model.visual_projection(pooled)
+
+
 def load_pil_image(base_dir: str, rel_path: str, image_size: int = 512):
     abs_path = os.path.join(base_dir, rel_path)
     return resize_and_pad_image(abs_path, target_size=(image_size, image_size))
@@ -226,8 +238,8 @@ def main(args):
                 max_length=clip_max_length,
             ).to(device)
             clip_imgs = clip_processor(images=[img_A, img_B], return_tensors="pt").to(device)
-            text_feat = clip_model.get_text_features(**clip_text)
-            image_feat = clip_model.get_image_features(pixel_values=clip_imgs["pixel_values"])
+            text_feat = get_clip_text_embedding(clip_model, clip_text)
+            image_feat = get_clip_image_embedding(clip_model, clip_imgs["pixel_values"])
             clip_scores = cosine_similarity(image_feat, text_feat.expand_as(image_feat))
         clip_preds.append("A" if float(clip_scores[0]) > float(clip_scores[1]) else "B")
 
