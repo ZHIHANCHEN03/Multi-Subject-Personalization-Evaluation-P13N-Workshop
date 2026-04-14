@@ -4,8 +4,8 @@
 # Hardware: NVIDIA A100 (80GB) | Environment: Linux / RunPod
 # ==============================================================================
 
-# Exit immediately if a command exits with a non-zero status.
-set -e
+# Exit on errors, undefined vars, and failed piped commands.
+set -euo pipefail
 
 echo "======================================================================"
 echo "🚀 Initializing LENS Pipeline on A100 Server..."
@@ -51,35 +51,46 @@ echo "✅ [1/5] Xet disabled via HF_HUB_DISABLE_XET=1"
 # 2. Dependency Management
 echo "⏳ [2/5] Creating isolated A100 training environment..."
 VENV_DIR="${VENV_DIR:-$PWD/.venv-a100-unsloth}"
-if [ -d "$VENV_DIR" ]; then
-  echo "🧹 [2/5] Removing stale virtualenv: $VENV_DIR"
+REBUILD_VENV="${REBUILD_VENV:-0}"
+if [ -d "$VENV_DIR" ] && [ "$REBUILD_VENV" = "1" ]; then
+  echo "🧹 [2/5] Rebuilding virtualenv as requested: $VENV_DIR"
   rm -rf "$VENV_DIR"
 fi
-echo "🧱 [2/5] Creating fresh virtualenv at: $VENV_DIR"
-python3 -m venv "$VENV_DIR"
+if [ ! -d "$VENV_DIR" ]; then
+  echo "🧱 [2/5] Creating fresh virtualenv at: $VENV_DIR"
+  python3 -m venv "$VENV_DIR"
+else
+  echo "♻️  [2/5] Reusing existing virtualenv: $VENV_DIR"
+fi
 source "$VENV_DIR/bin/activate"
 echo "🐍 [2/5] Using python: $(which python)"
 echo "📦 [2/5] Using pip: $(which pip)"
 python --version
 pip --version
-echo "⬆️  [2/5] Upgrading pip/setuptools/wheel..."
-python -m pip install --upgrade pip setuptools wheel
+CONSTRAINTS_FILE="$VENV_DIR/constraints-a100.txt"
 echo "🧱 [2/5] Writing A100 training constraints..."
-cat > "$VENV_DIR/constraints-a100.txt" <<'EOF'
+cat > "$CONSTRAINTS_FILE" <<'EOF'
 torch==2.10.0
 torchvision==0.25.0
 torchaudio==2.10.0
 transformers==5.5.0
 fsspec==2025.9.0
 EOF
-echo "🔥 [2/5] Installing pinned torch stack for A100 training (cu128)..."
-python -m pip install --upgrade --force-reinstall --no-cache-dir torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cu128
-echo "🧩 [2/5] Installing pinned Python stack..."
-python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/constraints-a100.txt" transformers==5.5.0 peft pillow fsspec==2025.9.0
-echo "🦥 [2/5] Installing Unsloth under the same constraints..."
-python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/constraints-a100.txt" unsloth unsloth_zoo
-echo "⚡ [2/5] Skipping Flash Attention 2 strict installation (Falling back to Xformers/PyTorch SDPA)..."
-# python -m pip install flash-attn==2.8.3 --no-build-isolation --no-cache-dir
+if [ "$REBUILD_VENV" = "1" ] || [ ! -f "$VENV_DIR/.deps_ready" ]; then
+  echo "⬆️  [2/5] Upgrading pip/setuptools/wheel..."
+  python -m pip install --upgrade pip setuptools wheel
+  echo "🔥 [2/5] Installing pinned torch stack for A100 training (cu128)..."
+  python -m pip install --upgrade --force-reinstall --no-cache-dir torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cu128
+  echo "🧩 [2/5] Installing pinned Python stack..."
+  python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$CONSTRAINTS_FILE" transformers==5.5.0 peft pillow fsspec==2025.9.0
+  echo "🦥 [2/5] Installing Unsloth under the same constraints..."
+  python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$CONSTRAINTS_FILE" unsloth unsloth_zoo
+  echo "⚡ [2/5] Skipping Flash Attention 2 strict installation (Falling back to Xformers/PyTorch SDPA)..."
+  # python -m pip install flash-attn==2.8.3 --no-build-isolation --no-cache-dir
+  touch "$VENV_DIR/.deps_ready"
+else
+  echo "⚡ [2/5] Skipping dependency reinstall because cached environment is ready."
+fi
 echo "🔎 [2/5] Verifying final package versions..."
 python - <<'PY'
 import importlib

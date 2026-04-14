@@ -181,8 +181,8 @@ def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    test_path = os.path.join(os.path.dirname(__file__), "../data_v1/test_v1.json")
-    outputs_dir = os.path.join(os.path.dirname(__file__), "../outputs")
+    test_path = args.test_path
+    outputs_dir = args.outputs_dir
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     if not os.path.exists(test_path):
@@ -283,6 +283,8 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="unsloth/Qwen3.5-0.8B", help="Backbone model name used during training")
     parser.add_argument("--mode", type=str, default="layer_only", help="Checkpoint mode prefix used under outputs/.")
     parser.add_argument("--checkpoint_dir", type=str, default=None, help="Optional explicit checkpoint directory.")
+    parser.add_argument("--test_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/test_v1.json"), help="Path to test data")
+    parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory containing trained model checkpoints")
     parser.add_argument("--image_size", type=int, default=512, help="Resize-and-pad size used during evaluation.")
     parser.add_argument("--clip_model", type=str, default="openai/clip-vit-base-patch32")
     parser.add_argument("--dino_model", type=str, default="facebook/dinov2-base")

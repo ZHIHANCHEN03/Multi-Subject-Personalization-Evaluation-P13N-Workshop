@@ -1,20 +1,7 @@
 import os
 import sys
-import subprocess
 
-# 1. Auto-check and install dependencies
-def ensure_dependencies():
-    required_packages = {"torch": "torch", "PIL": "Pillow", "tqdm": "tqdm", "diffusers": "diffusers", "ollama": "ollama"}
-    for module_name, pip_name in required_packages.items():
-        try:
-            __import__(module_name)
-        except ImportError:
-            print(f"Installing missing dependency: {pip_name}...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
-
-ensure_dependencies()
-
-# 2. Fix Python Path for 'lens' module
+# 1. Fix Python Path for 'lens' module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import json
@@ -76,7 +63,7 @@ class LocalPrismBenchPipeline:
             grid.paste(imgs[3], (512, 512))
             grid.save(output_path)
             return output_path
-        except Exception as e:
+        except Exception:
             return None
 
     def call_ai_teacher(self, model_name, image_A_path, image_B_path, refs, prompt, subjects):
@@ -114,20 +101,26 @@ class LocalPrismBenchPipeline:
         """
         
         try:
-            # Requires the configured Ollama model to be available locally
-            # Note: A real implementation would pass multiple images to the VLM
+            # Requires the configured Ollama model to be available locally.
+            # We pass subject refs and both candidates so the teacher can actually inspect the images.
             response = ollama.chat(
                 model=model_name,
-                messages=[{'role': 'user', 'content': vlm_prompt}]
+                messages=[{
+                    'role': 'user',
+                    'content': vlm_prompt,
+                    'images': refs + [image_A_path, image_B_path],
+                }]
             )
             
             import re
             json_match = re.search(r'\{.*\}', response['message']['content'], re.DOTALL)
             if json_match:
                 return json.loads(json_match.group())
-            return self._fallback_labels(subjects)
+            print(f"Teacher {model_name} returned non-JSON output. Dropping sample.")
+            return None
         except Exception as e:
-            return self._fallback_labels(subjects)
+            print(f"Teacher {model_name} failed to label sample: {e}")
+            return None
 
     def _is_aligned(self, annotator_results):
         if len(annotator_results) < 2:
@@ -143,14 +136,20 @@ class LocalPrismBenchPipeline:
                 return False
 
         return True
-            
-    def _fallback_labels(self, subjects):
-        return {
-            "preference": "A",
-            "category_scores_A": {"existence": 1, "appearance": 1, "interaction": 1},
-            "category_scores_B": {"existence": 1, "appearance": 1, "interaction": 1}
-        }
 
+    def _is_valid_label_payload(self, labels):
+        if not isinstance(labels, dict):
+            return False
+        if labels.get("preference") not in {"A", "B"}:
+            return False
+        for key in ("category_scores_A", "category_scores_B"):
+            scores = labels.get(key)
+            if not isinstance(scores, dict):
+                return False
+            if not {"existence", "appearance", "interaction"}.issubset(scores):
+                return False
+        return True
+            
     def process_task(self, task):
         """End-to-End Pipeline for a single PrismBench pair."""
         task_id = str(uuid.uuid4())[:8]
@@ -176,13 +175,15 @@ class LocalPrismBenchPipeline:
         annotator_results = []
         for idx, model_name in enumerate(self.teacher_models):
             labels = self.call_ai_teacher(model_name, gen_1, gen_2, refs, prompt, subjects)
+            if labels is None or not self._is_valid_label_payload(labels):
+                return None
             annotator_results.append(
                 {
                     "annotator_id": f"teacher_vlm_{idx+1:02d}",
                     "model_name": model_name,
                     "preference": labels.get("preference", "A"),
-                    "category_scores_A": labels.get("category_scores_A", self._fallback_labels(subjects)["category_scores_A"]),
-                    "category_scores_B": labels.get("category_scores_B", self._fallback_labels(subjects)["category_scores_B"])
+                    "category_scores_A": labels.get("category_scores_A"),
+                    "category_scores_B": labels.get("category_scores_B")
                 }
             )
 

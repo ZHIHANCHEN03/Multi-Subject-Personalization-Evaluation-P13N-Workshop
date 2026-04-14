@@ -16,56 +16,8 @@ class PrismBenchDataset(Dataset):
     def __init__(self, json_path, processor=None, image_size=512):
         self.processor = processor
         self.image_size = image_size
-        try:
-            with open(json_path, 'r') as f:
-                self.data = json.load(f)
-        except FileNotFoundError:
-            print(f"Warning: Dataset not found at {json_path}. Creating a dummy dataset of length 10 for testing.")
-            self.data = [self._generate_dummy_item() for _ in range(10)]
-
-    def _generate_dummy_item(self):
-        return {
-            "task_id": "0001",
-            "prompt": "A photo of [Subject A], [Subject B] walking in a cyberpunk city.",
-            "subject_count": 2,
-            "subject_refs": [
-                {"id": "Subject A", "image_path": "./data/refs/cat_01.jpg"},
-                {"id": "Subject B", "image_path": "./data/refs/dog_02.jpg"}
-            ],
-            "image_A_path": "./data/generated/gemini_0001.jpg",
-            "image_B_path": "./data/generated/mosaic_0001.jpg",
-            "annotator_results": [
-                {
-                    "annotator_id": "ann_01",
-                    "preference": "A",
-                    "category_scores_A": {
-                        "existence": 1,
-                        "appearance": 0,
-                        "interaction": 0
-                    },
-                    "category_scores_B": {
-                        "existence": 0,
-                        "appearance": 0,
-                        "interaction": 0
-                    }
-                },
-                {
-                    "annotator_id": "ann_02",
-                    "preference": "A",
-                    "category_scores_A": {
-                        "existence": 1,
-                        "appearance": 0,
-                        "interaction": 1
-                    },
-                    "category_scores_B": {
-                        "existence": 0,
-                        "appearance": 0,
-                        "interaction": 0
-                    }
-                }
-            ],
-            "metadata": {"source": "GPT Automated Subject Generation"}
-        }
+        with open(json_path, 'r', encoding='utf-8') as f:
+            self.data = json.load(f)
 
     def __len__(self):
         return len(self.data)
