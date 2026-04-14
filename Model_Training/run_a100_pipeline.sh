@@ -23,8 +23,8 @@ IMAGE_SIZE="${IMAGE_SIZE:-512}"
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
-    "unsloth/Qwen3.5-0.8B") BATCH_SIZE=4 ;;  # VRAM Limit on A100 80GB
-    "unsloth/Qwen3.5-2B")   BATCH_SIZE=2 ;;  # VRAM Limit
+    "unsloth/Qwen3.5-0.8B") BATCH_SIZE=1 ;;  # VRAM Limit on A100 80GB (Due to Siamese + Flash Attention Fallback)
+    "unsloth/Qwen3.5-2B")   BATCH_SIZE=1 ;;  # VRAM Limit
     "unsloth/Qwen3.5-4B")   BATCH_SIZE=1 ;;  # VRAM Limit
     "unsloth/Qwen3.5-9B")   BATCH_SIZE=1 ;;  # VRAM Limit
     *)                      BATCH_SIZE=1 ;;
