@@ -1,5 +1,8 @@
+import os
 import torch
 import torch.nn as nn
+from unsloth import FastVisionModel
+from transformers import AutoProcessor
 
 class LENS(nn.Module):
     """

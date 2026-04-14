@@ -4,6 +4,7 @@ import gc
 import argparse
 import torch
 import torch.nn as nn
+from unsloth import FastVisionModel
 from torch.utils.data import DataLoader
 from transformers import AutoProcessor
 from torch.nn.utils.rnn import pad_sequence
