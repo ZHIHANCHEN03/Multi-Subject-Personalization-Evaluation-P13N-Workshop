@@ -53,6 +53,12 @@ def generate_lens_explanation(pred_choice: str, logits_A: torch.Tensor, logits_B
 
 
 def find_latest_checkpoint(outputs_dir: str, mode: str) -> str:
+    # First, check if a "-best" checkpoint exists
+    best_path = os.path.join(outputs_dir, f"LENS-v1-{mode}-best")
+    if os.path.isdir(best_path):
+        print(f"Detected '-best' checkpoint: {best_path}")
+        return best_path
+
     prefix = f"LENS-v1-{mode}-epoch"
     candidates = []
     if not os.path.isdir(outputs_dir):

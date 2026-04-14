@@ -121,14 +121,17 @@ def main(args):
     
     print(f"Starting Diagnostic-Aware Joint Training Loop. Train Batches: {len(train_loader)}, Val Batches: {len(val_loader)}, Epochs: {num_epochs}")
     
+    best_val_loss = float("inf")
+    
     for epoch in range(num_epochs):
         # ---------------- TRAIN ----------------
         model.train()
         print(f"\n--- Epoch {epoch+1}/{num_epochs} [TRAIN] ---")
         epoch_loss = 0.0
         
+        optimizer.zero_grad()
+        
         for step, batch in enumerate(train_loader):
-            optimizer.zero_grad()
             
             kwargs_A = {
                 "input_ids": batch["input_ids_A"].to(device),
@@ -167,6 +170,8 @@ def main(args):
             loss_cls = (loss_cls_A + loss_cls_B) / 2.0
             
             total_loss = alpha * loss_pref + beta * loss_cls
+            scaled_loss = total_loss / args.grad_accum_steps
+            
             loss_value = total_loss.item()
             pref_val = loss_pref.item()
             cls_val = loss_cls.item()
@@ -174,11 +179,14 @@ def main(args):
             score_B_mean = score_B.mean().item()
             score_gap_mean = (score_A.squeeze(-1) - score_B.squeeze(-1)).abs().mean().item()
             
-            total_loss.backward()
-            optimizer.step()
+            scaled_loss.backward()
+            
+            if (step + 1) % args.grad_accum_steps == 0 or (step + 1) == len(train_loader):
+                optimizer.step()
+                optimizer.zero_grad()
             
             # Explicitly clear batch tensors to free up VRAM during loop
-            del kwargs_A, kwargs_B, score_A, score_B, logits_A, logits_B, loss_pref, loss_cls_A, loss_cls_B, loss_cls, total_loss
+            del kwargs_A, kwargs_B, score_A, score_B, logits_A, logits_B, loss_pref, loss_cls_A, loss_cls_B, loss_cls, total_loss, scaled_loss
             
             epoch_loss += loss_value
             
@@ -239,9 +247,17 @@ def main(args):
         save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/LENS-v1-{args.mode}-epoch{epoch+1}")
         model.save_pretrained(save_dir)
         print(f"Checkpoint saved to: {os.path.abspath(save_dir)}")
+        
+        # Track Best Checkpoint
+        if avg_val_loss < best_val_loss:
+            print(f"🌟 New Best Validation Loss: {avg_val_loss:.4f} (Previous: {best_val_loss:.4f})")
+            best_val_loss = avg_val_loss
+            best_dir = os.path.join(os.path.dirname(__file__), f"../outputs/LENS-v1-{args.mode}-best")
+            model.save_pretrained(best_dir)
+            print(f"🌟 Best checkpoint updated at: {os.path.abspath(best_dir)}")
 
     print("\nTraining Completed successfully!")
-    print(f"You can now upload the contents of {save_dir} directly to Hugging Face 🤗")
+    print(f"You can now upload the contents of {best_dir} directly to Hugging Face 🤗")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
@@ -251,6 +267,7 @@ if __name__ == "__main__":
                         help="Training Mode: 'layer_only' (only unfreeze the top N layers), 'lora_layer' (LoRA plus top N layers), 'lora', 'head_only', 'partial' (alias of layer_only), or 'full'.")
     parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze for layer_only / lora_layer / partial")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Siamese training")
+    parser.add_argument("--grad_accum_steps", type=int, default=8, help="Gradient accumulation steps to simulate larger batch size")
     parser.add_argument("--image_size", type=int, default=512, help="Square image size used for resize-and-pad before processor encoding")
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")
