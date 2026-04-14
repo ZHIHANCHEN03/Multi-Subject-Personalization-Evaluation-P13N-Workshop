@@ -109,7 +109,8 @@ python scripts/build_v1_dataset.py
 echo "✅ [3/5] Dataset built successfully."
 
 # Enable gradient checkpointing and memory expansion for massive VLM training
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True # Limits threads to prevent CPU RAM OOM during compilation/loading
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+export TOKENIZERS_PARALLELISM=false # Limits threads to prevent CPU RAM OOM during compilation/loading
 
 # Create logs directory
 LOG_DIR="logs"
