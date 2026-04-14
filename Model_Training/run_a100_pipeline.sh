@@ -79,7 +79,7 @@ python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/c
 echo "🦥 [2/5] Installing Unsloth under the same constraints..."
 python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$VENV_DIR/constraints-a100.txt" unsloth unsloth_zoo
 echo "⚡ [2/5] Installing Flash Attention 2 for ultimate VRAM & Speed optimization..."
-python -m pip install flash-attn --no-build-isolation
+python -m pip install --no-build-isolation flash-attn==2.8.3 --no-cache-dir
 echo "🔎 [2/5] Verifying final package versions..."
 python - <<'PY'
 import importlib
