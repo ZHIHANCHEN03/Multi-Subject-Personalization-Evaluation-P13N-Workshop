@@ -3,6 +3,7 @@ import sys
 import gc
 import math
 import argparse
+import unsloth
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -20,6 +21,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lens.model import LENS
 from lens.dataset import PrismBenchDataset
+
+_ = unsloth  # Keep Unsloth imported before transformers/peft patch sites.
 
 def create_collate_fn(pad_token_id=0):
     def custom_collate_fn(batch):
@@ -99,6 +102,15 @@ def prepare_model_inputs(batch, device, suffix):
         kwargs["mm_token_type_ids"] = batch[f"mm_token_type_ids_{suffix}"].to(device)
     return kwargs
 
+def get_epoch_loss_weights(args, epoch):
+    """Optionally anneal the classification weight as training progresses."""
+    alpha = args.alpha
+    beta = args.beta
+    if args.adaptive_beta and args.epochs > 1:
+        progress = epoch / max(1, args.epochs - 1)
+        beta = args.beta + (args.beta_final - args.beta) * progress
+    return alpha, beta
+
 def compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, alpha, beta):
     """Performs forward passes and calculates the multi-task loss."""
     kwargs_A = prepare_model_inputs(batch, device, "A")
@@ -135,12 +147,16 @@ def compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, 
 def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch):
     """Runs a single training epoch."""
     model.train()
+    alpha, beta = get_epoch_loss_weights(args, epoch)
     print(f"\n--- Epoch {epoch+1}/{args.epochs} [TRAIN] ---")
+    print(f"Loss Weights | alpha={alpha:.4f} beta={beta:.4f}")
     epoch_loss = 0.0
+    epoch_pref_loss = 0.0
+    epoch_cls_loss = 0.0
     optimizer.zero_grad()
     
     for step, batch in enumerate(train_loader):
-        total_loss, metrics = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, args.alpha, args.beta)
+        total_loss, metrics = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, alpha, beta)
         
         # Calculate actual accumulation steps for the tail batch
         actual_accum_steps = min(args.grad_accum_steps, len(train_loader) - step + (step % args.grad_accum_steps))
@@ -148,11 +164,15 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
         scaled_loss.backward()
         
         if (step + 1) % args.grad_accum_steps == 0 or (step + 1) == len(train_loader):
+            if args.grad_clip_norm > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip_norm)
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad()
         
         epoch_loss += metrics["total_loss"]
+        epoch_pref_loss += metrics["pref_loss"]
+        epoch_cls_loss += metrics["cls_loss"]
         
         print(f"Step {step+1}/{len(train_loader)} | Pref Rank Loss: {metrics['pref_loss']:.4f} | "
               f"Cls Loss: {metrics['cls_loss']:.4f} | Total Loss: {metrics['total_loss']:.4f} | "
@@ -163,24 +183,46 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-    return epoch_loss / len(train_loader)
+    return {
+        "total_loss": epoch_loss / len(train_loader),
+        "pref_loss": epoch_pref_loss / len(train_loader),
+        "cls_loss": epoch_cls_loss / len(train_loader),
+        "alpha": alpha,
+        "beta": beta,
+    }
 
 def validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch):
     """Runs validation for a single epoch."""
     model.eval()
     print(f"--- Epoch {epoch+1}/{args.epochs} [VALIDATION] ---")
+    alpha, beta = get_epoch_loss_weights(args, epoch)
     val_loss = 0.0
+    val_pref_loss = 0.0
+    val_cls_loss = 0.0
     
     with torch.no_grad():
         for batch in val_loader:
-            total_loss, _ = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, args.alpha, args.beta)
+            total_loss, metrics = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, alpha, beta)
             val_loss += total_loss.item()
+            val_pref_loss += metrics["pref_loss"]
+            val_cls_loss += metrics["cls_loss"]
             
             del batch, total_loss
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
-    return val_loss / len(val_loader)
+    avg_total_loss = val_loss / len(val_loader)
+    avg_pref_loss = val_pref_loss / len(val_loader)
+    avg_cls_loss = val_cls_loss / len(val_loader)
+    monitor_loss = avg_pref_loss + args.monitor_cls_weight * avg_cls_loss
+    return {
+        "total_loss": avg_total_loss,
+        "pref_loss": avg_pref_loss,
+        "cls_loss": avg_cls_loss,
+        "monitor_loss": monitor_loss,
+        "alpha": alpha,
+        "beta": beta,
+    }
 
 def main(args):
     torch.cuda.empty_cache()
@@ -243,28 +285,41 @@ def main(args):
     print(f"Starting Diagnostic-Aware Joint Training Loop. Train Batches: {len(train_loader)}, Val Batches: {len(val_loader)}, Epochs: {args.epochs}")
     
     # 6. Training Loop
-    best_val_loss = float("inf")
+    best_monitor_loss = float("inf")
+    epochs_without_improvement = 0
     safe_model_name = args.model_name.replace("/", "_")
     best_dir = os.path.join(os.path.dirname(__file__), f"../outputs/{safe_model_name}-{args.mode}-best")
     
     for epoch in range(args.epochs):
-        avg_train_loss = train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch)
-        avg_val_loss = validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch)
+        train_metrics = train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch)
+        val_metrics = validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch)
         
-        print(f"Epoch {epoch+1} Summary | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")
+        print(
+            f"Epoch {epoch+1} Summary | "
+            f"Train Total: {train_metrics['total_loss']:.4f} | Train Pref: {train_metrics['pref_loss']:.4f} | Train Cls: {train_metrics['cls_loss']:.4f} | "
+            f"Val Total: {val_metrics['total_loss']:.4f} | Val Pref: {val_metrics['pref_loss']:.4f} | Val Cls: {val_metrics['cls_loss']:.4f} | "
+            f"Monitor: {val_metrics['monitor_loss']:.4f}"
+        )
         
         save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/{safe_model_name}-{args.mode}-epoch{epoch+1}")
         model.save_pretrained(save_dir)
         print(f"Checkpoint saved to: {os.path.abspath(save_dir)}")
         
-        if avg_val_loss < best_val_loss:
-            print(f"🌟 New Best Validation Loss: {avg_val_loss:.4f} (Previous: {best_val_loss:.4f})")
-            best_val_loss = avg_val_loss
+        if val_metrics["monitor_loss"] < best_monitor_loss - args.early_stopping_min_delta:
+            print(f"🌟 New Best Monitor Loss: {val_metrics['monitor_loss']:.4f} (Previous: {best_monitor_loss:.4f})")
+            best_monitor_loss = val_metrics["monitor_loss"]
+            epochs_without_improvement = 0
             model.save_pretrained(best_dir)
             print(f"🌟 Best checkpoint updated at: {os.path.abspath(best_dir)}")
+        else:
+            epochs_without_improvement += 1
+            print(f"⏳ No monitor improvement for {epochs_without_improvement} epoch(s).")
+            if epochs_without_improvement >= args.early_stopping_patience:
+                print("🛑 Early stopping triggered.")
+                break
 
     print("\nTraining Completed successfully!")
-    if best_val_loss != float("inf"):
+    if best_monitor_loss != float("inf"):
         print(f"You can now upload the contents of {best_dir} directly to Hugging Face 🤗")
 
 if __name__ == "__main__":
@@ -279,6 +334,12 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")
     parser.add_argument("--beta", type=float, default=0.5, help="Weight for Classification Loss")
+    parser.add_argument("--adaptive_beta", action=argparse.BooleanOptionalAction, default=True, help="Linearly anneal beta over epochs")
+    parser.add_argument("--beta_final", type=float, default=0.25, help="Final beta value when adaptive beta is enabled")
+    parser.add_argument("--monitor_cls_weight", type=float, default=0.5, help="Fixed cls weight used for best-checkpoint monitoring")
+    parser.add_argument("--grad_clip_norm", type=float, default=1.0, help="Gradient clipping norm; set <=0 to disable")
+    parser.add_argument("--early_stopping_patience", type=int, default=2, help="Stop if monitor loss does not improve for N epochs")
+    parser.add_argument("--early_stopping_min_delta", type=float, default=1e-3, help="Minimum monitor improvement to reset patience")
     parser.add_argument("--train_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json"), help="Path to training data")
     parser.add_argument("--val_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/val_v1.json"), help="Path to validation data")
     parser.add_argument("--num_workers", type=int, default=0, help="Number of dataloader workers")
