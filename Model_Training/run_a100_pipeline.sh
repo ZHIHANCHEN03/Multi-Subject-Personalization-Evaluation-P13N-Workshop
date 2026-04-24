@@ -85,7 +85,7 @@ if [ "$REBUILD_VENV" = "1" ] || [ ! -f "$VENV_DIR/.deps_ready" ]; then
   echo "🔥 [2/5] Installing pinned torch stack for A100 training (cu128)..."
   python -m pip install --upgrade --force-reinstall --no-cache-dir torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cu128
   echo "🧩 [2/5] Installing pinned Python stack..."
-  python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$CONSTRAINTS_FILE" transformers==5.5.0 peft pillow fsspec<=2025.9.0
+  python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$CONSTRAINTS_FILE" transformers==5.5.0 peft pillow 'fsspec<=2025.9.0'
   echo "🦥 [2/5] Installing Unsloth under the same constraints..."
   python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$CONSTRAINTS_FILE" unsloth unsloth_zoo
   echo "⚡ [2/5] Skipping Flash Attention 2 strict installation (Falling back to Xformers/PyTorch SDPA)..."
