@@ -78,6 +78,14 @@ class LENS(nn.Module):
             (p.dtype for p in self.base_model.parameters() if p.is_floating_point()),
             torch.bfloat16,
         )
+        peft_kwargs = dict(
+            r=16,
+            lora_alpha=32,
+            lora_dropout=0.0,
+            bias="none",
+            use_gradient_checkpointing="unsloth",
+            random_state=3407,
+        )
         if mode == "lora":
             print("Injecting LoRA adapters via Unsloth (Optimized for VLM)...")
             self.backbone = FastVisionModel.get_peft_model(
@@ -86,10 +94,7 @@ class LENS(nn.Module):
                 finetune_language=True,   # Essential: Allow language model to train
                 finetune_attention_modules=True,
                 finetune_mlp_modules=True,
-                r=16,
-                lora_alpha=32,
-                lora_dropout=0.0,
-                bias="none",
+                **peft_kwargs,
             )
             self.backbone.print_trainable_parameters()
             
@@ -109,10 +114,7 @@ class LENS(nn.Module):
                 finetune_language=True,
                 finetune_attention_modules=True,
                 finetune_mlp_modules=True,
-                r=16,
-                lora_alpha=32,
-                lora_dropout=0.0,
-                bias="none",
+                **peft_kwargs,
             )
             unfreeze_last_layers(self.backbone, unfreeze_layers)
             self.backbone.print_trainable_parameters()
