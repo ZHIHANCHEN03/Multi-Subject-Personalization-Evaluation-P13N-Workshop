@@ -1,0 +1,24 @@
+[
+  {
+    "task_id": "combo_066",
+    "subject_count": 8,
+    "num_refs": 8,
+    "merged_reference_path": "/Users/bytedance/Documents/multi_subject_generation/Multi-Subject-Personalization-Evaluation-P13N-Workshop/Model_Training/vlm_multisubject_eval/merged_references/combo_066_refs_grid.jpg",
+    "reference_filenames": [
+      "h03.jpg",
+      "h02.jpg",
+      "h09.jpg",
+      "h06.jpg",
+      "h08.jpg",
+      "h04.jpg",
+      "h01.jpg",
+      "h10.jpg"
+    ],
+    "grid": {
+      "width": 1312,
+      "height": 712,
+      "rows": 2,
+      "cols": 4
+    }
+  }
+]
