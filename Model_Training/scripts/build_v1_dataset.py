@@ -151,6 +151,37 @@ def process_dataset(base_dir):
 
     return result
 
+def stratified_split(dataset, train_ratio, val_ratio, seed):
+    """
+    Split data while preserving coarse distributional structure that matters for evaluation.
+    We stratify by subject_count and ratio_type to reduce split skew from pure random shuffling.
+    """
+    rng = random.Random(seed)
+    buckets = defaultdict(list)
+
+    for item in dataset:
+        key = (
+            item.get("subject_count", 0),
+            item.get("metadata", {}).get("ratio_type", "unknown"),
+        )
+        buckets[key].append(item)
+
+    train_data, val_data, test_data = [], [], []
+    for bucket_items in buckets.values():
+        rng.shuffle(bucket_items)
+        bucket_len = len(bucket_items)
+        train_len = int(bucket_len * train_ratio)
+        val_len = int(bucket_len * val_ratio)
+
+        train_data.extend(bucket_items[:train_len])
+        val_data.extend(bucket_items[train_len:train_len + val_len])
+        test_data.extend(bucket_items[train_len + val_len:])
+
+    rng.shuffle(train_data)
+    rng.shuffle(val_data)
+    rng.shuffle(test_data)
+    return train_data, val_data, test_data
+
 def main(args):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.abspath(os.path.join(current_dir, "..", "data_v1"))
@@ -158,16 +189,13 @@ def main(args):
     print(f"Processing raw annotations from: {base_dir}")
     dataset = process_dataset(base_dir)
     
-    random.seed(args.seed)
-    random.shuffle(dataset)
-
     total_len = len(dataset)
-    train_len = int(total_len * args.train_ratio)
-    val_len = int(total_len * args.val_ratio)
-
-    train_data = dataset[:train_len]
-    val_data = dataset[train_len:train_len + val_len]
-    test_data = dataset[train_len + val_len:]
+    train_data, val_data, test_data = stratified_split(
+        dataset,
+        train_ratio=args.train_ratio,
+        val_ratio=args.val_ratio,
+        seed=args.seed,
+    )
 
     train_path = os.path.join(base_dir, "train_v1.json")
     val_path = os.path.join(base_dir, "val_v1.json")

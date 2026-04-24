@@ -4,7 +4,6 @@ import os
 import sys
 from typing import Dict, List, Tuple
 
-import unsloth
 import torch
 import torch.nn.functional as F
 from peft import PeftModel
@@ -20,7 +19,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lens.dataset import PrismBenchDataset
 from lens.model import LENS
-from lens.utils.image_processing import resize_and_pad_image
+from lens.utils.image_processing import load_image_with_safety
 
 
 DIAGNOSTIC_DIMENSIONS = ["Existence", "Appearance", "Interaction"]
@@ -89,10 +88,12 @@ def load_lens_checkpoint(checkpoint_dir: str, device: torch.device) -> Tuple[LEN
     with open(config_path, "r", encoding="utf-8") as f:
         cfg = json.load(f)
 
+    init_mode = "head_only" if cfg["mode"] in {"lora", "lora_layer"} else cfg["mode"]
+
     model = LENS(
         model_name=cfg["base_model_name"],
         num_error_classes=cfg["num_error_classes"],
-        mode=cfg["mode"],
+        mode=init_mode,
         unfreeze_layers=cfg.get("unfreeze_layers", 4),
     )
 
@@ -104,7 +105,8 @@ def load_lens_checkpoint(checkpoint_dir: str, device: torch.device) -> Tuple[LEN
     if cfg["mode"] in {"lora", "lora_layer"}:
         if not os.path.isdir(lora_dir):
             raise FileNotFoundError(f"Missing LoRA adapter directory: {lora_dir}")
-        model.backbone = PeftModel.from_pretrained(model.backbone, lora_dir, is_trainable=False)
+        # Load adapters onto the plain base model to avoid stacking a second random LoRA wrapper.
+        model.backbone = PeftModel.from_pretrained(model.base_model, lora_dir, is_trainable=False)
 
     backbone_updates_path = os.path.join(checkpoint_dir, "trainable_backbone.pt")
     if cfg["mode"] in {"layer_only", "partial", "lora_layer", "full"}:
@@ -172,7 +174,8 @@ def get_clip_image_embedding(clip_model: CLIPModel, pixel_values: torch.Tensor) 
 
 def load_pil_image(base_dir: str, rel_path: str, image_size: int = 512):
     abs_path = os.path.join(base_dir, rel_path)
-    return resize_and_pad_image(abs_path, target_size=(image_size, image_size))
+    _ = image_size
+    return load_image_with_safety(abs_path)
 
 
 def main(args):
@@ -285,7 +288,7 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint_dir", type=str, default=None, help="Optional explicit checkpoint directory.")
     parser.add_argument("--test_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/test_v1.json"), help="Path to test data")
     parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory containing trained model checkpoints")
-    parser.add_argument("--image_size", type=int, default=512, help="Resize-and-pad size used during evaluation.")
+    parser.add_argument("--image_size", type=int, default=512, help="Kept for compatibility; LENS now preserves original image aspect ratio during evaluation.")
     parser.add_argument("--clip_model", type=str, default="openai/clip-vit-base-patch32")
     parser.add_argument("--dino_model", type=str, default="facebook/dinov2-base")
     args = parser.parse_args()

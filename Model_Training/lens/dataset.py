@@ -3,7 +3,7 @@ import os
 import torch
 from torch.utils.data import Dataset
 
-from lens.utils.image_processing import resize_and_pad_image
+from lens.utils.image_processing import load_image_with_safety
 
 class PrismBenchDataset(Dataset):
     """
@@ -15,6 +15,7 @@ class PrismBenchDataset(Dataset):
     """
     def __init__(self, json_path, processor=None, image_size=512):
         self.processor = processor
+        # image_size is kept for compatibility, but modern VLMs will use their dynamic resolution mechanism
         self.image_size = image_size
         with open(json_path, 'r', encoding='utf-8') as f:
             self.data = json.load(f)
@@ -92,7 +93,8 @@ class PrismBenchDataset(Dataset):
         
         def load_and_norm(rel_path):
             abs_path = os.path.join(base_dir, rel_path)
-            return resize_and_pad_image(abs_path, target_size=(self.image_size, self.image_size))
+            # Delegate to the AutoProcessor to handle dynamic resolution natively
+            return load_image_with_safety(abs_path)
 
         if self.processor is None:
             raise ValueError("Processor must be provided to PrismBenchDataset to load images. Please pass processor=AutoProcessor.from_pretrained(...)")

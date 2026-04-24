@@ -1,12 +1,13 @@
 import os
 import sys
 import gc
+import math
 import argparse
 import torch
 import torch.nn as nn
 from unsloth import FastVisionModel
 from torch.utils.data import DataLoader
-from transformers import AutoProcessor
+from transformers import AutoProcessor, get_cosine_schedule_with_warmup
 from torch.nn.utils.rnn import pad_sequence
 
 # Safe default Hugging Face cache settings for server-side training.
@@ -21,34 +22,36 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lens.model import LENS
 from lens.dataset import PrismBenchDataset
 
-def custom_collate_fn(batch):
-    """Handles variable-length token sequences by padding them."""
-    out = {}
-    
-    out["task_id"] = [b["task_id"] for b in batch]
-    out["preference_label"] = torch.stack([b["preference_label"] for b in batch])
-    out["category_scores_A"] = torch.stack([b["category_scores_A"] for b in batch])
-    out["category_scores_B"] = torch.stack([b["category_scores_B"] for b in batch])
-    
-    # Pad sequences
-    out["input_ids_A"] = pad_sequence([b["input_ids_A"] for b in batch], batch_first=True, padding_value=0)
-    out["attention_mask_A"] = pad_sequence([b["attention_mask_A"] for b in batch], batch_first=True, padding_value=0)
-    out["input_ids_B"] = pad_sequence([b["input_ids_B"] for b in batch], batch_first=True, padding_value=0)
-    out["attention_mask_B"] = pad_sequence([b["attention_mask_B"] for b in batch], batch_first=True, padding_value=0)
-    
-    if "mm_token_type_ids_A" in batch[0]:
-        out["mm_token_type_ids_A"] = pad_sequence([b["mm_token_type_ids_A"] for b in batch], batch_first=True, padding_value=0)
-        out["mm_token_type_ids_B"] = pad_sequence([b["mm_token_type_ids_B"] for b in batch], batch_first=True, padding_value=0)
-    
-    # Concat pixel values
-    out["pixel_values_A"] = torch.cat([b["pixel_values_A"] for b in batch], dim=0)
-    out["pixel_values_B"] = torch.cat([b["pixel_values_B"] for b in batch], dim=0)
-    
-    if "image_grid_thw_A" in batch[0]:
-        out["image_grid_thw_A"] = torch.cat([b["image_grid_thw_A"] for b in batch], dim=0)
-        out["image_grid_thw_B"] = torch.cat([b["image_grid_thw_B"] for b in batch], dim=0)
+def create_collate_fn(pad_token_id=0):
+    def custom_collate_fn(batch):
+        """Handles variable-length token sequences by padding them."""
+        out = {}
         
-    return out
+        out["task_id"] = [b["task_id"] for b in batch]
+        out["preference_label"] = torch.stack([b["preference_label"] for b in batch])
+        out["category_scores_A"] = torch.stack([b["category_scores_A"] for b in batch])
+        out["category_scores_B"] = torch.stack([b["category_scores_B"] for b in batch])
+        
+        # Pad sequences using the correct tokenizer pad_token_id
+        out["input_ids_A"] = pad_sequence([b["input_ids_A"] for b in batch], batch_first=True, padding_value=pad_token_id)
+        out["attention_mask_A"] = pad_sequence([b["attention_mask_A"] for b in batch], batch_first=True, padding_value=0)
+        out["input_ids_B"] = pad_sequence([b["input_ids_B"] for b in batch], batch_first=True, padding_value=pad_token_id)
+        out["attention_mask_B"] = pad_sequence([b["attention_mask_B"] for b in batch], batch_first=True, padding_value=0)
+        
+        if "mm_token_type_ids_A" in batch[0]:
+            out["mm_token_type_ids_A"] = pad_sequence([b["mm_token_type_ids_A"] for b in batch], batch_first=True, padding_value=0)
+            out["mm_token_type_ids_B"] = pad_sequence([b["mm_token_type_ids_B"] for b in batch], batch_first=True, padding_value=0)
+        
+        # Concat pixel values
+        out["pixel_values_A"] = torch.cat([b["pixel_values_A"] for b in batch], dim=0)
+        out["pixel_values_B"] = torch.cat([b["pixel_values_B"] for b in batch], dim=0)
+        
+        if "image_grid_thw_A" in batch[0]:
+            out["image_grid_thw_A"] = torch.cat([b["image_grid_thw_A"] for b in batch], dim=0)
+            out["image_grid_thw_B"] = torch.cat([b["image_grid_thw_B"] for b in batch], dim=0)
+            
+        return out
+    return custom_collate_fn
 
 def calculate_auto_scaling(args, train_size, val_size):
     """Calculates and updates grad_accum_steps and epochs dynamically."""
@@ -106,13 +109,15 @@ def compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, 
     score_B, logits_B = model(**kwargs_B)
 
     labels = batch["preference_label"].to(device).float()
-    loss_pref = ranking_loss_fn(score_A.squeeze(-1), score_B.squeeze(-1), labels)
+    # Force float32 for numerical stability in margin ranking loss
+    loss_pref = ranking_loss_fn(score_A.squeeze(-1).float(), score_B.squeeze(-1).float(), labels)
     
     targets_A = batch["category_scores_A"].to(device).float()
     targets_B = batch["category_scores_B"].to(device).float()
     
-    loss_cls_A = classification_loss_fn(logits_A, targets_A)
-    loss_cls_B = classification_loss_fn(logits_B, targets_B)
+    # Force float32 for BCEWithLogitsLoss to prevent underflow/overflow during Sigmoid
+    loss_cls_A = classification_loss_fn(logits_A.float(), targets_A)
+    loss_cls_B = classification_loss_fn(logits_B.float(), targets_B)
     loss_cls = (loss_cls_A + loss_cls_B) / 2.0
     
     total_loss = alpha * loss_pref + beta * loss_cls
@@ -128,7 +133,7 @@ def compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, 
     
     return total_loss, metrics
 
-def train_epoch(model, train_loader, optimizer, device, ranking_loss_fn, classification_loss_fn, args, epoch):
+def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch):
     """Runs a single training epoch."""
     model.train()
     print(f"\n--- Epoch {epoch+1}/{args.epochs} [TRAIN] ---")
@@ -138,11 +143,14 @@ def train_epoch(model, train_loader, optimizer, device, ranking_loss_fn, classif
     for step, batch in enumerate(train_loader):
         total_loss, metrics = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, args.alpha, args.beta)
         
-        scaled_loss = total_loss / args.grad_accum_steps
+        # Calculate actual accumulation steps for the tail batch
+        actual_accum_steps = min(args.grad_accum_steps, len(train_loader) - step + (step % args.grad_accum_steps))
+        scaled_loss = total_loss / actual_accum_steps
         scaled_loss.backward()
         
         if (step + 1) % args.grad_accum_steps == 0 or (step + 1) == len(train_loader):
             optimizer.step()
+            scheduler.step()
             optimizer.zero_grad()
         
         epoch_loss += metrics["total_loss"]
@@ -211,15 +219,27 @@ def main(args):
     if processor.tokenizer.pad_token is None:
         processor.tokenizer.pad_token = processor.tokenizer.eos_token
     
+    pad_token_id = processor.tokenizer.pad_token_id
+    
     train_dataset = PrismBenchDataset(json_path=args.train_path, processor=processor, image_size=args.image_size)
     val_dataset = PrismBenchDataset(json_path=args.val_path, processor=processor, image_size=args.image_size)
     
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=custom_collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=custom_collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None)
+    collate_fn = create_collate_fn(pad_token_id=pad_token_id)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None)
     
     # 5. Auto-Scale
     if args.auto_scale:
         calculate_auto_scaling(args, len(train_dataset), len(val_dataset))
+        
+    # 5.5 Setup LR Scheduler
+    updates_per_epoch = math.ceil(len(train_loader) / args.grad_accum_steps)
+    total_steps = updates_per_epoch * args.epochs
+    scheduler = get_cosine_schedule_with_warmup(
+        optimizer, 
+        num_warmup_steps=int(total_steps * 0.05), # 5% warmup
+        num_training_steps=total_steps
+    )
     
     print(f"Starting Diagnostic-Aware Joint Training Loop. Train Batches: {len(train_loader)}, Val Batches: {len(val_loader)}, Epochs: {args.epochs}")
     
@@ -229,7 +249,7 @@ def main(args):
     best_dir = os.path.join(os.path.dirname(__file__), f"../outputs/{safe_model_name}-{args.mode}-best")
     
     for epoch in range(args.epochs):
-        avg_train_loss = train_epoch(model, train_loader, optimizer, device, ranking_loss_fn, classification_loss_fn, args, epoch)
+        avg_train_loss = train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch)
         avg_val_loss = validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch)
         
         print(f"Epoch {epoch+1} Summary | Train Loss: {avg_train_loss:.4f} | Val Loss: {avg_val_loss:.4f}")

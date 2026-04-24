@@ -7,6 +7,9 @@
 # Exit on errors, undefined vars, and failed piped commands.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 echo "======================================================================"
 echo "🚀 Initializing LENS Pipeline on A100 Server..."
 echo "======================================================================"
@@ -50,7 +53,7 @@ echo "✅ [1/5] Xet disabled via HF_HUB_DISABLE_XET=1"
 
 # 2. Dependency Management
 echo "⏳ [2/5] Creating isolated A100 training environment..."
-VENV_DIR="${VENV_DIR:-$PWD/.venv-a100-unsloth}"
+VENV_DIR="${VENV_DIR:-$SCRIPT_DIR/.venv-a100-unsloth}"
 REBUILD_VENV="${REBUILD_VENV:-0}"
 if [ -d "$VENV_DIR" ] && [ "$REBUILD_VENV" = "1" ]; then
   echo "🧹 [2/5] Rebuilding virtualenv as requested: $VENV_DIR"
