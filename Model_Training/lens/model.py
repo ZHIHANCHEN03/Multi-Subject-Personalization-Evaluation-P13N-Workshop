@@ -1,5 +1,9 @@
+import unsloth
 import torch
 import torch.nn as nn
+from unsloth import FastVisionModel
+
+_ = unsloth  # Keep the top-level import explicit for Unsloth's patching expectations.
 
 class LENS(nn.Module):
     """
@@ -14,12 +18,6 @@ class LENS(nn.Module):
         
         print(f"Loading VLM Backbone: {model_name} in [{mode.upper()}] mode using Unsloth on CUDA...")
         
-        # We must use FastVisionModel for Qwen3.5 multimodal capabilities in Unsloth
-        try:
-            from unsloth import FastVisionModel
-        except ImportError:
-            raise ImportError("Unsloth is not installed. Please run: pip install unsloth unsloth_zoo")
-
         # Load base model via Unsloth (handles multi-modal correctly and saves 50% VRAM)
         use_gc = "unsloth" if mode in {"lora", "lora_layer", "full"} else False
         self.base_model, self.tokenizer = FastVisionModel.from_pretrained(
