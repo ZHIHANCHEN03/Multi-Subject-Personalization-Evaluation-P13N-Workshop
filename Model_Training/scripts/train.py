@@ -279,7 +279,7 @@ if __name__ == "__main__":
     parser.add_argument("--image_size", type=int, default=512, help="Square image size")
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")
-    parser.add_argument("--beta", type=float, default=1.0, help="Weight for Classification Loss")
+    parser.add_argument("--beta", type=float, default=0.5, help="Weight for Classification Loss")
     parser.add_argument("--train_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json"), help="Path to training data")
     parser.add_argument("--val_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/val_v1.json"), help="Path to validation data")
     parser.add_argument("--num_workers", type=int, default=0, help="Number of dataloader workers")
