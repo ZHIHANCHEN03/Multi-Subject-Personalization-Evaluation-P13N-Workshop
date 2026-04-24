@@ -1,8 +1,5 @@
-import os
 import torch
 import torch.nn as nn
-from unsloth import FastVisionModel
-from transformers import AutoProcessor
 
 class LENS(nn.Module):
     """
@@ -93,7 +90,7 @@ class LENS(nn.Module):
                 finetune_mlp_modules=True,
                 r=16,
                 lora_alpha=32,
-                lora_dropout=0.05,
+                lora_dropout=0.0,
                 bias="none",
             )
             self.backbone.print_trainable_parameters()
@@ -116,7 +113,7 @@ class LENS(nn.Module):
                 finetune_mlp_modules=True,
                 r=16,
                 lora_alpha=32,
-                lora_dropout=0.05,
+                lora_dropout=0.0,
                 bias="none",
             )
             unfreeze_last_layers(self.backbone, unfreeze_layers)

@@ -23,6 +23,9 @@ MODEL_NAME="${MODEL_NAME:-unsloth/Qwen3.5-0.8B}"
 RUN_LAYER_ONLY="${RUN_LAYER_ONLY:-1}"
 RUN_LORA_LAYER="${RUN_LORA_LAYER:-1}"
 IMAGE_SIZE="${IMAGE_SIZE:-512}"
+INSTALL_FLASH_ATTN="${INSTALL_FLASH_ATTN:-1}"
+INSTALL_FASTPATH_DEPS="${INSTALL_FASTPATH_DEPS:-1}"
+MAX_JOBS="${MAX_JOBS:-8}"
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
@@ -37,6 +40,8 @@ fi
 echo "✅ [0/5] Selected backbone: $MODEL_NAME"
 echo "✅ [0/5] Selected physical batch size: $BATCH_SIZE (Effective Batch Size & Epochs will be AUTO-SCALED)"
 echo "✅ [0/5] Selected image size: ${IMAGE_SIZE}x${IMAGE_SIZE}"
+echo "✅ [0/5] Optional FlashAttention install: ${INSTALL_FLASH_ATTN}"
+echo "✅ [0/5] Optional fast-path deps install: ${INSTALL_FASTPATH_DEPS}"
 
 # 1. Environment Setup (Safe Cache Storage)
 # IMPORTANT:
@@ -82,14 +87,37 @@ EOF
 if [ "$REBUILD_VENV" = "1" ] || [ ! -f "$VENV_DIR/.deps_ready" ]; then
   echo "⬆️  [2/5] Upgrading pip/setuptools/wheel..."
   python -m pip install --upgrade pip setuptools wheel
+  echo "🧰 [2/5] Installing common build helpers..."
+  python -m pip install --upgrade --no-cache-dir packaging ninja
   echo "🔥 [2/5] Installing pinned torch stack for A100 training (cu128)..."
   python -m pip install --upgrade --force-reinstall --no-cache-dir torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/cu128
   echo "🧩 [2/5] Installing pinned Python stack..."
   python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$CONSTRAINTS_FILE" transformers==5.5.0 peft pillow 'fsspec<=2025.9.0'
   echo "🦥 [2/5] Installing Unsloth under the same constraints..."
   python -m pip install --upgrade --force-reinstall --no-cache-dir -c "$CONSTRAINTS_FILE" unsloth unsloth_zoo
-  echo "⚡ [2/5] Skipping Flash Attention 2 strict installation (Falling back to Xformers/PyTorch SDPA)..."
-  # python -m pip install flash-attn==2.8.3 --no-build-isolation --no-cache-dir
+
+  if [ "$INSTALL_FLASH_ATTN" = "1" ]; then
+    echo "⚡ [2/5] Attempting FlashAttention 2 installation (best effort)..."
+    if MAX_JOBS="$MAX_JOBS" python -m pip install --upgrade --no-cache-dir flash-attn==2.8.3 --no-build-isolation; then
+      echo "✅ [2/5] FlashAttention 2 installed successfully."
+    else
+      echo "⚠️  [2/5] FlashAttention 2 install failed; training will fall back to Xformers/PyTorch SDPA."
+    fi
+  else
+    echo "⏭️  [2/5] Skipping FlashAttention 2 installation by request."
+  fi
+
+  if [ "$INSTALL_FASTPATH_DEPS" = "1" ]; then
+    echo "🚀 [2/5] Attempting optional fast-path deps install (best effort)..."
+    if python -m pip install --upgrade --no-cache-dir 'flash-linear-attention[conv1d]'; then
+      echo "✅ [2/5] Optional fast-path deps installed successfully."
+    else
+      echo "⚠️  [2/5] Optional fast-path deps install failed; Unsloth may use slower fallback kernels."
+    fi
+  else
+    echo "⏭️  [2/5] Skipping optional fast-path deps installation by request."
+  fi
+
   touch "$VENV_DIR/.deps_ready"
 else
   echo "⚡ [2/5] Skipping dependency reinstall because cached environment is ready."

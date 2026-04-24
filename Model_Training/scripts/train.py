@@ -5,7 +5,6 @@ import math
 import argparse
 import torch
 import torch.nn as nn
-from unsloth import FastVisionModel
 from torch.utils.data import DataLoader
 from transformers import AutoProcessor, get_cosine_schedule_with_warmup
 from torch.nn.utils.rnn import pad_sequence
