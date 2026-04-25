@@ -4,6 +4,7 @@ import os
 import sys
 from typing import Dict, List, Tuple
 
+import unsloth
 import torch
 import torch.nn.functional as F
 from peft import PeftModel

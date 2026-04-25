@@ -124,6 +124,7 @@ else
 fi
 echo "🔎 [2/5] Verifying final package versions..."
 python - <<'PY'
+import unsloth
 import importlib
 packages = ["torch", "torchvision", "torchaudio", "transformers", "peft", "unsloth", "unsloth_zoo", "fsspec"]
 for name in packages:
