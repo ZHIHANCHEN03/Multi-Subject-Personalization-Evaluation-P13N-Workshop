@@ -38,41 +38,39 @@ You will receive:
 
 Your job consists of two parts:
 Part 1: Independent Evaluation
-Evaluate candidate A and candidate B independently against the prompt and references. For each image, assess the following three dimensions:
-- Existence: Are ALL the required subjects in the references present in the generated image?
-- Appearance: Do the generated subjects match the provided references in identity and style?
-- Interaction: Does the generated image accurately reflect the prompt's described actions, maintain correct relative proportions between subjects, and follow realistic spatial/physical laws?
+Evaluate candidate A and candidate B independently. For each image, strictly evaluate:
+- Existence: Are ALL the required subjects in the references physically present? (Generic versions count as 1; completely missing counts as 0).
+- Appearance: Are the subjects rendered WITHOUT structural deformations? Do the generated subjects strictly match the references across ALL features: Face/Skin tone, Hair style, Top clothing, AND Bottoms (pants)?
+- Interaction: Does the generated image reflect the described actions, maintain correct proportions, and follow realistic spatial/physical laws?
+
 Part 2: Overall Comparison
-Compare Candidate A and B and decide the winner.
+Compare Candidate A and B and decide the overall winner.
 
 OUTPUT RULES:
-- Use ONLY the provided prompt and images to make your decision.
-- Judge image A and image B independently on the three dimensions.
-- Choose the overall winner. `winner` must be either "A" or "B" (Never "Tie").
+- Use ONLY the provided prompt and images.
 - All dimensional scores (`*_existence`, `*_appearance`, `*_interaction`) must be strictly binary: 1 (fully correct) or 0 (any issue exists).
-- Return valid JSON ONLY. Absolutely NO markdown formatting, NO markdown code blocks (do not use ```json), and NO extra text.
-- `reason` must be 25 words or fewer, mentioning only the main deciding factor or the dimensions that scored 0.
+- `winner` must be either "A" or "B" (Never "Tie").
+- Return valid JSON ONLY. Absolutely NO markdown formatting.
+- **CRITICAL**: To focus on errors, the JSON MUST begin with `a_flaw_log` and `b_flaw_log`. DO NOT list perfect subjects. ONLY list subjects with errors and explicitly state what is wrong (Missing, Wrong Face/Hair/Skin, Wrong Top, Wrong Pants, Action/Spatial/Physics Error). If an image is 100% perfect, write "None".
 
 SCORING NOTES & SPECIFIC EDGE CASES:
-- Missing Subjects (Strict Existence Rule): If one or more subjects from the reference images are completely missing (i.e., not rendered at all) in the candidate image, you MUST score Existence as 0. 
-- Mangled/Melted Subjects: If the model clearly attempted to generate a subject but it is severely deformed (e.g., missing a head but the body is present, or subjects are merged), score Existence as 1 (since it was attempted), but strictly score Appearance and Interaction as 0.
-- Appearance Matching: Score Appearance as 1 ONLY if every successfully generated subject matches its reference in hairstyle, facial features, clothing style, and object style. Any mismatch in these identity-defining details must result in an Appearance score of 0.
-- Interaction - Partial Generation: Evaluate interactions based ONLY on the subjects that were actually rendered. If the generated subjects perform their individual actions correctly, score Interaction as 1, even if other unrelated subjects are missing. HOWEVER, if an interaction inherently requires a missing subject (e.g., rendered subject A is supposed to hug subject B, but subject B is missing), the interaction becomes physically/logically impossible and MUST be scored 0.
-- Interaction - Proportions & Spatial Logic: Subjects must maintain logical relative sizes (proportions) and realistic spatial positioning as dictated by the prompt and real-world physical laws. Scale distortions or impossible geometry must be scored 0.
-- Interaction - Physics & Gravity: Obvious physical violations (e.g., floating objects, unexplained supporting structures) must be scored 0. Be lenient only on very minor physical inaccuracies.
-- Interaction - Gaze & Movement: Terms like "looking at" or "walking towards" require the correct general direction. Score 0 only if the subject is clearly facing or moving away from the target.
-- Interaction - Occlusion: Strictly judge terms like "behind" or "in front of". If an object can logically be considered "behind" spatially, it is acceptable. If the foreground/background relationship is explicitly reversed compared to the prompt, score 0.
+- Appearance (Strict Identity & Wardrobe): You MUST check the whole person. If a subject has the correct top but wrong pants, wrong hair, or mismatched skin tone/face compared to the reference, score Appearance as 0 and log the specific flaw (e.g., "Woman red hoodie: Wrong face/skin color", "Man flannel shirt: Wrong pants color").
+- Appearance (Mangled/Melted): Any structural artifacts (extra limbs, mangled faces) = Appearance 0.
+- Existence vs Appearance: If requested "man denim jacket" is drawn as a generic man in a grey sweater, Existence is 1, Appearance is 0.
+- Interaction (Partial): Evaluate interactions based ONLY on rendered subjects. If an interaction requires a missing subject, Interaction is 0.
+- Interaction (Physics, Environment & Scale): Obvious physical violations (e.g., objects floating in mid-air without support) OR severe scale distortions between objects (e.g., abnormally giant bread, miniature people) = Interaction 0. HOWEVER, the presence of unprompted but logical supporting structures (e.g., tables, pedestals) used to hold objects is PERMITTED and should NOT be penalized.
 
 EXPECTED JSON SCHEMA:
 {
-  "a_existence": 0,
+  "a_flaw_log": "Middle eastern man: Appearance (wears green sweater instead of beige shirt). Man flannel shirt: Appearance (wrong pants color). Woman red hoodie: Appearance (mismatched face/skin/hair). Interaction: Man is not occluded by the woman; The burger is floating in mid-air.",
+  "b_flaw_log": "Middle eastern man: Missing. Man bomber jacket: Missing. DSLR camera: Missing. Interaction: Man is not walking towards/staring at the woman; Fails due to missing interaction targets.",
+  "a_existence": 1,
   "a_appearance": 0,
   "a_interaction": 0,
   "b_existence": 0,
   "b_appearance": 0,
   "b_interaction": 0,
-  "winner": "A",
-  "reason": "short reason here"
+  "winner": "A"
 }
 """.strip()
 
@@ -349,11 +347,6 @@ def normalize_binary_score(value: Any) -> int:
     raise ValueError(f"Invalid binary score: {value}")
 
 
-def trim_reason(reason: Any, max_words: int = 25) -> str:
-    words = str(reason or "").strip().split()
-    return " ".join(words[:max_words])
-
-
 def normalize_result(raw: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "a_existence": normalize_binary_score(raw.get("a_existence")),
@@ -363,7 +356,7 @@ def normalize_result(raw: Dict[str, Any]) -> Dict[str, Any]:
         "b_appearance": normalize_binary_score(raw.get("b_appearance")),
         "b_interaction": normalize_binary_score(raw.get("b_interaction")),
         "winner": normalize_preference(raw.get("winner")),
-        "reason": trim_reason(raw.get("reason")),
+        "reason": f"A: {raw.get('a_flaw_log')}; B: {raw.get('b_flaw_log')}",  
     }
 
 
