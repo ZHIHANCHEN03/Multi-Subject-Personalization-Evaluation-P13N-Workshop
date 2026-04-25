@@ -1,18 +1,17 @@
 # VLM Multi-Subject Eval
 
-这个子目录用于做多主体生成的 `VLM-as-a-Judge` 评测，直接调用 `OpenAI` 或 `Gemini` API，对 `test_v1.json` 里的 A/B 候选图进行成对比较。
+这个子目录用于做多主体生成的 `VLM-as-a-Judge` 评测，直接调用 `OpenAI` 或 `Gemini` API，对 A/B 候选图进行成对比较。
 
 ## 功能
 
-- 读取现有 `Model_Training/data_v1/test_v1.json`
 - 将 `prompt + subject reference images + candidate A/B` 一起发给 VLM
 - 输出固定字段：
-  - `a_subject_existence`
-  - `a_subject_appearance`
-  - `a_interaction_alignment`
-  - `b_subject_existence`
-  - `b_subject_appearance`
-  - `b_interaction_alignment`
+  - `a_existence`
+  - `a_appearance`
+  - `a_interaction`
+  - `b_existence`
+  - `b_appearance`
+  - `b_interaction`
   - `better_candidate`，只允许 `A` 或 `B`
   - `reason`，限制在 `25` 个词以内
 - 自动保存：
