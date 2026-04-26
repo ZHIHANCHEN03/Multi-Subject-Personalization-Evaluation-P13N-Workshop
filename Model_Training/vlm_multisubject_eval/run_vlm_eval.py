@@ -16,6 +16,10 @@ PROVIDER_TO_MODEL = {
     "openai": "gpt-5.4-mini",
     "gemini": "gemini-3.1-flash-lite-preview",
 }
+GEMINI_MODEL_CHOICES = [
+    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite-preview",
+]
 OPENAI_BATCH_TERMINAL_STATUSES = {"completed", "failed", "expired", "cancelled"}
 GEMINI_BATCH_TERMINAL_STATES = {
     "JOB_STATE_SUCCEEDED",
@@ -86,6 +90,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--provider", choices=["openai", "gemini"], required=True)
     parser.add_argument(
+        "--gemini-model",
+        choices=GEMINI_MODEL_CHOICES,
+        default=PROVIDER_TO_MODEL["gemini"],
+        help="Gemini model to use when `--provider gemini`.",
+    )
+    parser.add_argument(
         "--api-mode",
         choices=["auto", "sync", "batch"],
         default="auto",
@@ -127,6 +137,12 @@ def parse_args() -> argparse.Namespace:
 
 def safe_model_name(model_name: str) -> str:
     return re.sub(r"[^a-zA-Z0-9._-]+", "_", model_name).strip("_")
+
+
+def resolve_model(provider: str, gemini_model: str) -> str:
+    if provider == "gemini":
+        return gemini_model
+    return PROVIDER_TO_MODEL[provider]
 
 
 def ensure_output_path(output_arg: Optional[str], provider: str, model: str, output_dir: Path) -> Path:
@@ -1210,7 +1226,7 @@ def select_items(items: Sequence[Dict[str, Any]], only_task_id: Optional[str], m
 
 def main() -> None:
     args = parse_args()
-    model = PROVIDER_TO_MODEL[args.provider]
+    model = resolve_model(args.provider, args.gemini_model)
     api_mode = resolve_api_mode(args.provider, args.api_mode)
 
     script_dir = Path(__file__).resolve().parent
