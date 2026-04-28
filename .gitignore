@@ -9,3 +9,6 @@ eval_outputs/
 results/
 .venv*
 *.env
+Model_Training/vlm_multisubject_eval/results_test/
+Model_Training/vlm_multisubject_eval/results/2_5/
+Model_Training/vlm_multisubject_eval/results/3_1/

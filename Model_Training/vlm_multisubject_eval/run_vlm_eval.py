@@ -96,6 +96,11 @@ def parse_args() -> argparse.Namespace:
         help="Gemini model to use when `--provider gemini`.",
     )
     parser.add_argument(
+        "--gemini-api-key-env",
+        default="GEMINI_API_KEY",
+        help="Environment variable name to read the Gemini API key from, e.g. GEMINI_API_KEY_1.",
+    )
+    parser.add_argument(
         "--api-mode",
         choices=["auto", "sync", "batch"],
         default="auto",
@@ -108,12 +113,20 @@ def parse_args() -> argparse.Namespace:
         help="Base directory used to resolve relative image paths from the dataset",
     )
     parser.add_argument(
+        "--skip-lines",
+        type=int,
+        default=0,
+        help="Skip the first N lines when reading a JSONL dataset.",
+    )
+    parser.add_argument(
         "--output",
         default=None,
         help="Optional output JSONL path. Defaults to results/<provider>_<model>_<timestamp>.jsonl",
     )
     parser.add_argument("--max-samples", type=int, default=None, help="Evaluate only the first N samples")
     parser.add_argument("--only-task-id", default=None, help="Evaluate a single task_id")
+    parser.add_argument("--min-task-id", type=int, default=None, help="Select only task_id >= this value")
+    parser.add_argument("--max-task-id", type=int, default=None, help="Select only task_id <= this value")
     parser.add_argument("--sleep-seconds", type=float, default=0.0, help="Sleep between API calls")
     parser.add_argument(
         "--batch-id",
@@ -223,13 +236,19 @@ def build_item_from_jsonl_record(record: Dict[str, Any], data_root: Path) -> Dic
     }
 
 
-def load_dataset(dataset_path: Path, base_dir: Optional[Path] = None) -> List[Dict[str, Any]]:
+def load_dataset(
+    dataset_path: Path,
+    base_dir: Optional[Path] = None,
+    skip_lines: int = 0,
+) -> List[Dict[str, Any]]:
     if dataset_path.suffix.lower() == ".jsonl":
         data_root = base_dir or dataset_path.parent
         items: List[Dict[str, Any]] = []
         skipped_missing_assets = 0
         with dataset_path.open("r", encoding="utf-8") as f:
             for line_number, line in enumerate(f, start=1):
+                if line_number <= skip_lines:
+                    continue
                 line = line.strip()
                 if not line:
                     continue
@@ -496,11 +515,33 @@ def call_openai(
     return response.output_text
 
 
-def get_gemini_api_key() -> str:
-    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    if not api_key:
-        raise EnvironmentError("GEMINI_API_KEY or GOOGLE_API_KEY is not set")
-    return api_key
+def get_gemini_api_key(preferred_env_name: Optional[str] = None) -> str:
+    candidate_env_names: List[str] = []
+    if preferred_env_name:
+        candidate_env_names.append(preferred_env_name)
+        if preferred_env_name.startswith("GEMINI_API_KEY_"):
+            suffix = preferred_env_name.removeprefix("GEMINI_API_KEY_")
+            candidate_env_names.append(f"GOOGLE_API_KEY_{suffix}")
+        elif preferred_env_name.startswith("GOOGLE_API_KEY_"):
+            suffix = preferred_env_name.removeprefix("GOOGLE_API_KEY_")
+            candidate_env_names.append(f"GEMINI_API_KEY_{suffix}")
+    candidate_env_names.extend(["GEMINI_API_KEY", "GOOGLE_API_KEY"])
+
+    seen = set()
+    ordered_env_names = []
+    for name in candidate_env_names:
+        if name and name not in seen:
+            ordered_env_names.append(name)
+            seen.add(name)
+
+    for env_name in ordered_env_names:
+        api_key = os.environ.get(env_name)
+        if api_key:
+            return api_key
+
+    raise EnvironmentError(
+        "Gemini API key is not set. Checked env vars: " + ", ".join(ordered_env_names)
+    )
 
 
 def build_gemini_contents(
@@ -541,7 +582,26 @@ def build_gemini_contents(
 def build_gemini_generate_config() -> Any:
     from google.genai import types
 
-    return types.GenerateContentConfig(temperature=0)
+    return types.GenerateContentConfig(temperature=0,
+        safety_settings=[
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            ),
+        ],
+    )
 
 
 def extract_gemini_response_text(response: Any) -> str:
@@ -552,17 +612,42 @@ def extract_gemini_response_text(response: Any) -> str:
     candidates = getattr(response, "candidates", None) or []
     chunks: List[str] = []
     for candidate in candidates:
-        content = getattr(candidate, "content", None)
+        content = candidate.get("content") if isinstance(candidate, dict) else getattr(candidate, "content", None)
         if content is None:
             continue
-        parts = getattr(content, "parts", None) or []
+        parts = content.get("parts", []) if isinstance(content, dict) else (getattr(content, "parts", None) or [])
         for part in parts:
-            part_text = getattr(part, "text", None)
+            part_text = part.get("text") if isinstance(part, dict) else getattr(part, "text", None)
             if isinstance(part_text, str):
                 chunks.append(part_text)
     if chunks:
         return "".join(chunks)
-    raise ValueError("Gemini response did not contain text")
+
+    candidate_summaries = []
+    for index, candidate in enumerate(candidates, start=1):
+        if isinstance(candidate, dict):
+            finish_reason = candidate.get("finish_reason")
+            safety_ratings = candidate.get("safety_ratings")
+            content = candidate.get("content")
+        else:
+            finish_reason = getattr(candidate, "finish_reason", None)
+            safety_ratings = getattr(candidate, "safety_ratings", None)
+            content = getattr(candidate, "content", None)
+        candidate_summaries.append(
+            {
+                "index": index,
+                "finish_reason": model_to_jsonable(finish_reason),
+                "safety_ratings": model_to_jsonable(safety_ratings),
+                "content": model_to_jsonable(content),
+            }
+        )
+
+    details = {
+        "prompt_feedback": model_to_jsonable(getattr(response, "prompt_feedback", None)),
+        "candidates": candidate_summaries,
+        "usage_metadata": model_to_jsonable(getattr(response, "usage_metadata", None)),
+    }
+    raise ValueError(f"Gemini response did not contain text. details={json.dumps(details, ensure_ascii=False)}")
 
 
 def call_gemini(
@@ -576,13 +661,41 @@ def call_gemini(
     from google import genai
 
     client = genai.Client(api_key=api_key)
+    contents = build_gemini_contents(text_payload, ref_paths, image_a_path, image_b_path)
+    config = build_gemini_generate_config()
+    max_retries = 6
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=config,
+            )
+            return extract_gemini_response_text(response)
+        except Exception as exc:
+            error_msg = str(exc)
+            retryable_keywords = [
+                "429",
+                "RESOURCE_EXHAUSTED",
+                "503",
+                "UNAVAILABLE",
+                "500",
+                "502",
+                "504",
+                "DEADLINE_EXCEEDED",
+            ]
+            is_retryable = any(keyword in error_msg for keyword in retryable_keywords)
+            if not is_retryable or attempt == max_retries - 1:
+                raise
 
-    response = client.models.generate_content(
-        model=model,
-        contents=build_gemini_contents(text_payload, ref_paths, image_a_path, image_b_path),
-        config=build_gemini_generate_config(),
-    )
-    return extract_gemini_response_text(response)
+            wait_time = min(2 ** attempt * 2.0, 60.0)
+            print(
+                "Gemini transient error in sync mode, "
+                f"retrying in {wait_time:.1f}s (attempt {attempt + 1}/{max_retries}): {error_msg}"
+            )
+            time.sleep(wait_time)
+
+    raise RuntimeError("Unexpected retry loop exit in call_gemini")
 
 
 def dispatch_api_call(
@@ -592,6 +705,7 @@ def dispatch_api_call(
     ref_paths: Sequence[Path],
     image_a_path: Path,
     image_b_path: Path,
+    gemini_api_key_env: Optional[str] = None,
 ) -> str:
     if provider == "openai":
         api_key = os.environ.get("OPENAI_API_KEY")
@@ -600,10 +714,26 @@ def dispatch_api_call(
         return call_openai(api_key, model, text_payload, ref_paths, image_a_path, image_b_path)
 
     if provider == "gemini":
-        api_key = get_gemini_api_key()
+        api_key = get_gemini_api_key(gemini_api_key_env)
         return call_gemini(api_key, model, text_payload, ref_paths, image_a_path, image_b_path)
 
     raise ValueError(f"Unsupported provider: {provider}")
+
+
+def is_gemini_prohibited_content_error(error: Exception) -> bool:
+    message = str(error)
+    return "PROHIBITED_CONTENT" in message
+
+
+def is_gemini_rate_limit_error(error: Exception) -> bool:
+    message = str(error)
+    return "429" in message or "RESOURCE_EXHAUSTED" in message
+
+
+class GeminiBatchRateLimitError(RuntimeError):
+    def __init__(self, message: str, remaining_task_ids: Sequence[str]) -> None:
+        super().__init__(message)
+        self.remaining_task_ids = list(remaining_task_ids)
 
 
 def serialize_batch_jsonl_line(payload: Dict[str, Any]) -> str:
@@ -796,12 +926,15 @@ def run_sync_mode(
     model: str,
 ) -> None:
     completed_task_ids = set()
+    sync_error_path = output_path.with_suffix(".sync_errors.jsonl")
     existing_records = load_existing_records(output_path)
     if output_path.exists() and not args.overwrite:
         completed_task_ids = set(load_existing_task_ids(output_path))
     elif args.overwrite and output_path.exists():
         output_path.unlink()
         existing_records = []
+        if sync_error_path.exists():
+            sync_error_path.unlink()
 
     prepared_items = prepare_items(items, base_dir)
 
@@ -814,14 +947,30 @@ def run_sync_mode(
                 continue
 
             print(f"[{index}/{len(prepared_items)}] Evaluating {task_id}")
-            raw_response_text = dispatch_api_call(
-                provider=provider,
-                model=model,
-                text_payload=prepared["text_payload"],
-                ref_paths=prepared["ref_paths"],
-                image_a_path=prepared["image_a_path"],
-                image_b_path=prepared["image_b_path"],
-            )
+            try:
+                raw_response_text = dispatch_api_call(
+                    provider=provider,
+                    model=model,
+                    text_payload=prepared["text_payload"],
+                    ref_paths=prepared["ref_paths"],
+                    image_a_path=prepared["image_a_path"],
+                    image_b_path=prepared["image_b_path"],
+                    gemini_api_key_env=args.gemini_api_key_env,
+                )
+            except Exception as exc:
+                if provider == "gemini" and is_gemini_prohibited_content_error(exc):
+                    error_record = {
+                        "task_id": task_id,
+                        "provider": provider,
+                        "model": model,
+                        "error_type": "PROHIBITED_CONTENT",
+                        "error_message": str(exc),
+                    }
+                    with sync_error_path.open("a", encoding="utf-8") as error_f:
+                        error_f.write(json.dumps(error_record, ensure_ascii=False) + "\n")
+                    print(f"  skipped {task_id} due to PROHIBITED_CONTENT")
+                    continue
+                raise
 
             parsed = extract_json_object(raw_response_text)
             normalized = normalize_result(parsed)
@@ -838,6 +987,8 @@ def run_sync_mode(
     write_summary(written_records, summary_path)
     print(f"Saved JSONL to: {output_path}")
     print(f"Saved summary to: {summary_path}")
+    if sync_error_path.exists():
+        print(f"Saved sync error log to: {sync_error_path}")
 
 
 def run_openai_batch_mode(
@@ -1096,7 +1247,7 @@ def run_gemini_batch_mode(
 ) -> None:
     from google import genai
 
-    client = genai.Client(api_key=get_gemini_api_key())
+    client = genai.Client(api_key=get_gemini_api_key(args.gemini_api_key_env))
     prepared_items = prepare_items(items, base_dir)
     prepared_by_task_id = {prepared["task_id"]: prepared for prepared in prepared_items}
 
@@ -1129,19 +1280,58 @@ def run_gemini_batch_mode(
 
         chunks = chunk_gemini_prepared_items(pending_prepared_items)
         batches = []
+        
+        # 新增：准备一个实时保存 batch_name 的文件，防止中途崩溃
+        recovery_file = output_path.with_suffix(".submitted_batches.txt")
+
         for chunk_index, chunk in enumerate(chunks, start=1):
             inline_requests = [build_gemini_inline_request(prepared, model) for prepared in chunk]
-            batch = client.batches.create(
-                model=model,
-                src=inline_requests,
-                config={"display_name": f"vlm-eval-{safe_model_name(model)}-{chunk_index}"},
-            )
-            batches.append(batch)
-            submitted_batch_names.append(str(batch.name))
-            print(
-                f"Created Gemini batch {chunk_index}/{len(chunks)}: "
-                f"name={batch.name} state={gemini_job_state_name(batch)} requests={len(chunk)}"
-            )
+            
+            # 加入指数退避重试逻辑
+            max_retries = 6
+            for attempt in range(max_retries):
+                try:
+                    batch = client.batches.create(
+                        model=model,
+                        src=inline_requests,
+                        config={"display_name": f"vlm-eval-{safe_model_name(model)}-{chunk_index}"},
+                    )
+                    batches.append(batch)
+                    submitted_batch_names.append(str(batch.name))
+                    print(
+                        f"Created Gemini batch {chunk_index}/{len(chunks)}: "
+                        f"name={batch.name} state={gemini_job_state_name(batch)} requests={len(chunk)}"
+                    )
+                    
+                    # 关键修改 1：实时追加写入本地文件，落袋为安。就算随时被 kill 掉也不怕。
+                    with open(recovery_file, "a", encoding="utf-8") as rf:
+                        rf.write(f"{batch.name}\n")
+                        
+                    # 关键修改 2：成功后强行暂停 3 秒，防止瞬间几百个高并发打爆 Gemini 的请求频率上限 (RPM)
+                    time.sleep(3)
+                    
+                    break  # 成功提交，跳出重试循环，处理下一个 chunk
+                    
+                except Exception as e:
+                    error_msg = str(e)
+                    # 捕捉 429 速率限制错误
+                    if any(kw in error_msg for kw in ["429", "RESOURCE_EXHAUSTED", "503", "UNAVAILABLE", "500", "502"]):
+                        if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
+                            remaining_prepared_items = [
+                                prepared
+                                for pending_chunk in chunks[chunk_index - 1:]
+                                for prepared in pending_chunk
+                            ]
+                            raise GeminiBatchRateLimitError(
+                                f"Gemini batch submit rate-limited at chunk {chunk_index}: {error_msg}",
+                                [prepared["task_id"] for prepared in remaining_prepared_items],
+                            ) from e
+                        wait_time = 2 ** attempt * 15  # 阶梯等待: 15s, 30s, 60s, 120s...
+                        print(f"⚠️ 触发并发限制 (429)。等待 {wait_time} 秒后重试提交 chunk {chunk_index}...")
+                        time.sleep(wait_time)
+                    else:
+                        # 如果是别的问题（比如网络断了或者凭证过期），直接抛出异常
+                        raise e
 
         metadata = {
             "provider": provider,
@@ -1215,13 +1405,34 @@ def resolve_image_path(base_dir: Path, image_path: str) -> Path:
     return (base_dir / path).resolve()
 
 
-def select_items(items: Sequence[Dict[str, Any]], only_task_id: Optional[str], max_samples: Optional[int]) -> List[Dict[str, Any]]:
+def select_items(
+    items: Sequence[Dict[str, Any]],
+    only_task_id: Optional[str],
+    max_samples: Optional[int],
+    min_task_id: Optional[int],
+    max_task_id: Optional[int],
+) -> List[Dict[str, Any]]:
     selected = list(items)
     if only_task_id:
         selected = [item for item in selected if str(item.get("task_id")) == only_task_id]
+    if min_task_id is not None:
+        selected = [
+            item for item in selected
+            if str(item.get("task_id", "")).isdigit() and int(str(item.get("task_id"))) >= min_task_id
+        ]
+    if max_task_id is not None:
+        selected = [
+            item for item in selected
+            if str(item.get("task_id", "")).isdigit() and int(str(item.get("task_id"))) <= max_task_id
+        ]
     if max_samples is not None:
         selected = selected[:max_samples]
     return selected
+
+
+def select_items_by_task_ids(items: Sequence[Dict[str, Any]], task_ids: Sequence[str]) -> List[Dict[str, Any]]:
+    task_id_set = set(str(task_id) for task_id in task_ids)
+    return [item for item in items if str(item.get("task_id")) in task_id_set]
 
 
 def main() -> None:
@@ -1236,17 +1447,21 @@ def main() -> None:
 
     dataset_path = Path(args.dataset).expanduser().resolve()
     base_dir = Path(args.base_dir).expanduser().resolve()
-    items = load_dataset(dataset_path, base_dir=base_dir)
-    items = select_items(items, args.only_task_id, args.max_samples)
+    items = load_dataset(dataset_path, base_dir=base_dir, skip_lines=args.skip_lines)
+    items = select_items(items, args.only_task_id, args.max_samples, args.min_task_id, args.max_task_id)
 
     if not items:
         raise ValueError("No dataset items selected")
 
     print(f"Provider: {args.provider}")
     print(f"Model: {model}")
+    if args.provider == "gemini":
+        print(f"Gemini API key env: {args.gemini_api_key_env}")
     print(f"API mode: {api_mode}")
     print(f"Dataset: {dataset_path}")
     print(f"Base dir: {base_dir}")
+    print(f"Skip lines: {args.skip_lines}")
+    print(f"Task range: {args.min_task_id} - {args.max_task_id}")
     print(f"Output: {output_path}")
     print(f"Selected samples: {len(items)}")
     if api_mode == "sync":
@@ -1258,7 +1473,35 @@ def main() -> None:
         return
 
     if args.provider == "gemini":
-        run_gemini_batch_mode(args, items, base_dir, output_path, summary_path, args.provider, model)
+        if api_mode == "batch":
+            try:
+                run_gemini_batch_mode(args, items, base_dir, output_path, summary_path, args.provider, model)
+            except GeminiBatchRateLimitError as exc:
+                if args.batch_id:
+                    raise
+                remaining_items = select_items_by_task_ids(items, exc.remaining_task_ids)
+                print(
+                    "Gemini batch mode hit rate limit (429/RESOURCE_EXHAUSTED). "
+                    f"Falling back to sync mode for remaining {len(remaining_items)} task(s)."
+                )
+                if remaining_items:
+                    run_sync_mode(args, remaining_items, base_dir, output_path, summary_path, args.provider, model)
+                return
+            except Exception as exc:
+                # Fallback only when we are submitting new Gemini batches. For explicit batch-id polling,
+                # we should not switch to sync mode silently.
+                if args.batch_id:
+                    raise
+                if is_gemini_rate_limit_error(exc):
+                    print(
+                        "Gemini batch mode hit rate limit (429/RESOURCE_EXHAUSTED). "
+                        "Falling back to sync mode."
+                    )
+                    run_sync_mode(args, items, base_dir, output_path, summary_path, args.provider, model)
+                    return
+                raise
+        else:
+            run_gemini_batch_mode(args, items, base_dir, output_path, summary_path, args.provider, model)
         return
 
     raise ValueError(f"Unsupported provider: {args.provider}")
