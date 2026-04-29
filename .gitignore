@@ -13,3 +13,4 @@ Model_Training/vlm_multisubject_eval/results/2_5/
 Model_Training/vlm_multisubject_eval/results/3_1/
 *.jsonl
 Model_Training/vlm_multisubject_eval/results/*merged_sorted*.jsonl
+Model_Training/vlm_multisubject_eval/results/serve_batch.py
