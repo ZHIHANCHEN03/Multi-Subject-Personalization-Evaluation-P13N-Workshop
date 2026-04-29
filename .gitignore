@@ -8,3 +8,6 @@ __pycache__/
 eval_outputs/
 results/
 .venv*
+Model_Training/data_v2/60k_LLM_Result/*.jsonl
+Model_Training/data_v2/get_data/id_ed25519_3
+Model_Training/data_v2/get_data/id_ed25519_3.pub
