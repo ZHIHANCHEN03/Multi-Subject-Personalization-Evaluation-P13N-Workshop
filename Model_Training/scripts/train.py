@@ -288,7 +288,9 @@ def main(args):
     best_monitor_loss = float("inf")
     epochs_without_improvement = 0
     safe_model_name = args.model_name.replace("/", "_")
-    best_dir = os.path.join(os.path.dirname(__file__), f"../outputs/{safe_model_name}-{args.mode}-best")
+    outputs_dir = os.path.abspath(args.outputs_dir)
+    os.makedirs(outputs_dir, exist_ok=True)
+    best_dir = os.path.join(outputs_dir, f"{safe_model_name}-{args.mode}-best")
     
     for epoch in range(args.epochs):
         train_metrics = train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch)
@@ -301,7 +303,7 @@ def main(args):
             f"Monitor: {val_metrics['monitor_loss']:.4f}"
         )
         
-        save_dir = os.path.join(os.path.dirname(__file__), f"../outputs/{safe_model_name}-{args.mode}-epoch{epoch+1}")
+        save_dir = os.path.join(outputs_dir, f"{safe_model_name}-{args.mode}-epoch{epoch+1}")
         model.save_pretrained(save_dir)
         print(f"Checkpoint saved to: {os.path.abspath(save_dir)}")
         
@@ -342,6 +344,7 @@ if __name__ == "__main__":
     parser.add_argument("--early_stopping_min_delta", type=float, default=1e-3, help="Minimum monitor improvement to reset patience")
     parser.add_argument("--train_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json"), help="Path to training data")
     parser.add_argument("--val_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/val_v1.json"), help="Path to validation data")
+    parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory where checkpoints will be written")
     parser.add_argument("--num_workers", type=int, default=0, help="Number of dataloader workers")
     args = parser.parse_args()
     main(args)

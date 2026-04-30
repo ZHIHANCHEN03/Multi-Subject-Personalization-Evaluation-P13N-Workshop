@@ -20,12 +20,19 @@ echo "======================================================================"
 #   MODEL_NAME=unsloth/Qwen3.5-4B bash run_a100_pipeline.sh
 #   MODEL_NAME=unsloth/Qwen3.5-2B RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
 MODEL_NAME="${MODEL_NAME:-unsloth/Qwen3.5-0.8B}"
+DATA_VERSION="${DATA_VERSION:-v1}"
 RUN_LAYER_ONLY="${RUN_LAYER_ONLY:-1}"
 RUN_LORA_LAYER="${RUN_LORA_LAYER:-1}"
 IMAGE_SIZE="${IMAGE_SIZE:-512}"
 INSTALL_FLASH_ATTN="${INSTALL_FLASH_ATTN:-0}"
 INSTALL_FASTPATH_DEPS="${INSTALL_FASTPATH_DEPS:-0}"
 MAX_JOBS="${MAX_JOBS:-8}"
+IMAGE_A_ROOT="${IMAGE_A_ROOT:-/root/data/A}"
+IMAGE_B_ROOT="${IMAGE_B_ROOT:-/root/data/B}"
+TRAIN_PATH="${TRAIN_PATH:-}"
+VAL_PATH="${VAL_PATH:-}"
+TEST_PATH="${TEST_PATH:-}"
+RUNS_ROOT="${RUNS_ROOT:-/workspace/Model_Training_runs}"
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
@@ -38,6 +45,7 @@ if [ -z "${BATCH_SIZE:-}" ]; then
 fi
 
 echo "✅ [0/5] Selected backbone: $MODEL_NAME"
+echo "✅ [0/5] Selected data version: $DATA_VERSION"
 echo "✅ [0/5] Selected physical batch size: $BATCH_SIZE (Effective Batch Size & Epochs will be AUTO-SCALED)"
 echo "✅ [0/5] Selected image size: ${IMAGE_SIZE}x${IMAGE_SIZE}"
 echo "✅ [0/5] Optional FlashAttention install: ${INSTALL_FLASH_ATTN}"
@@ -137,18 +145,39 @@ echo "✅ [2/5] Isolated environment is ready at: $VENV_DIR"
 
 # 3. Data Preparation
 echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
-python scripts/build_v1_dataset.py
+if [ "$DATA_VERSION" = "v2" ]; then
+  python scripts/build_v2_dataset.py --image_a_root "$IMAGE_A_ROOT" --image_b_root "$IMAGE_B_ROOT"
+  DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v2/train_v2.json"
+  DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v2/val_v2.json"
+  DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v2/test_v2.json"
+else
+  python scripts/build_v1_dataset.py
+  DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v1/train_v1.json"
+  DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v1/val_v1.json"
+  DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v1/test_v1.json"
+fi
+TRAIN_PATH="${TRAIN_PATH:-$DEFAULT_TRAIN_PATH}"
+VAL_PATH="${VAL_PATH:-$DEFAULT_VAL_PATH}"
+TEST_PATH="${TEST_PATH:-$DEFAULT_TEST_PATH}"
 echo "✅ [3/5] Dataset built successfully."
+echo "✅ [3/5] Train manifest: $TRAIN_PATH"
+echo "✅ [3/5] Val manifest: $VAL_PATH"
+echo "✅ [3/5] Test manifest: $TEST_PATH"
 
 # Enable gradient checkpointing and memory expansion for massive VLM training
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=false # Limits threads to prevent CPU RAM OOM during compilation/loading
 
 # Create logs directory
-LOG_DIR="logs"
-mkdir -p "$LOG_DIR"
 SAFE_MODEL_NAME=$(echo "$MODEL_NAME" | tr '/' '_')
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+RUN_DIR="${RUNS_ROOT}/${DATA_VERSION}/${SAFE_MODEL_NAME}/${TIMESTAMP}"
+OUTPUTS_DIR="${RUN_DIR}/outputs"
+LOG_DIR="${RUN_DIR}/logs"
+mkdir -p "$OUTPUTS_DIR" "$LOG_DIR"
+echo "✅ [3.5/5] Run directory: $RUN_DIR"
+echo "✅ [3.5/5] Logs directory: $LOG_DIR"
+echo "✅ [3.5/5] Outputs directory: $OUTPUTS_DIR"
 
 # 4. EXPERIMENT A: Layer-only
 if [ "$RUN_LAYER_ONLY" = "1" ]; then
@@ -158,11 +187,11 @@ if [ "$RUN_LAYER_ONLY" = "1" ]; then
   LOG_FILE_A="$LOG_DIR/${SAFE_MODEL_NAME}_layer_only_${TIMESTAMP}.log"
   echo "📝 Logging output to $LOG_FILE_A"
   
-  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --auto_scale 2>&1 | tee "$LOG_FILE_A"
+  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --auto_scale 2>&1 | tee "$LOG_FILE_A"
   echo "✅ [4/6] Training A completed."
 
   echo "⏳ Running Benchmark Evaluation for Experiment A..."
-  python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode layer_only --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_A"
+  python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode layer_only --test_path "$TEST_PATH" --outputs_dir "$OUTPUTS_DIR" --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_A"
   echo "✅ Evaluation A completed."
 else
   echo "⏭️  [4/6] Skipping layer-only experiment. Set RUN_LAYER_ONLY=1 to enable."
@@ -176,7 +205,7 @@ if [ "$RUN_LORA_LAYER" = "1" ]; then
   LOG_FILE_B="$LOG_DIR/${SAFE_MODEL_NAME}_lora_layer_${TIMESTAMP}.log"
   echo "📝 Logging output to $LOG_FILE_B"
   
-  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --auto_scale 2>&1 | tee "$LOG_FILE_B"
+  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --auto_scale 2>&1 | tee "$LOG_FILE_B"
   echo "✅ [5/6] Training B completed."
 else
   echo "⏭️  [5/6] Skipping LoRA + Layer experiment. Set RUN_LORA_LAYER=1 to enable."
@@ -184,7 +213,7 @@ fi
 
 if [ "$RUN_LORA_LAYER" = "1" ]; then
   echo "⏳ Running Benchmark Evaluation for Experiment B..."
-  python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode lora_layer --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_B"
+  python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode lora_layer --test_path "$TEST_PATH" --outputs_dir "$OUTPUTS_DIR" --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_B"
   echo "✅ Evaluation B completed."
 fi
 
