@@ -32,6 +32,8 @@ IMAGE_B_ROOT="${IMAGE_B_ROOT:-/workspace/data/B}"
 IMAGE_A_EXT="${IMAGE_A_EXT:-.png}"
 IMAGE_B_EXT="${IMAGE_B_EXT:-.jpg}"
 REFS_ROOT="${REFS_ROOT:-$SCRIPT_DIR/data_v2/refs}"
+PREFILTER_CACHE_PATH="${PREFILTER_CACHE_PATH:-$SCRIPT_DIR/data_v2/v2_prefilter_candidates.json}"
+REUSE_PREFILTER_CACHE="${REUSE_PREFILTER_CACHE:-true}"
 TRAIN_PATH="${TRAIN_PATH:-}"
 VAL_PATH="${VAL_PATH:-}"
 TEST_PATH="${TEST_PATH:-}"
@@ -176,7 +178,20 @@ echo "✅ [2/5] Isolated environment is ready at: $VENV_DIR"
 
 # 3. Data Preparation
 echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
-python scripts/build_v2_dataset.py --image_a_root "$IMAGE_A_ROOT" --image_b_root "$IMAGE_B_ROOT" --image_a_ext "$IMAGE_A_EXT" --image_b_ext "$IMAGE_B_EXT" --refs_root "$REFS_ROOT"
+BUILD_DATA_ARGS=(
+  --image_a_root "$IMAGE_A_ROOT"
+  --image_b_root "$IMAGE_B_ROOT"
+  --image_a_ext "$IMAGE_A_EXT"
+  --image_b_ext "$IMAGE_B_EXT"
+  --refs_root "$REFS_ROOT"
+  --prefilter_cache_path "$PREFILTER_CACHE_PATH"
+)
+if [ "$REUSE_PREFILTER_CACHE" = "true" ]; then
+  BUILD_DATA_ARGS+=(--reuse_prefilter_cache)
+else
+  BUILD_DATA_ARGS+=(--no-reuse_prefilter_cache)
+fi
+python scripts/build_v2_dataset.py "${BUILD_DATA_ARGS[@]}"
 DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v2/train_v2.json"
 DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v2/val_v2.json"
 DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v2/test_v2.json"
@@ -184,6 +199,7 @@ TRAIN_PATH="${TRAIN_PATH:-$DEFAULT_TRAIN_PATH}"
 VAL_PATH="${VAL_PATH:-$DEFAULT_VAL_PATH}"
 TEST_PATH="${TEST_PATH:-$DEFAULT_TEST_PATH}"
 echo "✅ [3/5] Dataset built successfully."
+echo "✅ [3/5] Prefilter cache: $PREFILTER_CACHE_PATH"
 echo "✅ [3/5] Train manifest: $TRAIN_PATH"
 echo "✅ [3/5] Val manifest: $VAL_PATH"
 echo "✅ [3/5] Test manifest: $TEST_PATH"

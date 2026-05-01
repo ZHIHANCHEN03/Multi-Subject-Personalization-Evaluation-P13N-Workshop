@@ -26,6 +26,21 @@ def load_jsonl(path, desc):
     return records
 
 
+def load_json(path):
+    log(f"Loading JSON: {path}")
+    with open(path, "r", encoding="utf-8") as f:
+        records = json.load(f)
+    log(f"Loaded {len(records)} records from {path}")
+    return records
+
+
+def write_json(path, records, desc):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    log(f"Writing {desc} to {path}")
+    path.write_text(json.dumps(records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def build_file_index(root, allowed_exts, desc):
     root = Path(root)
     if not root.exists():
@@ -191,24 +206,15 @@ def stratified_group_split(records, train_ratio, val_ratio, seed):
     return train_records, val_records, test_records
 
 
-def main(args):
-    log("Starting V2 dataset build")
+def prepare_prefiltered_candidates(args):
+    log("Preparing prefiltered candidates from prompt/label/ref data")
     log(f"Prompt path: {args.prompt_path}")
     log(f"Label paths: {', '.join(args.labels_paths)}")
-    log(f"Image A root: {args.image_a_root}")
-    log(f"Image B root: {args.image_b_root}")
     log(f"Refs root: {args.refs_root}")
-    prompt_records = load_jsonl(args.prompt_path, desc="Loading prompts")
-    image_a_root = Path(args.image_a_root)
-    image_b_root = Path(args.image_b_root)
-    refs_root = Path(args.refs_root)
-    image_ext_fallbacks = [".png", ".jpg", ".jpeg", ".webp"]
-    ref_ext_fallbacks = [".jpg", ".png", ".jpeg", ".webp"]
-    image_a_ext_order = [args.image_a_ext] + [ext for ext in image_ext_fallbacks if ext != args.image_a_ext]
-    image_b_ext_order = [args.image_b_ext] + [ext for ext in image_ext_fallbacks if ext != args.image_b_ext]
 
-    image_a_index = build_file_index(image_a_root, image_a_ext_order, desc="Indexing image A root")
-    image_b_index = build_file_index(image_b_root, image_b_ext_order, desc="Indexing image B root")
+    prompt_records = load_jsonl(args.prompt_path, desc="Loading prompts")
+    refs_root = Path(args.refs_root)
+    ref_ext_fallbacks = [".jpg", ".png", ".jpeg", ".webp"]
     refs_index = build_file_index(refs_root, ref_ext_fallbacks, desc="Indexing refs root")
 
     labels_by_task = defaultdict(list)
@@ -218,57 +224,44 @@ def main(args):
             labels_by_task[str(row["task_id"])].append(row)
         log(f"Indexed labels from {label_path}; current unique task ids: {len(labels_by_task)}")
 
-    output_records = []
+    candidate_records = []
     missing_labels = 0
     missing_preference = 0
-    missing_images = 0
     missing_refs = 0
-    fallback_hits_a = 0
-    fallback_hits_b = 0
     fallback_hits_refs = 0
 
-    progress = tqdm(prompt_records, desc="Building usable samples", unit=" sample", mininterval=1.0)
+    progress = tqdm(prompt_records, desc="Preparing candidates", unit=" sample", mininterval=1.0)
     for index, row in enumerate(progress, start=1):
         task_id = str(row["id"])
         labels = labels_by_task.get(task_id, [])
         if not labels:
             missing_labels += 1
-        else:
-            aggregate = aggregate_labels(labels)
-            if aggregate["preference"] is None:
-                missing_preference += 1
-                continue
+            continue
 
-            image_a_path, ext_a = resolve_image_path_from_index(image_a_index, task_id)
-            image_b_path, ext_b = resolve_image_path_from_index(image_b_index, task_id)
-            if image_a_path is None or image_b_path is None:
-                missing_images += 1
-                continue
-            if ext_a != args.image_a_ext:
-                fallback_hits_a += 1
-            if ext_b != args.image_b_ext:
-                fallback_hits_b += 1
+        aggregate = aggregate_labels(labels)
+        if aggregate["preference"] is None:
+            missing_preference += 1
+            continue
 
-            subject_refs, row_missing_refs, row_ref_fallbacks = build_subject_refs_from_index(
-                row.get("people_names", []),
-                row.get("object_names", []),
-                refs_index,
-                args.refs_prefix,
-                preferred_ext=".jpg",
-            )
-            if row_missing_refs:
-                missing_refs += 1
-                continue
-            fallback_hits_refs += row_ref_fallbacks
+        subject_refs, row_missing_refs, row_ref_fallbacks = build_subject_refs_from_index(
+            row.get("people_names", []),
+            row.get("object_names", []),
+            refs_index,
+            args.refs_prefix,
+            preferred_ext=".jpg",
+        )
+        if row_missing_refs:
+            missing_refs += 1
+            continue
+        fallback_hits_refs += row_ref_fallbacks
 
-            item = {
+        candidate_records.append(
+            {
                 "task_id": task_id,
                 "prompt": row.get("prompt_en") or row.get("prompt") or "",
                 "prompt_zh": row.get("prompt_zh", ""),
                 "subject_count": int(row.get("total_entities", 0)),
                 "subject_refs": subject_refs,
-                "image_A_path": str(image_a_path),
-                "image_B_path": str(image_b_path),
                 "preference": aggregate["preference"],
                 "category_scores_A": aggregate["category_scores_A"],
                 "category_scores_B": aggregate["category_scores_B"],
@@ -287,24 +280,124 @@ def main(args):
                     "num_label_votes": len(labels),
                 },
             }
-            output_records.append(item)
+        )
 
         if index % 1000 == 0 or index == len(prompt_records):
             progress.set_postfix(
-                kept=len(output_records),
+                kept=len(candidate_records),
                 no_label=missing_labels,
                 pref_drop=missing_preference,
-                img_drop=missing_images,
                 ref_drop=missing_refs,
             )
 
-    log(f"Finished sample filtering. Usable records: {len(output_records)}")
+    stats = {
+        "loaded_prompts": len(prompt_records),
+        "candidate_records": len(candidate_records),
+        "missing_labels": missing_labels,
+        "missing_preference": missing_preference,
+        "missing_refs": missing_refs,
+        "fallback_hits_refs": fallback_hits_refs,
+    }
+    log(
+        "Prefilter stage summary | "
+        f"loaded_prompts={stats['loaded_prompts']} candidates={stats['candidate_records']} "
+        f"missing_labels={stats['missing_labels']} pref_drop={stats['missing_preference']} "
+        f"ref_drop={stats['missing_refs']} ref_fallback_hits={stats['fallback_hits_refs']}"
+    )
+    return candidate_records, stats
+
+
+def finalize_candidates_with_images(candidate_records, args):
+    log("Finalizing candidate records with generated image checks and dataset split")
+    log(f"Image A root: {args.image_a_root}")
+    log(f"Image B root: {args.image_b_root}")
+
+    image_a_root = Path(args.image_a_root)
+    image_b_root = Path(args.image_b_root)
+    image_ext_fallbacks = [".png", ".jpg", ".jpeg", ".webp"]
+    image_a_ext_order = [args.image_a_ext] + [ext for ext in image_ext_fallbacks if ext != args.image_a_ext]
+    image_b_ext_order = [args.image_b_ext] + [ext for ext in image_ext_fallbacks if ext != args.image_b_ext]
+
+    image_a_index = build_file_index(image_a_root, image_a_ext_order, desc="Indexing image A root")
+    image_b_index = build_file_index(image_b_root, image_b_ext_order, desc="Indexing image B root")
+
+    output_records = []
+    missing_images = 0
+    fallback_hits_a = 0
+    fallback_hits_b = 0
+
+    progress = tqdm(candidate_records, desc="Finalizing usable samples", unit=" sample", mininterval=1.0)
+    for index, item in enumerate(progress, start=1):
+        task_id = str(item["task_id"])
+        image_a_path, ext_a = resolve_image_path_from_index(image_a_index, task_id)
+        image_b_path, ext_b = resolve_image_path_from_index(image_b_index, task_id)
+        if image_a_path is None or image_b_path is None:
+            missing_images += 1
+            continue
+        if ext_a.lower() != args.image_a_ext.lower():
+            fallback_hits_a += 1
+        if ext_b.lower() != args.image_b_ext.lower():
+            fallback_hits_b += 1
+
+        finalized_item = dict(item)
+        finalized_item["image_A_path"] = str(image_a_path)
+        finalized_item["image_B_path"] = str(image_b_path)
+        output_records.append(finalized_item)
+
+        if index % 1000 == 0 or index == len(candidate_records):
+            progress.set_postfix(
+                kept=len(output_records),
+                img_drop=missing_images,
+                a_fallback=fallback_hits_a,
+                b_fallback=fallback_hits_b,
+            )
+
+    log(f"Finished image validation. Usable records after image check: {len(output_records)}")
     train_records, val_records, test_records = stratified_group_split(
         output_records,
         train_ratio=args.train_ratio,
         val_ratio=args.val_ratio,
         seed=args.seed,
     )
+
+    stats = {
+        "candidate_records": len(candidate_records),
+        "usable_records": len(output_records),
+        "missing_images": missing_images,
+        "fallback_hits_a": fallback_hits_a,
+        "fallback_hits_b": fallback_hits_b,
+        "train_records": len(train_records),
+        "val_records": len(val_records),
+        "test_records": len(test_records),
+    }
+    log(
+        "Finalize stage summary | "
+        f"candidates={stats['candidate_records']} usable={stats['usable_records']} "
+        f"missing_images={stats['missing_images']} image_a_fallback_hits={stats['fallback_hits_a']} "
+        f"image_b_fallback_hits={stats['fallback_hits_b']}"
+    )
+    return train_records, val_records, test_records, stats
+
+
+def main(args):
+    log("Starting V2 dataset build")
+    if args.prepare_candidates_only and not args.prefilter_cache_path:
+        raise ValueError("--prepare_candidates_only requires --prefilter_cache_path")
+
+    prefilter_stats = None
+    if args.prefilter_cache_path and args.reuse_prefilter_cache and Path(args.prefilter_cache_path).exists():
+        log(f"Reusing existing prefilter cache: {args.prefilter_cache_path}")
+        candidate_records = load_json(args.prefilter_cache_path)
+    else:
+        candidate_records, prefilter_stats = prepare_prefiltered_candidates(args)
+        if args.prefilter_cache_path:
+            write_json(args.prefilter_cache_path, candidate_records, desc="prefilter candidate cache")
+
+    if args.prepare_candidates_only:
+        log("Prepare-only mode enabled; skipping generated image checks and split writing")
+        return
+
+    train_records, val_records, test_records, finalize_stats = finalize_candidates_with_images(candidate_records, args)
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -313,25 +406,27 @@ def main(args):
     val_path = output_dir / "val_v2.json"
     test_path = output_dir / "test_v2.json"
 
-    log(f"Writing train split to {train_path}")
-    train_path.write_text(json.dumps(train_records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    log(f"Writing val split to {val_path}")
-    val_path.write_text(json.dumps(val_records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    log(f"Writing test split to {test_path}")
-    test_path.write_text(json.dumps(test_records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_json(train_path, train_records, desc="train split")
+    write_json(val_path, val_records, desc="val split")
+    write_json(test_path, test_records, desc="test split")
 
-    log(f"Loaded prompts: {len(prompt_records)}")
-    log(f"Built usable records: {len(output_records)}")
-    log(f"Dropped for missing labels: {missing_labels}")
-    log(f"Dropped for unresolved preference ties: {missing_preference}")
-    log(f"Dropped for missing generated images: {missing_images}")
-    log(f"Dropped for missing reference images: {missing_refs}")
-    log(f"Image A fallback extension hits: {fallback_hits_a}")
-    log(f"Image B fallback extension hits: {fallback_hits_b}")
-    log(f"Reference fallback extension hits: {fallback_hits_refs}")
-    log(f"Train split: {len(train_records)} -> {train_path}")
-    log(f"Val split: {len(val_records)} -> {val_path}")
-    log(f"Test split: {len(test_records)} -> {test_path}")
+    if prefilter_stats is not None:
+        log(f"Loaded prompts: {prefilter_stats['loaded_prompts']}")
+        log(f"Prefilter candidates: {prefilter_stats['candidate_records']}")
+        log(f"Dropped for missing labels: {prefilter_stats['missing_labels']}")
+        log(f"Dropped for unresolved preference ties: {prefilter_stats['missing_preference']}")
+        log(f"Dropped for missing reference images: {prefilter_stats['missing_refs']}")
+        log(f"Reference fallback extension hits: {prefilter_stats['fallback_hits_refs']}")
+    else:
+        log(f"Prefilter candidates loaded from cache: {len(candidate_records)}")
+
+    log(f"Built usable records: {finalize_stats['usable_records']}")
+    log(f"Dropped for missing generated images: {finalize_stats['missing_images']}")
+    log(f"Image A fallback extension hits: {finalize_stats['fallback_hits_a']}")
+    log(f"Image B fallback extension hits: {finalize_stats['fallback_hits_b']}")
+    log(f"Train split: {finalize_stats['train_records']} -> {train_path}")
+    log(f"Val split: {finalize_stats['val_records']} -> {val_path}")
+    log(f"Test split: {finalize_stats['test_records']} -> {test_path}")
     log("Dataset build completed successfully")
 
 
@@ -389,5 +484,22 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42, help="Random seed for grouped splitting")
     parser.add_argument("--train_ratio", type=float, default=0.9, help="Train split ratio by seed_id group")
     parser.add_argument("--val_ratio", type=float, default=0.05, help="Validation split ratio by seed_id group")
+    parser.add_argument(
+        "--prefilter_cache_path",
+        type=str,
+        default=str(Path(__file__).resolve().parent.parent / "data_v2" / "v2_prefilter_candidates.json"),
+        help="Reusable cache file for prompt/label/ref-prefiltered candidate records",
+    )
+    parser.add_argument(
+        "--reuse_prefilter_cache",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Reuse existing prefilter cache when available",
+    )
+    parser.add_argument(
+        "--prepare_candidates_only",
+        action="store_true",
+        help="Only build and save the reusable prefilter candidate cache; skip image checks and final split",
+    )
     args = parser.parse_args()
     main(args)
