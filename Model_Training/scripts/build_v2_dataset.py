@@ -26,6 +26,37 @@ def load_jsonl(path, desc):
     return records
 
 
+def build_file_index(root, allowed_exts, desc):
+    root = Path(root)
+    if not root.exists():
+        raise FileNotFoundError(f"Directory not found: {root}")
+    if not root.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {root}")
+
+    ext_priority = {ext.lower(): idx for idx, ext in enumerate(allowed_exts)}
+    index = {}
+    total_files = 0
+
+    log(f"Scanning directory for {desc}: {root}")
+    for path in tqdm(root.iterdir(), desc=desc, unit=" file", mininterval=1.0):
+        if not path.is_file():
+            continue
+        total_files += 1
+        ext = path.suffix.lower()
+        if ext not in ext_priority:
+            continue
+        stem = path.stem
+        existing = index.get(stem)
+        if existing is None or ext_priority[ext] < ext_priority[existing[1].lower()]:
+            index[stem] = (path, path.suffix)
+
+    log(
+        f"Indexed {len(index)} usable names from {root} "
+        f"({total_files} filesystem entries scanned)"
+    )
+    return index
+
+
 def build_subject_refs(people_names, object_names, refs_root, refs_prefix, fallback_exts):
     subject_refs = []
     missing_refs = []
@@ -48,13 +79,30 @@ def build_subject_refs(people_names, object_names, refs_root, refs_prefix, fallb
     return subject_refs, missing_refs, fallback_hits
 
 
-def resolve_image_path(image_root, task_id, preferred_ext, fallback_exts):
-    candidates = [preferred_ext] + [ext for ext in fallback_exts if ext != preferred_ext]
-    for ext in candidates:
-        path = image_root / f"{task_id}{ext}"
-        if path.exists():
-            return path, ext
-    return None, None
+def build_subject_refs_from_index(people_names, object_names, refs_index, refs_prefix, preferred_ext):
+    subject_refs = []
+    missing_refs = []
+    fallback_hits = 0
+
+    for name in people_names + object_names:
+        resolved = refs_index.get(name)
+        if resolved is None:
+            missing_refs.append(name)
+            continue
+        path, ext = resolved
+        if ext.lower() != preferred_ext.lower():
+            fallback_hits += 1
+        subject_refs.append({"id": name, "image_path": f"{refs_prefix}/{path.name}"})
+
+    return subject_refs, missing_refs, fallback_hits
+
+
+def resolve_image_path_from_index(image_index, task_id):
+    resolved = image_index.get(str(task_id))
+    if resolved is None:
+        return None, None
+    path, ext = resolved
+    return path, ext
 
 
 def aggregate_labels(labels):
@@ -156,6 +204,12 @@ def main(args):
     refs_root = Path(args.refs_root)
     image_ext_fallbacks = [".png", ".jpg", ".jpeg", ".webp"]
     ref_ext_fallbacks = [".jpg", ".png", ".jpeg", ".webp"]
+    image_a_ext_order = [args.image_a_ext] + [ext for ext in image_ext_fallbacks if ext != args.image_a_ext]
+    image_b_ext_order = [args.image_b_ext] + [ext for ext in image_ext_fallbacks if ext != args.image_b_ext]
+
+    image_a_index = build_file_index(image_a_root, image_a_ext_order, desc="Indexing image A root")
+    image_b_index = build_file_index(image_b_root, image_b_ext_order, desc="Indexing image B root")
+    refs_index = build_file_index(refs_root, ref_ext_fallbacks, desc="Indexing refs root")
 
     labels_by_task = defaultdict(list)
     for label_path in args.labels_paths:
@@ -185,8 +239,8 @@ def main(args):
                 missing_preference += 1
                 continue
 
-            image_a_path, ext_a = resolve_image_path(image_a_root, task_id, args.image_a_ext, image_ext_fallbacks)
-            image_b_path, ext_b = resolve_image_path(image_b_root, task_id, args.image_b_ext, image_ext_fallbacks)
+            image_a_path, ext_a = resolve_image_path_from_index(image_a_index, task_id)
+            image_b_path, ext_b = resolve_image_path_from_index(image_b_index, task_id)
             if image_a_path is None or image_b_path is None:
                 missing_images += 1
                 continue
@@ -195,12 +249,12 @@ def main(args):
             if ext_b != args.image_b_ext:
                 fallback_hits_b += 1
 
-            subject_refs, row_missing_refs, row_ref_fallbacks = build_subject_refs(
+            subject_refs, row_missing_refs, row_ref_fallbacks = build_subject_refs_from_index(
                 row.get("people_names", []),
                 row.get("object_names", []),
-                refs_root,
+                refs_index,
                 args.refs_prefix,
-                ref_ext_fallbacks,
+                preferred_ext=".jpg",
             )
             if row_missing_refs:
                 missing_refs += 1
