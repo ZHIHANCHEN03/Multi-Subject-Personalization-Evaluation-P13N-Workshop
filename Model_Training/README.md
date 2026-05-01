@@ -246,6 +246,48 @@ cd Model_Training
 MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
 ```
 
+Run `2B + layer_only`:
+
+```bash
+cd Model_Training
+MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+```
+
+Run `2B + lora_layer`:
+
+```bash
+cd Model_Training
+MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+```
+
+Run `4B + layer_only`:
+
+```bash
+cd Model_Training
+MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+```
+
+Run `4B + lora_layer`:
+
+```bash
+cd Model_Training
+MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+```
+
+Run `9B + layer_only`:
+
+```bash
+cd Model_Training
+MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+```
+
+Run `9B + lora_layer`:
+
+```bash
+cd Model_Training
+MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+```
+
 ## Sanity Checks Before Training
 
 Recommended checks on the training machine:
