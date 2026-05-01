@@ -294,7 +294,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="unsloth/Qwen3.5-0.8B", help="Backbone model name used during training")
     parser.add_argument("--mode", type=str, default="layer_only", help="Checkpoint mode prefix used under outputs/.")
     parser.add_argument("--checkpoint_dir", type=str, default=None, help="Optional explicit checkpoint directory.")
-    parser.add_argument("--test_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/test_v1.json"), help="Path to test data")
+    parser.add_argument("--test_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v2/test_v2.json"), help="Path to test data")
     parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory containing trained model checkpoints")
     parser.add_argument("--image_size", type=int, default=512, help="Kept for compatibility; LENS now preserves original image aspect ratio during evaluation.")
     parser.add_argument("--clip_model", type=str, default="openai/clip-vit-base-patch32")

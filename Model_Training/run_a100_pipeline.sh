@@ -77,6 +77,11 @@ echo "✅ [0/5] Fair-train protocol: EBS=${AUTO_SCALE_TARGET_EBS}, target_update
 echo "✅ [0/5] Optional FlashAttention install: ${INSTALL_FLASH_ATTN}"
 echo "✅ [0/5] Optional fast-path deps install: ${INSTALL_FASTPATH_DEPS}"
 
+if [ "$DATA_VERSION" != "v2" ]; then
+  echo "❌ This public release only supports DATA_VERSION=v2."
+  exit 1
+fi
+
 # 1. Environment Setup (Safe Cache Storage)
 # IMPORTANT:
 # Some RunPod environments expose /workspace with large capacity in `df -h`,
@@ -171,17 +176,10 @@ echo "✅ [2/5] Isolated environment is ready at: $VENV_DIR"
 
 # 3. Data Preparation
 echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
-if [ "$DATA_VERSION" = "v2" ]; then
-  python scripts/build_v2_dataset.py --image_a_root "$IMAGE_A_ROOT" --image_b_root "$IMAGE_B_ROOT" --image_a_ext "$IMAGE_A_EXT" --image_b_ext "$IMAGE_B_EXT" --refs_root "$REFS_ROOT"
-  DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v2/train_v2.json"
-  DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v2/val_v2.json"
-  DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v2/test_v2.json"
-else
-  python scripts/build_v1_dataset.py
-  DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v1/train_v1.json"
-  DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v1/val_v1.json"
-  DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v1/test_v1.json"
-fi
+python scripts/build_v2_dataset.py --image_a_root "$IMAGE_A_ROOT" --image_b_root "$IMAGE_B_ROOT" --image_a_ext "$IMAGE_A_EXT" --image_b_ext "$IMAGE_B_EXT" --refs_root "$REFS_ROOT"
+DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v2/train_v2.json"
+DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v2/val_v2.json"
+DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v2/test_v2.json"
 TRAIN_PATH="${TRAIN_PATH:-$DEFAULT_TRAIN_PATH}"
 VAL_PATH="${VAL_PATH:-$DEFAULT_VAL_PATH}"
 TEST_PATH="${TEST_PATH:-$DEFAULT_TEST_PATH}"

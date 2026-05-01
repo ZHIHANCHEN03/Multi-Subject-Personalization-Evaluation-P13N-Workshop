@@ -304,11 +304,11 @@ LENS 模型本身包含了一个庞大的 VLM backbone (Qwen3.5-9B)。为了**�
 2.  **`lora_adapter/` (可选)**: 仅约 50MB。如果你在训练时开启了 `--mode lora`，这里会保存 PEFT 的 LoRA 增量权重。
 3.  **`lens_config.json`**: 记录了依赖的基础模型 (`Qwen/Qwen3.5-9B`) 以及 Head 的分类维度等元数据。
 
-当 `scripts/train.py` 运行结束时，上述三个文件会自动保存到 `outputs/LENS-v1-[mode]/` 目录下。
+当 `scripts/train.py` 运行结束时，上述文件会自动保存到运行目录下的 `outputs/` 子目录中，例如 `/workspace/Model_Training_runs/v2/<model>/<timestamp>/outputs/`。
 
 ### 4.2 如何上传到 Hugging Face (HF Hub)
 将训练好的 LENS 模型分享给社区非常简单：
 
 1.  在 Hugging Face 创建一个模型仓库，例如：`your-username/LENS-Qwen3.5-9B`。
-2.  将 `outputs/` 目录下的那三个文件（`lens_heads.pt`, `lora_adapter/`, `lens_config.json`）直接拖拽上传到你的 HF 仓库。
+2.  将对应 checkpoint 目录中的文件（如 `lens_heads.pt`, `lora_adapter/`, `trainable_backbone.pt`, `lens_config.json`）上传到你的 HF 仓库。
 3.  在你的模型卡片 (Model Card/README) 里提供一段简单的加载代码，其他人就可以通过一行代码调用 LENS 了。因为我们保存了 config，其他人的代码会自动从 HF 官方下载原本的 Qwen 权重，并把你的 Head 缝合上去，即插即用！

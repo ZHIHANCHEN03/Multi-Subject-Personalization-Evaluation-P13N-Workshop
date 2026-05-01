@@ -1,5 +1,0 @@
-{
-    "base_model_name": "Qwen/Qwen2.5-7B",
-    "mode": "head_only",
-    "num_error_classes": 3
-}
