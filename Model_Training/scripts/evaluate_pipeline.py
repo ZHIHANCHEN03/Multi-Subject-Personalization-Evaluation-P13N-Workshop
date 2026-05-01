@@ -33,10 +33,15 @@ def calculate_accuracy(predictions: List[str], ground_truths: List[str]) -> floa
 
 def resolve_ground_truth(item: Dict) -> str:
     annotator_results = item.get("annotator_results", [])
-    if not annotator_results:
-        raise ValueError(f"Missing annotator_results for task_id={item.get('task_id', 'unknown')}")
-    votes = [ann.get("preference", "A") for ann in annotator_results]
-    return "A" if votes.count("A") >= votes.count("B") else "B"
+    if annotator_results:
+        votes = [ann.get("preference", "A") for ann in annotator_results]
+        return "A" if votes.count("A") >= votes.count("B") else "B"
+
+    preference = item.get("preference", item.get("winner"))
+    if preference in {"A", "B"}:
+        return preference
+
+    raise ValueError(f"Missing ground-truth preference for task_id={item.get('task_id', 'unknown')}")
 
 
 def sigmoid_probs(logits: torch.Tensor) -> List[float]:
@@ -194,6 +199,8 @@ def main(args):
 
     with open(test_path, "r", encoding="utf-8") as f:
         test_data = json.load(f)
+    if not test_data:
+        raise ValueError(f"Test dataset is empty: {test_path}")
     print(f"Loaded {len(test_data)} test samples.")
 
     checkpoint_dir = args.checkpoint_dir or find_latest_checkpoint(outputs_dir, args.model_name, args.mode)

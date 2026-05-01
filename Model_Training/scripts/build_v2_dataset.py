@@ -16,13 +16,26 @@ def load_jsonl(path):
     return records
 
 
-def build_subject_refs(people_names, object_names, refs_prefix):
+def build_subject_refs(people_names, object_names, refs_root, refs_prefix, fallback_exts):
     subject_refs = []
-    for name in people_names:
-        subject_refs.append({"id": name, "image_path": f"{refs_prefix}/{name}.jpg"})
-    for name in object_names:
-        subject_refs.append({"id": name, "image_path": f"{refs_prefix}/{name}.jpg"})
-    return subject_refs
+    missing_refs = []
+    fallback_hits = 0
+
+    for name in people_names + object_names:
+        resolved = None
+        for ext in fallback_exts:
+            candidate = refs_root / f"{name}{ext}"
+            if candidate.exists():
+                resolved = ext
+                break
+        if resolved is None:
+            missing_refs.append(name)
+            continue
+        if resolved != ".jpg":
+            fallback_hits += 1
+        subject_refs.append({"id": name, "image_path": f"{refs_prefix}/{name}{resolved}"})
+
+    return subject_refs, missing_refs, fallback_hits
 
 
 def resolve_image_path(image_root, task_id, preferred_ext, fallback_exts):
@@ -114,7 +127,9 @@ def main(args):
     prompt_records = load_jsonl(args.prompt_path)
     image_a_root = Path(args.image_a_root)
     image_b_root = Path(args.image_b_root)
+    refs_root = Path(args.refs_root)
     image_ext_fallbacks = [".png", ".jpg", ".jpeg", ".webp"]
+    ref_ext_fallbacks = [".jpg", ".png", ".jpeg", ".webp"]
 
     labels_by_task = defaultdict(list)
     for label_path in args.labels_paths:
@@ -125,8 +140,10 @@ def main(args):
     missing_labels = 0
     missing_preference = 0
     missing_images = 0
+    missing_refs = 0
     fallback_hits_a = 0
     fallback_hits_b = 0
+    fallback_hits_refs = 0
 
     for row in prompt_records:
         task_id = str(row["id"])
@@ -150,16 +167,24 @@ def main(args):
         if ext_b != args.image_b_ext:
             fallback_hits_b += 1
 
+        subject_refs, row_missing_refs, row_ref_fallbacks = build_subject_refs(
+            row.get("people_names", []),
+            row.get("object_names", []),
+            refs_root,
+            args.refs_prefix,
+            ref_ext_fallbacks,
+        )
+        if row_missing_refs:
+            missing_refs += 1
+            continue
+        fallback_hits_refs += row_ref_fallbacks
+
         item = {
             "task_id": task_id,
             "prompt": row.get("prompt_en") or row.get("prompt") or "",
             "prompt_zh": row.get("prompt_zh", ""),
             "subject_count": int(row.get("total_entities", 0)),
-            "subject_refs": build_subject_refs(
-                row.get("people_names", []),
-                row.get("object_names", []),
-                args.refs_prefix,
-            ),
+            "subject_refs": subject_refs,
             "image_A_path": str(image_a_path),
             "image_B_path": str(image_b_path),
             "preference": aggregate["preference"],
@@ -205,8 +230,10 @@ def main(args):
     print(f"Dropped for missing labels: {missing_labels}")
     print(f"Dropped for unresolved preference ties: {missing_preference}")
     print(f"Dropped for missing generated images: {missing_images}")
+    print(f"Dropped for missing reference images: {missing_refs}")
     print(f"Image A fallback extension hits: {fallback_hits_a}")
     print(f"Image B fallback extension hits: {fallback_hits_b}")
+    print(f"Reference fallback extension hits: {fallback_hits_refs}")
     print(f"Train split: {len(train_records)} -> {train_path}")
     print(f"Val split: {len(val_records)} -> {val_path}")
     print(f"Test split: {len(test_records)} -> {test_path}")
@@ -244,15 +271,21 @@ if __name__ == "__main__":
         help="Relative prefix stored inside subject_refs image paths",
     )
     parser.add_argument(
+        "--refs_root",
+        type=str,
+        default=str(Path(__file__).resolve().parent.parent / "data_v2" / "refs"),
+        help="Directory containing reference images",
+    )
+    parser.add_argument(
         "--image_a_root",
         type=str,
-        default="/root/data/A",
+        default="/workspace/data/A",
         help="Root directory for model A generated images",
     )
     parser.add_argument(
         "--image_b_root",
         type=str,
-        default="/root/data/B",
+        default="/workspace/data/B",
         help="Root directory for model B generated images",
     )
     parser.add_argument("--image_a_ext", type=str, default=".png", help="Extension for model A generated images")

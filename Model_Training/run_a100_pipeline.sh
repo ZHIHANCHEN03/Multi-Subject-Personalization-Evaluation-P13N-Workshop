@@ -20,19 +20,44 @@ echo "======================================================================"
 #   MODEL_NAME=unsloth/Qwen3.5-4B bash run_a100_pipeline.sh
 #   MODEL_NAME=unsloth/Qwen3.5-2B RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
 MODEL_NAME="${MODEL_NAME:-unsloth/Qwen3.5-0.8B}"
-DATA_VERSION="${DATA_VERSION:-v1}"
+DATA_VERSION="${DATA_VERSION:-v2}"
 RUN_LAYER_ONLY="${RUN_LAYER_ONLY:-1}"
-RUN_LORA_LAYER="${RUN_LORA_LAYER:-1}"
+RUN_LORA_LAYER="${RUN_LORA_LAYER:-0}"
 IMAGE_SIZE="${IMAGE_SIZE:-512}"
 INSTALL_FLASH_ATTN="${INSTALL_FLASH_ATTN:-0}"
 INSTALL_FASTPATH_DEPS="${INSTALL_FASTPATH_DEPS:-0}"
 MAX_JOBS="${MAX_JOBS:-8}"
-IMAGE_A_ROOT="${IMAGE_A_ROOT:-/root/data/A}"
-IMAGE_B_ROOT="${IMAGE_B_ROOT:-/root/data/B}"
+IMAGE_A_ROOT="${IMAGE_A_ROOT:-/workspace/data/A}"
+IMAGE_B_ROOT="${IMAGE_B_ROOT:-/workspace/data/B}"
+IMAGE_A_EXT="${IMAGE_A_EXT:-.png}"
+IMAGE_B_EXT="${IMAGE_B_EXT:-.jpg}"
+REFS_ROOT="${REFS_ROOT:-$SCRIPT_DIR/data_v2/refs}"
 TRAIN_PATH="${TRAIN_PATH:-}"
 VAL_PATH="${VAL_PATH:-}"
 TEST_PATH="${TEST_PATH:-}"
 RUNS_ROOT="${RUNS_ROOT:-/workspace/Model_Training_runs}"
+AUTO_SCALE_TARGET_EBS="${AUTO_SCALE_TARGET_EBS:-16}"
+AUTO_SCALE_TARGET_UPDATES="${AUTO_SCALE_TARGET_UPDATES:-6000}"
+AUTO_SCALE_MIN_EPOCHS="${AUTO_SCALE_MIN_EPOCHS:-2}"
+AUTO_SCALE_MAX_EPOCHS="${AUTO_SCALE_MAX_EPOCHS:-4}"
+NUM_WORKERS="${NUM_WORKERS:-0}"
+SEED="${SEED:-3407}"
+LR="${LR:-2e-5}"
+WEIGHT_DECAY="${WEIGHT_DECAY:-0.01}"
+WARMUP_RATIO="${WARMUP_RATIO:-0.03}"
+ALPHA="${ALPHA:-1.0}"
+BETA="${BETA:-0.5}"
+ADAPTIVE_BETA="${ADAPTIVE_BETA:-false}"
+BETA_FINAL="${BETA_FINAL:-0.5}"
+EARLY_STOPPING_PATIENCE="${EARLY_STOPPING_PATIENCE:-1}"
+EARLY_STOPPING_MIN_DELTA="${EARLY_STOPPING_MIN_DELTA:-0.001}"
+GRAD_CLIP_NORM="${GRAD_CLIP_NORM:-1.0}"
+
+if [ "$ADAPTIVE_BETA" = "true" ]; then
+  ADAPTIVE_BETA_FLAG="--adaptive_beta"
+else
+  ADAPTIVE_BETA_FLAG="--no-adaptive_beta"
+fi
 
 if [ -z "${BATCH_SIZE:-}" ]; then
   case "$MODEL_NAME" in
@@ -48,6 +73,7 @@ echo "✅ [0/5] Selected backbone: $MODEL_NAME"
 echo "✅ [0/5] Selected data version: $DATA_VERSION"
 echo "✅ [0/5] Selected physical batch size: $BATCH_SIZE (Effective Batch Size & Epochs will be AUTO-SCALED)"
 echo "✅ [0/5] Selected image size: ${IMAGE_SIZE}x${IMAGE_SIZE}"
+echo "✅ [0/5] Fair-train protocol: EBS=${AUTO_SCALE_TARGET_EBS}, target_updates=${AUTO_SCALE_TARGET_UPDATES}, lr=${LR}, wd=${WEIGHT_DECAY}, seed=${SEED}"
 echo "✅ [0/5] Optional FlashAttention install: ${INSTALL_FLASH_ATTN}"
 echo "✅ [0/5] Optional fast-path deps install: ${INSTALL_FASTPATH_DEPS}"
 
@@ -146,7 +172,7 @@ echo "✅ [2/5] Isolated environment is ready at: $VENV_DIR"
 # 3. Data Preparation
 echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
 if [ "$DATA_VERSION" = "v2" ]; then
-  python scripts/build_v2_dataset.py --image_a_root "$IMAGE_A_ROOT" --image_b_root "$IMAGE_B_ROOT"
+  python scripts/build_v2_dataset.py --image_a_root "$IMAGE_A_ROOT" --image_b_root "$IMAGE_B_ROOT" --image_a_ext "$IMAGE_A_EXT" --image_b_ext "$IMAGE_B_EXT" --refs_root "$REFS_ROOT"
   DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v2/train_v2.json"
   DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v2/val_v2.json"
   DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v2/test_v2.json"
@@ -187,7 +213,7 @@ if [ "$RUN_LAYER_ONLY" = "1" ]; then
   LOG_FILE_A="$LOG_DIR/${SAFE_MODEL_NAME}_layer_only_${TIMESTAMP}.log"
   echo "📝 Logging output to $LOG_FILE_A"
   
-  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --auto_scale 2>&1 | tee "$LOG_FILE_A"
+  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --num_workers "$NUM_WORKERS" --seed "$SEED" --lr "$LR" --weight_decay "$WEIGHT_DECAY" --warmup_ratio "$WARMUP_RATIO" --alpha "$ALPHA" --beta "$BETA" "$ADAPTIVE_BETA_FLAG" --beta_final "$BETA_FINAL" --grad_clip_norm "$GRAD_CLIP_NORM" --early_stopping_patience "$EARLY_STOPPING_PATIENCE" --early_stopping_min_delta "$EARLY_STOPPING_MIN_DELTA" --auto_scale --auto_scale_target_ebs "$AUTO_SCALE_TARGET_EBS" --auto_scale_target_updates "$AUTO_SCALE_TARGET_UPDATES" --auto_scale_min_epochs "$AUTO_SCALE_MIN_EPOCHS" --auto_scale_max_epochs "$AUTO_SCALE_MAX_EPOCHS" 2>&1 | tee "$LOG_FILE_A"
   echo "✅ [4/6] Training A completed."
 
   echo "⏳ Running Benchmark Evaluation for Experiment A..."
@@ -205,7 +231,7 @@ if [ "$RUN_LORA_LAYER" = "1" ]; then
   LOG_FILE_B="$LOG_DIR/${SAFE_MODEL_NAME}_lora_layer_${TIMESTAMP}.log"
   echo "📝 Logging output to $LOG_FILE_B"
   
-  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --auto_scale 2>&1 | tee "$LOG_FILE_B"
+  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --num_workers "$NUM_WORKERS" --seed "$SEED" --lr "$LR" --weight_decay "$WEIGHT_DECAY" --warmup_ratio "$WARMUP_RATIO" --alpha "$ALPHA" --beta "$BETA" "$ADAPTIVE_BETA_FLAG" --beta_final "$BETA_FINAL" --grad_clip_norm "$GRAD_CLIP_NORM" --early_stopping_patience "$EARLY_STOPPING_PATIENCE" --early_stopping_min_delta "$EARLY_STOPPING_MIN_DELTA" --auto_scale --auto_scale_target_ebs "$AUTO_SCALE_TARGET_EBS" --auto_scale_target_updates "$AUTO_SCALE_TARGET_UPDATES" --auto_scale_min_epochs "$AUTO_SCALE_MIN_EPOCHS" --auto_scale_max_epochs "$AUTO_SCALE_MAX_EPOCHS" 2>&1 | tee "$LOG_FILE_B"
   echo "✅ [5/6] Training B completed."
 else
   echo "⏭️  [5/6] Skipping LoRA + Layer experiment. Set RUN_LORA_LAYER=1 to enable."

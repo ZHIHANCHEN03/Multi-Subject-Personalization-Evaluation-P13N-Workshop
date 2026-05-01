@@ -2,6 +2,7 @@ import os
 import sys
 import gc
 import math
+import random
 import argparse
 import unsloth
 import torch
@@ -55,27 +56,42 @@ def create_collate_fn(pad_token_id=0):
         return out
     return custom_collate_fn
 
+
+def set_seed(seed):
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+
+def seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % 2**32
+    random.seed(worker_seed)
+
 def calculate_auto_scaling(args, train_size, val_size):
     """Calculates and updates grad_accum_steps and epochs dynamically."""
     is_large_model = "9b" in args.model_name.lower() or "4b" in args.model_name.lower()
     is_medium_model = "2b" in args.model_name.lower()
-    
-    target_ebs = 8 if train_size < 2000 else (16 if train_size < 10000 else 32)
-    
-    if is_large_model:
-        target_ebs = min(64, target_ebs * 2)
+
+    if args.auto_scale_target_ebs > 0:
+        target_ebs = args.auto_scale_target_ebs
+    else:
+        target_ebs = 8 if train_size < 2000 else (16 if train_size < 10000 else 32)
+        if is_large_model:
+            target_ebs = min(64, target_ebs * 2)
     
     args.grad_accum_steps = max(1, target_ebs // args.batch_size)
     actual_ebs = args.batch_size * args.grad_accum_steps
     
     base_target_steps = 5000 if is_large_model else (4000 if is_medium_model else 3000)
     
-    if args.mode in {"lora", "lora_layer"}:
-        base_target_steps = int(base_target_steps * 1.5)
+    if args.auto_scale_target_updates > 0:
+        base_target_steps = args.auto_scale_target_updates
         
     steps_per_epoch = max(1, train_size // actual_ebs)
-    calculated_epochs = base_target_steps // steps_per_epoch
-    args.epochs = max(3, min(20, calculated_epochs))
+    calculated_epochs = math.ceil(base_target_steps / steps_per_epoch)
+    args.epochs = max(args.auto_scale_min_epochs, min(args.auto_scale_max_epochs, calculated_epochs))
     
     print("\n" + "="*50)
     print(f"📊 AUTO-SCALING TRIGGERED")
@@ -110,6 +126,11 @@ def get_epoch_loss_weights(args, epoch):
         progress = epoch / max(1, args.epochs - 1)
         beta = args.beta + (args.beta_final - args.beta) * progress
     return alpha, beta
+
+
+def get_monitor_cls_weight(args, beta):
+    """Use the current cls weight by default so best-checkpoint selection matches the training objective."""
+    return beta if args.monitor_cls_weight < 0 else args.monitor_cls_weight
 
 def compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, alpha, beta):
     """Performs forward passes and calculates the multi-task loss."""
@@ -214,12 +235,14 @@ def validate_epoch(model, val_loader, device, ranking_loss_fn, classification_lo
     avg_total_loss = val_loss / len(val_loader)
     avg_pref_loss = val_pref_loss / len(val_loader)
     avg_cls_loss = val_cls_loss / len(val_loader)
-    monitor_loss = avg_pref_loss + args.monitor_cls_weight * avg_cls_loss
+    monitor_cls_weight = get_monitor_cls_weight(args, beta)
+    monitor_loss = avg_pref_loss + monitor_cls_weight * avg_cls_loss
     return {
         "total_loss": avg_total_loss,
         "pref_loss": avg_pref_loss,
         "cls_loss": avg_cls_loss,
         "monitor_loss": monitor_loss,
+        "monitor_cls_weight": monitor_cls_weight,
         "alpha": alpha,
         "beta": beta,
     }
@@ -227,6 +250,7 @@ def validate_epoch(model, val_loader, device, ranking_loss_fn, classification_lo
 def main(args):
     torch.cuda.empty_cache()
     gc.collect()
+    set_seed(args.seed)
 
     print(f"--- Initializing LENS Training Pipeline ---")
     print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
@@ -248,8 +272,9 @@ def main(args):
     
     # 2. Extract Trainable Parameters & Setup Optimizer
     trainable_params = [p for p in model.parameters() if p.requires_grad]
-    lr = 2e-5 if args.mode in {"lora", "lora_layer"} else 5e-5
-    optimizer = torch.optim.AdamW(trainable_params, lr=lr)
+    if not trainable_params:
+        raise ValueError(f"No trainable parameters found for mode={args.mode}")
+    optimizer = torch.optim.AdamW(trainable_params, lr=args.lr, weight_decay=args.weight_decay)
     
     # 3. Loss Functions
     ranking_loss_fn = nn.MarginRankingLoss(margin=0.1)
@@ -264,10 +289,16 @@ def main(args):
     
     train_dataset = PrismBenchDataset(json_path=args.train_path, processor=processor, image_size=args.image_size)
     val_dataset = PrismBenchDataset(json_path=args.val_path, processor=processor, image_size=args.image_size)
+    if len(train_dataset) == 0:
+        raise ValueError(f"Training dataset is empty: {args.train_path}")
+    if len(val_dataset) == 0:
+        raise ValueError(f"Validation dataset is empty: {args.val_path}")
     
     collate_fn = create_collate_fn(pad_token_id=pad_token_id)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None)
+    data_loader_generator = torch.Generator()
+    data_loader_generator.manual_seed(args.seed)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None, worker_init_fn=seed_worker if args.num_workers > 0 else None, generator=data_loader_generator)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None, worker_init_fn=seed_worker if args.num_workers > 0 else None)
     
     # 5. Auto-Scale
     if args.auto_scale:
@@ -278,7 +309,7 @@ def main(args):
     total_steps = updates_per_epoch * args.epochs
     scheduler = get_cosine_schedule_with_warmup(
         optimizer, 
-        num_warmup_steps=int(total_steps * 0.05), # 5% warmup
+        num_warmup_steps=max(1, int(total_steps * args.warmup_ratio)),
         num_training_steps=total_steps
     )
     
@@ -300,7 +331,7 @@ def main(args):
             f"Epoch {epoch+1} Summary | "
             f"Train Total: {train_metrics['total_loss']:.4f} | Train Pref: {train_metrics['pref_loss']:.4f} | Train Cls: {train_metrics['cls_loss']:.4f} | "
             f"Val Total: {val_metrics['total_loss']:.4f} | Val Pref: {val_metrics['pref_loss']:.4f} | Val Cls: {val_metrics['cls_loss']:.4f} | "
-            f"Monitor: {val_metrics['monitor_loss']:.4f}"
+            f"Monitor: {val_metrics['monitor_loss']:.4f} | MonitorClsW: {val_metrics['monitor_cls_weight']:.4f}"
         )
         
         save_dir = os.path.join(outputs_dir, f"{safe_model_name}-{args.mode}-epoch{epoch+1}")
@@ -327,21 +358,29 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
     parser.add_argument("--model_name", type=str, default="unsloth/Qwen3.5-0.8B", help="Backbone model name")
-    parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "layer_only", "lora_layer", "full"], default="lora", help="Training Mode")
+    parser.add_argument("--mode", type=str, choices=["head_only", "lora", "partial", "layer_only", "lora_layer", "full"], default="layer_only", help="Training Mode")
     parser.add_argument("--unfreeze_layers", type=int, default=4, help="Number of top layers to unfreeze")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size")
     parser.add_argument("--grad_accum_steps", type=int, default=8, help="Gradient accumulation steps")
     parser.add_argument("--auto_scale", action="store_true", help="Dynamically scale grad_accum_steps and epochs based on dataset size")
+    parser.add_argument("--auto_scale_target_ebs", type=int, default=16, help="Target effective batch size for fair comparisons")
+    parser.add_argument("--auto_scale_target_updates", type=int, default=0, help="Override auto-scale target optimizer updates; set <=0 to use heuristic defaults")
+    parser.add_argument("--auto_scale_min_epochs", type=int, default=2, help="Minimum epochs when auto-scale is enabled")
+    parser.add_argument("--auto_scale_max_epochs", type=int, default=6, help="Maximum epochs when auto-scale is enabled")
     parser.add_argument("--image_size", type=int, default=512, help="Square image size")
     parser.add_argument("--epochs", type=int, default=3, help="Number of training epochs")
+    parser.add_argument("--lr", type=float, default=2e-5, help="Learning rate")
+    parser.add_argument("--weight_decay", type=float, default=0.01, help="AdamW weight decay")
+    parser.add_argument("--warmup_ratio", type=float, default=0.03, help="Warmup ratio for cosine scheduler")
     parser.add_argument("--alpha", type=float, default=1.0, help="Weight for Ranking Loss")
     parser.add_argument("--beta", type=float, default=0.5, help="Weight for Classification Loss")
-    parser.add_argument("--adaptive_beta", action=argparse.BooleanOptionalAction, default=True, help="Linearly anneal beta over epochs")
-    parser.add_argument("--beta_final", type=float, default=0.25, help="Final beta value when adaptive beta is enabled")
-    parser.add_argument("--monitor_cls_weight", type=float, default=0.5, help="Fixed cls weight used for best-checkpoint monitoring")
+    parser.add_argument("--adaptive_beta", action=argparse.BooleanOptionalAction, default=False, help="Linearly anneal beta over epochs")
+    parser.add_argument("--beta_final", type=float, default=0.5, help="Final beta value when adaptive beta is enabled")
+    parser.add_argument("--monitor_cls_weight", type=float, default=-1.0, help="Cls weight used for best-checkpoint monitoring; set <0 to follow the current beta")
     parser.add_argument("--grad_clip_norm", type=float, default=1.0, help="Gradient clipping norm; set <=0 to disable")
     parser.add_argument("--early_stopping_patience", type=int, default=2, help="Stop if monitor loss does not improve for N epochs")
     parser.add_argument("--early_stopping_min_delta", type=float, default=1e-3, help="Minimum monitor improvement to reset patience")
+    parser.add_argument("--seed", type=int, default=3407, help="Global random seed")
     parser.add_argument("--train_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/train_v1.json"), help="Path to training data")
     parser.add_argument("--val_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v1/val_v1.json"), help="Path to validation data")
     parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory where checkpoints will be written")
