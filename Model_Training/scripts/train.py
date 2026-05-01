@@ -232,10 +232,9 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
                 f"LR {scheduler.get_last_lr()[0]:.2e}"
             )
 
-        # Local variables are naturally GC'd at loop end, but we explicitly clear tensors to guarantee VRAM hygiene
+        # Local variables are naturally GC'd at loop end; avoid per-batch empty_cache(),
+        # which can introduce allocator churn and reduce GPU utilization.
         del batch, total_loss, scaled_loss
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
         if reached_budget:
             tqdm.write(
                 f"[train] Reached fixed optimizer-step budget: "
@@ -283,10 +282,7 @@ def validate_epoch(model, val_loader, device, ranking_loss_fn, classification_lo
                     f"Total {metrics['total_loss']:.4f} | Pref {metrics['pref_loss']:.4f} | "
                     f"Cls {metrics['cls_loss']:.4f}"
                 )
-
             del batch, total_loss
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
 
     avg_total_loss = val_loss / len(val_loader)
     avg_pref_loss = val_pref_loss / len(val_loader)
@@ -365,8 +361,29 @@ def main(args):
     collate_fn = create_collate_fn(pad_token_id=pad_token_id)
     data_loader_generator = torch.Generator()
     data_loader_generator.manual_seed(args.seed)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None, worker_init_fn=seed_worker if args.num_workers > 0 else None, generator=data_loader_generator)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None, worker_init_fn=seed_worker if args.num_workers > 0 else None)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=collate_fn,
+        num_workers=args.num_workers,
+        pin_memory=True,
+        prefetch_factor=2 if args.num_workers > 0 else None,
+        persistent_workers=True if args.num_workers > 0 else False,
+        worker_init_fn=seed_worker if args.num_workers > 0 else None,
+        generator=data_loader_generator,
+    )
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        collate_fn=collate_fn,
+        num_workers=args.num_workers,
+        pin_memory=True,
+        prefetch_factor=2 if args.num_workers > 0 else None,
+        persistent_workers=True if args.num_workers > 0 else False,
+        worker_init_fn=seed_worker if args.num_workers > 0 else None,
+    )
     log(f"Dataloaders ready | train_batches={len(train_loader)} val_batches={len(val_loader)} workers={args.num_workers}")
     
     # 5. Auto-Scale
@@ -493,7 +510,7 @@ if __name__ == "__main__":
     parser.add_argument("--train_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v2/train_v2.json"), help="Path to training data")
     parser.add_argument("--val_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v2/val_v2.json"), help="Path to validation data")
     parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory where checkpoints will be written")
-    parser.add_argument("--num_workers", type=int, default=0, help="Number of dataloader workers")
+    parser.add_argument("--num_workers", type=int, default=4, help="Number of dataloader workers")
     parser.add_argument("--log_interval", type=int, default=50, help="Log every N train/val steps in addition to tqdm progress")
     parser.add_argument("--max_optimizer_steps", type=int, default=0, help="If >0, stop training after this many optimizer steps for a fixed-budget comparison")
     args = parser.parse_args()
