@@ -1,18 +1,28 @@
 import argparse
 import json
 import random
+import time
 from collections import defaultdict
 from pathlib import Path
 
+from tqdm.auto import tqdm
 
-def load_jsonl(path):
+
+def log(message):
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] [build_v2_dataset] {message}", flush=True)
+
+
+def load_jsonl(path, desc):
     records = []
+    log(f"Loading JSONL: {path}")
     with open(path, "r", encoding="utf-8") as f:
-        for line in f:
+        for line in tqdm(f, desc=desc, unit=" lines", mininterval=2.0):
             line = line.strip()
             if not line:
                 continue
             records.append(json.loads(line))
+    log(f"Loaded {len(records)} records from {path}")
     return records
 
 
@@ -98,9 +108,19 @@ def stratified_group_split(records, train_ratio, val_ratio, seed):
     for seed_id, bucket in seed_buckets.items():
         bucket_to_seed_ids[bucket].append(seed_id)
 
+    log(
+        f"Preparing grouped split across {len(seed_groups)} seed groups and "
+        f"{len(bucket_to_seed_ids)} stratification buckets"
+    )
     train_records, val_records, test_records = [], [], []
 
-    for seed_ids in bucket_to_seed_ids.values():
+    for seed_ids in tqdm(
+        bucket_to_seed_ids.values(),
+        total=len(bucket_to_seed_ids),
+        desc="Splitting buckets",
+        unit=" bucket",
+        mininterval=1.0,
+    ):
         rng.shuffle(seed_ids)
         n = len(seed_ids)
         train_n = int(n * train_ratio)
@@ -124,7 +144,13 @@ def stratified_group_split(records, train_ratio, val_ratio, seed):
 
 
 def main(args):
-    prompt_records = load_jsonl(args.prompt_path)
+    log("Starting V2 dataset build")
+    log(f"Prompt path: {args.prompt_path}")
+    log(f"Label paths: {', '.join(args.labels_paths)}")
+    log(f"Image A root: {args.image_a_root}")
+    log(f"Image B root: {args.image_b_root}")
+    log(f"Refs root: {args.refs_root}")
+    prompt_records = load_jsonl(args.prompt_path, desc="Loading prompts")
     image_a_root = Path(args.image_a_root)
     image_b_root = Path(args.image_b_root)
     refs_root = Path(args.refs_root)
@@ -133,8 +159,10 @@ def main(args):
 
     labels_by_task = defaultdict(list)
     for label_path in args.labels_paths:
-        for row in load_jsonl(label_path):
+        label_rows = load_jsonl(label_path, desc=f"Loading {Path(label_path).name}")
+        for row in label_rows:
             labels_by_task[str(row["task_id"])].append(row)
+        log(f"Indexed labels from {label_path}; current unique task ids: {len(labels_by_task)}")
 
     output_records = []
     missing_labels = 0
@@ -145,68 +173,78 @@ def main(args):
     fallback_hits_b = 0
     fallback_hits_refs = 0
 
-    for row in prompt_records:
+    progress = tqdm(prompt_records, desc="Building usable samples", unit=" sample", mininterval=1.0)
+    for index, row in enumerate(progress, start=1):
         task_id = str(row["id"])
         labels = labels_by_task.get(task_id, [])
         if not labels:
             missing_labels += 1
-            continue
+        else:
+            aggregate = aggregate_labels(labels)
+            if aggregate["preference"] is None:
+                missing_preference += 1
+                continue
 
-        aggregate = aggregate_labels(labels)
-        if aggregate["preference"] is None:
-            missing_preference += 1
-            continue
+            image_a_path, ext_a = resolve_image_path(image_a_root, task_id, args.image_a_ext, image_ext_fallbacks)
+            image_b_path, ext_b = resolve_image_path(image_b_root, task_id, args.image_b_ext, image_ext_fallbacks)
+            if image_a_path is None or image_b_path is None:
+                missing_images += 1
+                continue
+            if ext_a != args.image_a_ext:
+                fallback_hits_a += 1
+            if ext_b != args.image_b_ext:
+                fallback_hits_b += 1
 
-        image_a_path, ext_a = resolve_image_path(image_a_root, task_id, args.image_a_ext, image_ext_fallbacks)
-        image_b_path, ext_b = resolve_image_path(image_b_root, task_id, args.image_b_ext, image_ext_fallbacks)
-        if image_a_path is None or image_b_path is None:
-            missing_images += 1
-            continue
-        if ext_a != args.image_a_ext:
-            fallback_hits_a += 1
-        if ext_b != args.image_b_ext:
-            fallback_hits_b += 1
+            subject_refs, row_missing_refs, row_ref_fallbacks = build_subject_refs(
+                row.get("people_names", []),
+                row.get("object_names", []),
+                refs_root,
+                args.refs_prefix,
+                ref_ext_fallbacks,
+            )
+            if row_missing_refs:
+                missing_refs += 1
+                continue
+            fallback_hits_refs += row_ref_fallbacks
 
-        subject_refs, row_missing_refs, row_ref_fallbacks = build_subject_refs(
-            row.get("people_names", []),
-            row.get("object_names", []),
-            refs_root,
-            args.refs_prefix,
-            ref_ext_fallbacks,
-        )
-        if row_missing_refs:
-            missing_refs += 1
-            continue
-        fallback_hits_refs += row_ref_fallbacks
+            item = {
+                "task_id": task_id,
+                "prompt": row.get("prompt_en") or row.get("prompt") or "",
+                "prompt_zh": row.get("prompt_zh", ""),
+                "subject_count": int(row.get("total_entities", 0)),
+                "subject_refs": subject_refs,
+                "image_A_path": str(image_a_path),
+                "image_B_path": str(image_b_path),
+                "preference": aggregate["preference"],
+                "category_scores_A": aggregate["category_scores_A"],
+                "category_scores_B": aggregate["category_scores_B"],
+                "metadata": {
+                    "source": "V2 synthetic + VLM consensus",
+                    "seed_id": row.get("seed_id"),
+                    "level": row.get("level"),
+                    "class_tag": row.get("class_tag"),
+                    "ratio_type": row.get("ratio_type"),
+                    "n_humans": row.get("n_humans"),
+                    "n_objects": row.get("n_objects"),
+                    "people_names": row.get("people_names", []),
+                    "object_names": row.get("object_names", []),
+                    "token_len_est": row.get("token_len_est"),
+                    "label_sources": aggregate["label_sources"],
+                    "num_label_votes": len(labels),
+                },
+            }
+            output_records.append(item)
 
-        item = {
-            "task_id": task_id,
-            "prompt": row.get("prompt_en") or row.get("prompt") or "",
-            "prompt_zh": row.get("prompt_zh", ""),
-            "subject_count": int(row.get("total_entities", 0)),
-            "subject_refs": subject_refs,
-            "image_A_path": str(image_a_path),
-            "image_B_path": str(image_b_path),
-            "preference": aggregate["preference"],
-            "category_scores_A": aggregate["category_scores_A"],
-            "category_scores_B": aggregate["category_scores_B"],
-            "metadata": {
-                "source": "V2 synthetic + VLM consensus",
-                "seed_id": row.get("seed_id"),
-                "level": row.get("level"),
-                "class_tag": row.get("class_tag"),
-                "ratio_type": row.get("ratio_type"),
-                "n_humans": row.get("n_humans"),
-                "n_objects": row.get("n_objects"),
-                "people_names": row.get("people_names", []),
-                "object_names": row.get("object_names", []),
-                "token_len_est": row.get("token_len_est"),
-                "label_sources": aggregate["label_sources"],
-                "num_label_votes": len(labels),
-            },
-        }
-        output_records.append(item)
+        if index % 1000 == 0 or index == len(prompt_records):
+            progress.set_postfix(
+                kept=len(output_records),
+                no_label=missing_labels,
+                pref_drop=missing_preference,
+                img_drop=missing_images,
+                ref_drop=missing_refs,
+            )
 
+    log(f"Finished sample filtering. Usable records: {len(output_records)}")
     train_records, val_records, test_records = stratified_group_split(
         output_records,
         train_ratio=args.train_ratio,
@@ -221,22 +259,26 @@ def main(args):
     val_path = output_dir / "val_v2.json"
     test_path = output_dir / "test_v2.json"
 
+    log(f"Writing train split to {train_path}")
     train_path.write_text(json.dumps(train_records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    log(f"Writing val split to {val_path}")
     val_path.write_text(json.dumps(val_records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    log(f"Writing test split to {test_path}")
     test_path.write_text(json.dumps(test_records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    print(f"Loaded prompts: {len(prompt_records)}")
-    print(f"Built usable records: {len(output_records)}")
-    print(f"Dropped for missing labels: {missing_labels}")
-    print(f"Dropped for unresolved preference ties: {missing_preference}")
-    print(f"Dropped for missing generated images: {missing_images}")
-    print(f"Dropped for missing reference images: {missing_refs}")
-    print(f"Image A fallback extension hits: {fallback_hits_a}")
-    print(f"Image B fallback extension hits: {fallback_hits_b}")
-    print(f"Reference fallback extension hits: {fallback_hits_refs}")
-    print(f"Train split: {len(train_records)} -> {train_path}")
-    print(f"Val split: {len(val_records)} -> {val_path}")
-    print(f"Test split: {len(test_records)} -> {test_path}")
+    log(f"Loaded prompts: {len(prompt_records)}")
+    log(f"Built usable records: {len(output_records)}")
+    log(f"Dropped for missing labels: {missing_labels}")
+    log(f"Dropped for unresolved preference ties: {missing_preference}")
+    log(f"Dropped for missing generated images: {missing_images}")
+    log(f"Dropped for missing reference images: {missing_refs}")
+    log(f"Image A fallback extension hits: {fallback_hits_a}")
+    log(f"Image B fallback extension hits: {fallback_hits_b}")
+    log(f"Reference fallback extension hits: {fallback_hits_refs}")
+    log(f"Train split: {len(train_records)} -> {train_path}")
+    log(f"Val split: {len(val_records)} -> {val_path}")
+    log(f"Test split: {len(test_records)} -> {test_path}")
+    log("Dataset build completed successfully")
 
 
 if __name__ == "__main__":

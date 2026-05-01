@@ -8,6 +8,7 @@ import unsloth
 import torch
 import torch.nn.functional as F
 from peft import PeftModel
+from tqdm.auto import tqdm
 from transformers import (
     AutoImageProcessor,
     AutoModel,
@@ -22,8 +23,14 @@ from lens.dataset import PrismBenchDataset
 from lens.model import LENS
 from lens.utils.image_processing import load_image_with_safety
 
+_ = unsloth  # Keep Unsloth imported before downstream patch sites.
+
 
 DIAGNOSTIC_DIMENSIONS = ["Existence", "Appearance", "Interaction"]
+
+
+def log(message: str) -> None:
+    print(f"[eval] {message}", flush=True)
 
 
 def calculate_accuracy(predictions: List[str], ground_truths: List[str]) -> float:
@@ -63,7 +70,7 @@ def find_latest_checkpoint(outputs_dir: str, model_name: str, mode: str) -> str:
     # First, check if a "-best" checkpoint exists
     best_path = os.path.join(outputs_dir, f"{safe_model_name}-{mode}-best")
     if os.path.isdir(best_path):
-        print(f"Detected '-best' checkpoint: {best_path}")
+        log(f"Detected '-best' checkpoint: {best_path}")
         return best_path
 
     prefix = f"{safe_model_name}-{mode}-epoch"
@@ -185,10 +192,10 @@ def load_pil_image(base_dir: str, rel_path: str, image_size: int = 512):
 
 
 def main(args):
-    print("--- Starting REAL Pipeline Evaluation (LENS vs Baselines) ---")
-    print(f"Running script: {os.path.abspath(__file__)}")
+    log("--- Starting REAL Pipeline Evaluation (LENS vs Baselines) ---")
+    log(f"Running script: {os.path.abspath(__file__)}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+    log(f"Using device: {device}")
 
     test_path = args.test_path
     outputs_dir = args.outputs_dir
@@ -201,20 +208,21 @@ def main(args):
         test_data = json.load(f)
     if not test_data:
         raise ValueError(f"Test dataset is empty: {test_path}")
-    print(f"Loaded {len(test_data)} test samples.")
+    log(f"Loaded {len(test_data)} test samples from: {os.path.abspath(test_path)}")
 
     checkpoint_dir = args.checkpoint_dir or find_latest_checkpoint(outputs_dir, args.model_name, args.mode)
-    print(f"Loading LENS checkpoint from: {checkpoint_dir}")
+    log(f"Loading LENS checkpoint from: {checkpoint_dir}")
     lens_model, lens_processor, lens_cfg = load_lens_checkpoint(checkpoint_dir, device)
     lens_dataset = PrismBenchDataset(json_path=test_path, processor=lens_processor, image_size=args.image_size)
+    log(f"LENS dataset prepared with {len(lens_dataset)} samples")
 
-    print(f"Loading CLIP baseline: {args.clip_model}")
+    log(f"Loading CLIP baseline: {args.clip_model}")
     clip_model = CLIPModel.from_pretrained(args.clip_model).to(device).eval()
     clip_processor = CLIPProcessor.from_pretrained(args.clip_model)
     clip_max_length = int(clip_model.config.text_config.max_position_embeddings)
-    print(f"CLIP text truncation enabled with max_length={clip_max_length}")
+    log(f"CLIP text truncation enabled with max_length={clip_max_length}")
 
-    print(f"Loading DINO baseline: {args.dino_model}")
+    log(f"Loading DINO baseline: {args.dino_model}")
     dino_model = AutoModel.from_pretrained(args.dino_model).to(device).eval()
     dino_processor = AutoImageProcessor.from_pretrained(args.dino_model)
 
@@ -223,8 +231,15 @@ def main(args):
     clip_preds = []
     dino_preds = []
 
-    print("\n--- Example Interpretability Logs ---")
-    for idx, item in enumerate(test_data):
+    log("Starting per-sample evaluation")
+    progress = tqdm(
+        enumerate(test_data),
+        total=len(test_data),
+        desc="Evaluating test set",
+        unit=" sample",
+        mininterval=1.0,
+    )
+    for idx, item in progress:
         gt_pref = resolve_ground_truth(item)
         ground_truths.append(gt_pref)
 
@@ -239,9 +254,9 @@ def main(args):
         lens_pred = "A" if score_A_val > score_B_val else "B"
         lens_preds.append(lens_pred)
 
-        if idx % 5 == 0:
-            print(f"Task ID: {item.get('task_id', 'unknown')}")
-            print(generate_lens_explanation(lens_pred, logits_A.squeeze(0), logits_B.squeeze(0)))
+        if idx % args.log_every == 0:
+            tqdm.write(f"[eval] Task ID: {item.get('task_id', 'unknown')}")
+            tqdm.write(generate_lens_explanation(lens_pred, logits_A.squeeze(0), logits_B.squeeze(0)))
 
         prompt = item["prompt"]
         img_A = load_pil_image(base_dir, item["image_A_path"], args.image_size)
@@ -273,20 +288,34 @@ def main(args):
             dino_scores = cosine_similarity(gen_outputs, ref_mean.expand_as(gen_outputs))
         dino_preds.append("A" if float(dino_scores[0]) > float(dino_scores[1]) else "B")
 
+        current_count = len(ground_truths)
+        if current_count % args.log_every == 0 or current_count == len(test_data):
+            progress.set_postfix(
+                lens=f"{calculate_accuracy(lens_preds, ground_truths):.2f}%",
+                clip=f"{calculate_accuracy(clip_preds, ground_truths):.2f}%",
+                dino=f"{calculate_accuracy(dino_preds, ground_truths):.2f}%",
+            )
+            tqdm.write(
+                f"[eval] Progress {current_count}/{len(test_data)} | "
+                f"LENS {calculate_accuracy(lens_preds, ground_truths):.2f}% | "
+                f"CLIP {calculate_accuracy(clip_preds, ground_truths):.2f}% | "
+                f"DINO {calculate_accuracy(dino_preds, ground_truths):.2f}%"
+            )
+
     lens_acc = calculate_accuracy(lens_preds, ground_truths)
     clip_acc = calculate_accuracy(clip_preds, ground_truths)
     dino_acc = calculate_accuracy(dino_preds, ground_truths)
 
-    print("\n==========================================")
-    print("        PIPELINE EVALUATION RESULTS       ")
-    print("==========================================")
-    print(f"Checkpoint: {checkpoint_dir}")
-    print(f"Mode: {lens_cfg['mode']}")
-    print(f"Test Set Size: {len(test_data)} pairs")
-    print(f"1. CLIP Accuracy:   {clip_acc:.2f}% (Real Baseline - Prompt/Image Similarity)")
-    print(f"2. DINO Accuracy:   {dino_acc:.2f}% (Real Baseline - Ref/Image Similarity)")
-    print(f"3. LENS Accuracy:   {lens_acc:.2f}% (Real Checkpoint - Diagnostic Metric)")
-    print("==========================================")
+    log("==========================================")
+    log("PIPELINE EVALUATION RESULTS")
+    log("==========================================")
+    log(f"Checkpoint: {checkpoint_dir}")
+    log(f"Mode: {lens_cfg['mode']}")
+    log(f"Test Set Size: {len(test_data)} pairs")
+    log(f"1. CLIP Accuracy:   {clip_acc:.2f}% (Real Baseline - Prompt/Image Similarity)")
+    log(f"2. DINO Accuracy:   {dino_acc:.2f}% (Real Baseline - Ref/Image Similarity)")
+    log(f"3. LENS Accuracy:   {lens_acc:.2f}% (Real Checkpoint - Diagnostic Metric)")
+    log("==========================================")
 
 
 if __name__ == "__main__":
@@ -299,5 +328,6 @@ if __name__ == "__main__":
     parser.add_argument("--image_size", type=int, default=512, help="Kept for compatibility; LENS now preserves original image aspect ratio during evaluation.")
     parser.add_argument("--clip_model", type=str, default="openai/clip-vit-base-patch32")
     parser.add_argument("--dino_model", type=str, default="facebook/dinov2-base")
+    parser.add_argument("--log_every", type=int, default=50, help="Emit detailed evaluation progress every N samples")
     args = parser.parse_args()
     main(args)

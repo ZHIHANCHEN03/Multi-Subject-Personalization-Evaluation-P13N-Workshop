@@ -10,6 +10,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from transformers import AutoProcessor, get_cosine_schedule_with_warmup
 from torch.nn.utils.rnn import pad_sequence
+from tqdm.auto import tqdm
 
 # Safe default Hugging Face cache settings for server-side training.
 os.environ.setdefault("HF_HOME", os.path.expanduser("~/huggingface_cache"))
@@ -24,6 +25,11 @@ from lens.model import LENS
 from lens.dataset import PrismBenchDataset
 
 _ = unsloth  # Keep Unsloth imported before transformers/peft patch sites.
+
+
+def log(message):
+    print(f"[train] {message}", flush=True)
+
 
 def create_collate_fn(pad_token_id=0):
     def custom_collate_fn(batch):
@@ -65,7 +71,8 @@ def set_seed(seed):
         torch.cuda.manual_seed_all(seed)
 
 
-def seed_worker(worker_id):
+def seed_worker(_worker_id):
+    _ = _worker_id
     worker_seed = torch.initial_seed() % 2**32
     random.seed(worker_seed)
 
@@ -93,17 +100,17 @@ def calculate_auto_scaling(args, train_size, val_size):
     calculated_epochs = math.ceil(base_target_steps / steps_per_epoch)
     args.epochs = max(args.auto_scale_min_epochs, min(args.auto_scale_max_epochs, calculated_epochs))
     
-    print("\n" + "="*50)
-    print(f"📊 AUTO-SCALING TRIGGERED")
-    print(f"   - Model               : {args.model_name} (Large: {is_large_model}, Medium: {is_medium_model})")
-    print(f"   - Dataset Size        : {train_size} train, {val_size} val")
-    print(f"   - Physical Batch Size : {args.batch_size} (VRAM constraint)")
-    print(f"   - Target Effective BS : {target_ebs}")
-    print(f"   - Grad Accum Steps    : {args.grad_accum_steps}")
-    print(f"   - Actual Effective BS : {actual_ebs}")
-    print(f"   - Target Updates      : ~{base_target_steps}")
-    print(f"   - Epochs Calculated   : {args.epochs} (Total Updates: {args.epochs * steps_per_epoch})")
-    print("="*50 + "\n")
+    log("=" * 50)
+    log("AUTO-SCALING TRIGGERED")
+    log(f"Model               : {args.model_name} (Large: {is_large_model}, Medium: {is_medium_model})")
+    log(f"Dataset Size        : {train_size} train, {val_size} val")
+    log(f"Physical Batch Size : {args.batch_size} (VRAM constraint)")
+    log(f"Target Effective BS : {target_ebs}")
+    log(f"Grad Accum Steps    : {args.grad_accum_steps}")
+    log(f"Actual Effective BS : {actual_ebs}")
+    log(f"Target Updates      : ~{base_target_steps}")
+    log(f"Epochs Calculated   : {args.epochs} (Total Updates: {args.epochs * steps_per_epoch})")
+    log("=" * 50)
 
 def prepare_model_inputs(batch, device, suffix):
     """Extracts and formats inputs for a specific forward pass branch (A or B)."""
@@ -169,14 +176,21 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
     """Runs a single training epoch."""
     model.train()
     alpha, beta = get_epoch_loss_weights(args, epoch)
-    print(f"\n--- Epoch {epoch+1}/{args.epochs} [TRAIN] ---")
-    print(f"Loss Weights | alpha={alpha:.4f} beta={beta:.4f}")
+    log(f"--- Epoch {epoch+1}/{args.epochs} [TRAIN] ---")
+    log(f"Loss Weights | alpha={alpha:.4f} beta={beta:.4f}")
     epoch_loss = 0.0
     epoch_pref_loss = 0.0
     epoch_cls_loss = 0.0
     optimizer.zero_grad()
-    
-    for step, batch in enumerate(train_loader):
+
+    progress = tqdm(
+        enumerate(train_loader),
+        total=len(train_loader),
+        desc=f"Train Epoch {epoch+1}",
+        unit=" batch",
+        mininterval=1.0,
+    )
+    for step, batch in progress:
         total_loss, metrics = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, alpha, beta)
         
         # Calculate actual accumulation steps for the tail batch
@@ -194,10 +208,21 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
         epoch_loss += metrics["total_loss"]
         epoch_pref_loss += metrics["pref_loss"]
         epoch_cls_loss += metrics["cls_loss"]
-        
-        print(f"Step {step+1}/{len(train_loader)} | Pref Rank Loss: {metrics['pref_loss']:.4f} | "
-              f"Cls Loss: {metrics['cls_loss']:.4f} | Total Loss: {metrics['total_loss']:.4f} | "
-              f"ScoreA: {metrics['score_A_mean']:.4f} | ScoreB: {metrics['score_B_mean']:.4f} | Gap: {metrics['score_gap_mean']:.4f}")
+
+        progress.set_postfix(
+            loss=f"{metrics['total_loss']:.4f}",
+            pref=f"{metrics['pref_loss']:.4f}",
+            cls=f"{metrics['cls_loss']:.4f}",
+            lr=f"{scheduler.get_last_lr()[0]:.2e}",
+        )
+        if (step + 1) % args.log_interval == 0 or (step + 1) == len(train_loader):
+            tqdm.write(
+                "[train] "
+                f"Epoch {epoch+1} Step {step+1}/{len(train_loader)} | "
+                f"Total {metrics['total_loss']:.4f} | Pref {metrics['pref_loss']:.4f} | "
+                f"Cls {metrics['cls_loss']:.4f} | Gap {metrics['score_gap_mean']:.4f} | "
+                f"LR {scheduler.get_last_lr()[0]:.2e}"
+            )
 
         # Local variables are naturally GC'd at loop end, but we explicitly clear tensors to guarantee VRAM hygiene
         del batch, total_loss, scaled_loss
@@ -215,19 +240,32 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
 def validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch):
     """Runs validation for a single epoch."""
     model.eval()
-    print(f"--- Epoch {epoch+1}/{args.epochs} [VALIDATION] ---")
+    log(f"--- Epoch {epoch+1}/{args.epochs} [VALIDATION] ---")
     alpha, beta = get_epoch_loss_weights(args, epoch)
     val_loss = 0.0
     val_pref_loss = 0.0
     val_cls_loss = 0.0
-    
+
     with torch.no_grad():
-        for batch in val_loader:
+        progress = tqdm(val_loader, total=len(val_loader), desc=f"Val Epoch {epoch+1}", unit=" batch", mininterval=1.0)
+        for step, batch in enumerate(progress, start=1):
             total_loss, metrics = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, alpha, beta)
             val_loss += total_loss.item()
             val_pref_loss += metrics["pref_loss"]
             val_cls_loss += metrics["cls_loss"]
-            
+            progress.set_postfix(
+                loss=f"{metrics['total_loss']:.4f}",
+                pref=f"{metrics['pref_loss']:.4f}",
+                cls=f"{metrics['cls_loss']:.4f}",
+            )
+            if step % args.log_interval == 0 or step == len(val_loader):
+                tqdm.write(
+                    "[val] "
+                    f"Epoch {epoch+1} Step {step}/{len(val_loader)} | "
+                    f"Total {metrics['total_loss']:.4f} | Pref {metrics['pref_loss']:.4f} | "
+                    f"Cls {metrics['cls_loss']:.4f}"
+                )
+
             del batch, total_loss
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
@@ -252,8 +290,8 @@ def main(args):
     gc.collect()
     set_seed(args.seed)
 
-    print(f"--- Initializing LENS Training Pipeline ---")
-    print(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
+    log("--- Initializing LENS Training Pipeline ---")
+    log(f"Mode: {args.mode.upper()} (Head-only vs LoRA)")
     
     # PyTorch performance optimizations
     torch.backends.cudnn.benchmark = True
@@ -262,18 +300,27 @@ def main(args):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if device.type == "cpu":
-        print("WARNING: CUDA is not available on this machine. Falling back to CPU for testing purposes only.")
-    print(f"Using device: {device}")
+        log("WARNING: CUDA is not available on this machine. Falling back to CPU for testing purposes only.")
+    log(f"Using device: {device}")
+    log(
+        f"Training config | model={args.model_name} mode={args.mode} batch_size={args.batch_size} "
+        f"image_size={args.image_size} lr={args.lr} wd={args.weight_decay} seed={args.seed}"
+    )
     
     # 1. Load Model (Dual-Head VLM)
+    log("Loading LENS backbone and heads...")
     model = LENS(model_name=args.model_name, num_error_classes=3, mode=args.mode, unfreeze_layers=args.unfreeze_layers)
     if torch.cuda.is_available():
         device = model.backbone.device
+    log(f"Model initialized on device: {device}")
     
     # 2. Extract Trainable Parameters & Setup Optimizer
     trainable_params = [p for p in model.parameters() if p.requires_grad]
     if not trainable_params:
         raise ValueError(f"No trainable parameters found for mode={args.mode}")
+    trainable_param_count = sum(p.numel() for p in trainable_params)
+    total_param_count = sum(p.numel() for p in model.parameters())
+    log(f"Trainable parameters: {trainable_param_count:,} / {total_param_count:,}")
     optimizer = torch.optim.AdamW(trainable_params, lr=args.lr, weight_decay=args.weight_decay)
     
     # 3. Loss Functions
@@ -281,24 +328,28 @@ def main(args):
     classification_loss_fn = nn.BCEWithLogitsLoss()
     
     # 4. Data Setup
+    log(f"Loading processor for {args.model_name}...")
     processor = AutoProcessor.from_pretrained(args.model_name, trust_remote_code=True)
     if processor.tokenizer.pad_token is None:
         processor.tokenizer.pad_token = processor.tokenizer.eos_token
     
     pad_token_id = processor.tokenizer.pad_token_id
-    
+    log(f"Loading training dataset from: {os.path.abspath(args.train_path)}")
     train_dataset = PrismBenchDataset(json_path=args.train_path, processor=processor, image_size=args.image_size)
+    log(f"Loading validation dataset from: {os.path.abspath(args.val_path)}")
     val_dataset = PrismBenchDataset(json_path=args.val_path, processor=processor, image_size=args.image_size)
     if len(train_dataset) == 0:
         raise ValueError(f"Training dataset is empty: {args.train_path}")
     if len(val_dataset) == 0:
         raise ValueError(f"Validation dataset is empty: {args.val_path}")
+    log(f"Dataset sizes | train={len(train_dataset)} val={len(val_dataset)}")
     
     collate_fn = create_collate_fn(pad_token_id=pad_token_id)
     data_loader_generator = torch.Generator()
     data_loader_generator.manual_seed(args.seed)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None, worker_init_fn=seed_worker if args.num_workers > 0 else None, generator=data_loader_generator)
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn, num_workers=args.num_workers, pin_memory=True, prefetch_factor=2 if args.num_workers > 0 else None, worker_init_fn=seed_worker if args.num_workers > 0 else None)
+    log(f"Dataloaders ready | train_batches={len(train_loader)} val_batches={len(val_loader)} workers={args.num_workers}")
     
     # 5. Auto-Scale
     if args.auto_scale:
@@ -312,8 +363,15 @@ def main(args):
         num_warmup_steps=max(1, int(total_steps * args.warmup_ratio)),
         num_training_steps=total_steps
     )
+    log(
+        f"Scheduler ready | updates_per_epoch={updates_per_epoch} total_steps={total_steps} "
+        f"warmup_steps={max(1, int(total_steps * args.warmup_ratio))}"
+    )
     
-    print(f"Starting Diagnostic-Aware Joint Training Loop. Train Batches: {len(train_loader)}, Val Batches: {len(val_loader)}, Epochs: {args.epochs}")
+    log(
+        f"Starting diagnostic-aware joint training loop | "
+        f"epochs={args.epochs} train_batches={len(train_loader)} val_batches={len(val_loader)}"
+    )
     
     # 6. Training Loop
     best_monitor_loss = float("inf")
@@ -322,12 +380,13 @@ def main(args):
     outputs_dir = os.path.abspath(args.outputs_dir)
     os.makedirs(outputs_dir, exist_ok=True)
     best_dir = os.path.join(outputs_dir, f"{safe_model_name}-{args.mode}-best")
+    log(f"Checkpoints will be saved under: {outputs_dir}")
     
     for epoch in range(args.epochs):
         train_metrics = train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch)
         val_metrics = validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch)
         
-        print(
+        log(
             f"Epoch {epoch+1} Summary | "
             f"Train Total: {train_metrics['total_loss']:.4f} | Train Pref: {train_metrics['pref_loss']:.4f} | Train Cls: {train_metrics['cls_loss']:.4f} | "
             f"Val Total: {val_metrics['total_loss']:.4f} | Val Pref: {val_metrics['pref_loss']:.4f} | Val Cls: {val_metrics['cls_loss']:.4f} | "
@@ -336,24 +395,24 @@ def main(args):
         
         save_dir = os.path.join(outputs_dir, f"{safe_model_name}-{args.mode}-epoch{epoch+1}")
         model.save_pretrained(save_dir)
-        print(f"Checkpoint saved to: {os.path.abspath(save_dir)}")
+        log(f"Checkpoint saved to: {os.path.abspath(save_dir)}")
         
         if val_metrics["monitor_loss"] < best_monitor_loss - args.early_stopping_min_delta:
-            print(f"🌟 New Best Monitor Loss: {val_metrics['monitor_loss']:.4f} (Previous: {best_monitor_loss:.4f})")
+            log(f"New best monitor loss: {val_metrics['monitor_loss']:.4f} (previous: {best_monitor_loss:.4f})")
             best_monitor_loss = val_metrics["monitor_loss"]
             epochs_without_improvement = 0
             model.save_pretrained(best_dir)
-            print(f"🌟 Best checkpoint updated at: {os.path.abspath(best_dir)}")
+            log(f"Best checkpoint updated at: {os.path.abspath(best_dir)}")
         else:
             epochs_without_improvement += 1
-            print(f"⏳ No monitor improvement for {epochs_without_improvement} epoch(s).")
+            log(f"No monitor improvement for {epochs_without_improvement} epoch(s).")
             if epochs_without_improvement >= args.early_stopping_patience:
-                print("🛑 Early stopping triggered.")
+                log("Early stopping triggered.")
                 break
 
-    print("\nTraining Completed successfully!")
+    log("Training completed successfully.")
     if best_monitor_loss != float("inf"):
-        print(f"You can now upload the contents of {best_dir} directly to Hugging Face 🤗")
+        log(f"Best checkpoint directory: {best_dir}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LENS Metric Model Training Pipeline")
@@ -385,5 +444,6 @@ if __name__ == "__main__":
     parser.add_argument("--val_path", type=str, default=os.path.join(os.path.dirname(__file__), "../data_v2/val_v2.json"), help="Path to validation data")
     parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory where checkpoints will be written")
     parser.add_argument("--num_workers", type=int, default=0, help="Number of dataloader workers")
+    parser.add_argument("--log_interval", type=int, default=50, help="Log every N train/val steps in addition to tqdm progress")
     args = parser.parse_args()
     main(args)
