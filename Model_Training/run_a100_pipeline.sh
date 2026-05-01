@@ -34,6 +34,8 @@ IMAGE_B_EXT="${IMAGE_B_EXT:-.jpg}"
 REFS_ROOT="${REFS_ROOT:-$SCRIPT_DIR/data_v2/refs}"
 PREFILTER_CACHE_PATH="${PREFILTER_CACHE_PATH:-$SCRIPT_DIR/data_v2/v2_prefilter_candidates.json}"
 REUSE_PREFILTER_CACHE="${REUSE_PREFILTER_CACHE:-true}"
+SKIP_BUILD="${SKIP_BUILD:-0}"
+SKIP_TEST="${SKIP_TEST:-1}"
 TRAIN_PATH="${TRAIN_PATH:-}"
 VAL_PATH="${VAL_PATH:-}"
 TEST_PATH="${TEST_PATH:-}"
@@ -42,6 +44,7 @@ AUTO_SCALE_TARGET_EBS="${AUTO_SCALE_TARGET_EBS:-16}"
 AUTO_SCALE_TARGET_UPDATES="${AUTO_SCALE_TARGET_UPDATES:-6000}"
 AUTO_SCALE_MIN_EPOCHS="${AUTO_SCALE_MIN_EPOCHS:-2}"
 AUTO_SCALE_MAX_EPOCHS="${AUTO_SCALE_MAX_EPOCHS:-4}"
+MAX_OPTIMIZER_STEPS="${MAX_OPTIMIZER_STEPS:-600}"
 NUM_WORKERS="${NUM_WORKERS:-0}"
 SEED="${SEED:-3407}"
 LR="${LR:-2e-5}"
@@ -78,6 +81,9 @@ echo "✅ [0/5] Selected image size: ${IMAGE_SIZE}x${IMAGE_SIZE}"
 echo "✅ [0/5] Fair-train protocol: EBS=${AUTO_SCALE_TARGET_EBS}, target_updates=${AUTO_SCALE_TARGET_UPDATES}, lr=${LR}, wd=${WEIGHT_DECAY}, seed=${SEED}"
 echo "✅ [0/5] Optional FlashAttention install: ${INSTALL_FLASH_ATTN}"
 echo "✅ [0/5] Optional fast-path deps install: ${INSTALL_FASTPATH_DEPS}"
+echo "✅ [0/5] Skip manifest build: ${SKIP_BUILD}"
+echo "✅ [0/5] Fixed optimizer-step budget: ${MAX_OPTIMIZER_STEPS}"
+echo "✅ [0/5] Skip test evaluation: ${SKIP_TEST}"
 
 if [ "$DATA_VERSION" != "v2" ]; then
   echo "❌ This public release only supports DATA_VERSION=v2."
@@ -177,29 +183,39 @@ python -m pip check
 echo "✅ [2/5] Isolated environment is ready at: $VENV_DIR"
 
 # 3. Data Preparation
-echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
-BUILD_DATA_ARGS=(
-  --image_a_root "$IMAGE_A_ROOT"
-  --image_b_root "$IMAGE_B_ROOT"
-  --image_a_ext "$IMAGE_A_EXT"
-  --image_b_ext "$IMAGE_B_EXT"
-  --refs_root "$REFS_ROOT"
-  --prefilter_cache_path "$PREFILTER_CACHE_PATH"
-)
-if [ "$REUSE_PREFILTER_CACHE" = "true" ]; then
-  BUILD_DATA_ARGS+=(--reuse_prefilter_cache)
-else
-  BUILD_DATA_ARGS+=(--no-reuse_prefilter_cache)
-fi
-python scripts/build_v2_dataset.py "${BUILD_DATA_ARGS[@]}"
 DEFAULT_TRAIN_PATH="$SCRIPT_DIR/data_v2/train_v2.json"
 DEFAULT_VAL_PATH="$SCRIPT_DIR/data_v2/val_v2.json"
 DEFAULT_TEST_PATH="$SCRIPT_DIR/data_v2/test_v2.json"
 TRAIN_PATH="${TRAIN_PATH:-$DEFAULT_TRAIN_PATH}"
 VAL_PATH="${VAL_PATH:-$DEFAULT_VAL_PATH}"
 TEST_PATH="${TEST_PATH:-$DEFAULT_TEST_PATH}"
-echo "✅ [3/5] Dataset built successfully."
-echo "✅ [3/5] Prefilter cache: $PREFILTER_CACHE_PATH"
+if [ "$SKIP_BUILD" = "1" ]; then
+  echo "⏭️  [3/5] Skipping dataset build and reusing existing manifests."
+  for required_path in "$TRAIN_PATH" "$VAL_PATH" "$TEST_PATH"; do
+    if [ ! -f "$required_path" ]; then
+      echo "❌ Required manifest not found while SKIP_BUILD=1: $required_path"
+      exit 1
+    fi
+  done
+else
+  echo "⏳ [3/5] Cleaning raw data and generating Train/Val/Test splits..."
+  BUILD_DATA_ARGS=(
+    --image_a_root "$IMAGE_A_ROOT"
+    --image_b_root "$IMAGE_B_ROOT"
+    --image_a_ext "$IMAGE_A_EXT"
+    --image_b_ext "$IMAGE_B_EXT"
+    --refs_root "$REFS_ROOT"
+    --prefilter_cache_path "$PREFILTER_CACHE_PATH"
+  )
+  if [ "$REUSE_PREFILTER_CACHE" = "true" ]; then
+    BUILD_DATA_ARGS+=(--reuse_prefilter_cache)
+  else
+    BUILD_DATA_ARGS+=(--no-reuse_prefilter_cache)
+  fi
+  python scripts/build_v2_dataset.py "${BUILD_DATA_ARGS[@]}"
+  echo "✅ [3/5] Dataset built successfully."
+  echo "✅ [3/5] Prefilter cache: $PREFILTER_CACHE_PATH"
+fi
 echo "✅ [3/5] Train manifest: $TRAIN_PATH"
 echo "✅ [3/5] Val manifest: $VAL_PATH"
 echo "✅ [3/5] Test manifest: $TEST_PATH"
@@ -227,12 +243,16 @@ if [ "$RUN_LAYER_ONLY" = "1" ]; then
   LOG_FILE_A="$LOG_DIR/${SAFE_MODEL_NAME}_layer_only_${TIMESTAMP}.log"
   echo "📝 Logging output to $LOG_FILE_A"
   
-  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --num_workers "$NUM_WORKERS" --seed "$SEED" --lr "$LR" --weight_decay "$WEIGHT_DECAY" --warmup_ratio "$WARMUP_RATIO" --alpha "$ALPHA" --beta "$BETA" "$ADAPTIVE_BETA_FLAG" --beta_final "$BETA_FINAL" --grad_clip_norm "$GRAD_CLIP_NORM" --early_stopping_patience "$EARLY_STOPPING_PATIENCE" --early_stopping_min_delta "$EARLY_STOPPING_MIN_DELTA" --auto_scale --auto_scale_target_ebs "$AUTO_SCALE_TARGET_EBS" --auto_scale_target_updates "$AUTO_SCALE_TARGET_UPDATES" --auto_scale_min_epochs "$AUTO_SCALE_MIN_EPOCHS" --auto_scale_max_epochs "$AUTO_SCALE_MAX_EPOCHS" 2>&1 | tee "$LOG_FILE_A"
+  python scripts/train.py --model_name "$MODEL_NAME" --mode layer_only --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --num_workers "$NUM_WORKERS" --seed "$SEED" --lr "$LR" --weight_decay "$WEIGHT_DECAY" --warmup_ratio "$WARMUP_RATIO" --alpha "$ALPHA" --beta "$BETA" "$ADAPTIVE_BETA_FLAG" --beta_final "$BETA_FINAL" --grad_clip_norm "$GRAD_CLIP_NORM" --early_stopping_patience "$EARLY_STOPPING_PATIENCE" --early_stopping_min_delta "$EARLY_STOPPING_MIN_DELTA" --auto_scale --auto_scale_target_ebs "$AUTO_SCALE_TARGET_EBS" --auto_scale_target_updates "$AUTO_SCALE_TARGET_UPDATES" --auto_scale_min_epochs "$AUTO_SCALE_MIN_EPOCHS" --auto_scale_max_epochs "$AUTO_SCALE_MAX_EPOCHS" --max_optimizer_steps "$MAX_OPTIMIZER_STEPS" 2>&1 | tee "$LOG_FILE_A"
   echo "✅ [4/6] Training A completed."
 
-  echo "⏳ Running Benchmark Evaluation for Experiment A..."
-  python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode layer_only --test_path "$TEST_PATH" --outputs_dir "$OUTPUTS_DIR" --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_A"
-  echo "✅ Evaluation A completed."
+  if [ "$SKIP_TEST" = "1" ]; then
+    echo "⏭️  Skipping test evaluation for Experiment A. Set SKIP_TEST=0 to enable."
+  else
+    echo "⏳ Running Benchmark Evaluation for Experiment A..."
+    python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode layer_only --test_path "$TEST_PATH" --outputs_dir "$OUTPUTS_DIR" --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_A"
+    echo "✅ Evaluation A completed."
+  fi
 else
   echo "⏭️  [4/6] Skipping layer-only experiment. Set RUN_LAYER_ONLY=1 to enable."
 fi
@@ -245,16 +265,20 @@ if [ "$RUN_LORA_LAYER" = "1" ]; then
   LOG_FILE_B="$LOG_DIR/${SAFE_MODEL_NAME}_lora_layer_${TIMESTAMP}.log"
   echo "📝 Logging output to $LOG_FILE_B"
   
-  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --num_workers "$NUM_WORKERS" --seed "$SEED" --lr "$LR" --weight_decay "$WEIGHT_DECAY" --warmup_ratio "$WARMUP_RATIO" --alpha "$ALPHA" --beta "$BETA" "$ADAPTIVE_BETA_FLAG" --beta_final "$BETA_FINAL" --grad_clip_norm "$GRAD_CLIP_NORM" --early_stopping_patience "$EARLY_STOPPING_PATIENCE" --early_stopping_min_delta "$EARLY_STOPPING_MIN_DELTA" --auto_scale --auto_scale_target_ebs "$AUTO_SCALE_TARGET_EBS" --auto_scale_target_updates "$AUTO_SCALE_TARGET_UPDATES" --auto_scale_min_epochs "$AUTO_SCALE_MIN_EPOCHS" --auto_scale_max_epochs "$AUTO_SCALE_MAX_EPOCHS" 2>&1 | tee "$LOG_FILE_B"
+  python scripts/train.py --model_name "$MODEL_NAME" --mode lora_layer --unfreeze_layers 4 --batch_size "$BATCH_SIZE" --image_size "$IMAGE_SIZE" --train_path "$TRAIN_PATH" --val_path "$VAL_PATH" --outputs_dir "$OUTPUTS_DIR" --num_workers "$NUM_WORKERS" --seed "$SEED" --lr "$LR" --weight_decay "$WEIGHT_DECAY" --warmup_ratio "$WARMUP_RATIO" --alpha "$ALPHA" --beta "$BETA" "$ADAPTIVE_BETA_FLAG" --beta_final "$BETA_FINAL" --grad_clip_norm "$GRAD_CLIP_NORM" --early_stopping_patience "$EARLY_STOPPING_PATIENCE" --early_stopping_min_delta "$EARLY_STOPPING_MIN_DELTA" --auto_scale --auto_scale_target_ebs "$AUTO_SCALE_TARGET_EBS" --auto_scale_target_updates "$AUTO_SCALE_TARGET_UPDATES" --auto_scale_min_epochs "$AUTO_SCALE_MIN_EPOCHS" --auto_scale_max_epochs "$AUTO_SCALE_MAX_EPOCHS" --max_optimizer_steps "$MAX_OPTIMIZER_STEPS" 2>&1 | tee "$LOG_FILE_B"
   echo "✅ [5/6] Training B completed."
 else
   echo "⏭️  [5/6] Skipping LoRA + Layer experiment. Set RUN_LORA_LAYER=1 to enable."
 fi
 
 if [ "$RUN_LORA_LAYER" = "1" ]; then
-  echo "⏳ Running Benchmark Evaluation for Experiment B..."
-  python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode lora_layer --test_path "$TEST_PATH" --outputs_dir "$OUTPUTS_DIR" --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_B"
-  echo "✅ Evaluation B completed."
+  if [ "$SKIP_TEST" = "1" ]; then
+    echo "⏭️  Skipping test evaluation for Experiment B. Set SKIP_TEST=0 to enable."
+  else
+    echo "⏳ Running Benchmark Evaluation for Experiment B..."
+    python scripts/evaluate_pipeline.py --model_name "$MODEL_NAME" --mode lora_layer --test_path "$TEST_PATH" --outputs_dir "$OUTPUTS_DIR" --image_size "$IMAGE_SIZE" 2>&1 | tee -a "$LOG_FILE_B"
+    echo "✅ Evaluation B completed."
+  fi
 fi
 
 echo "======================================================================"

@@ -172,7 +172,7 @@ def compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, 
     
     return total_loss, metrics
 
-def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch):
+def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch, global_optimizer_step):
     """Runs a single training epoch."""
     model.train()
     alpha, beta = get_epoch_loss_weights(args, epoch)
@@ -181,6 +181,8 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
     epoch_loss = 0.0
     epoch_pref_loss = 0.0
     epoch_cls_loss = 0.0
+    batches_processed = 0
+    optimizer_steps_this_epoch = 0
     optimizer.zero_grad()
 
     progress = tqdm(
@@ -192,18 +194,24 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
     )
     for step, batch in progress:
         total_loss, metrics = compute_loss(model, batch, device, ranking_loss_fn, classification_loss_fn, alpha, beta)
+        batches_processed += 1
         
         # Calculate actual accumulation steps for the tail batch
         actual_accum_steps = min(args.grad_accum_steps, len(train_loader) - step + (step % args.grad_accum_steps))
         scaled_loss = total_loss / actual_accum_steps
         scaled_loss.backward()
-        
+
+        reached_budget = False
         if (step + 1) % args.grad_accum_steps == 0 or (step + 1) == len(train_loader):
             if args.grad_clip_norm > 0:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip_norm)
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad()
+            optimizer_steps_this_epoch += 1
+            global_optimizer_step += 1
+            if args.max_optimizer_steps > 0 and global_optimizer_step >= args.max_optimizer_steps:
+                reached_budget = True
         
         epoch_loss += metrics["total_loss"]
         epoch_pref_loss += metrics["pref_loss"]
@@ -228,13 +236,23 @@ def train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_
         del batch, total_loss, scaled_loss
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+        if reached_budget:
+            tqdm.write(
+                f"[train] Reached fixed optimizer-step budget: "
+                f"{global_optimizer_step}/{args.max_optimizer_steps}. Stopping training after current batch."
+            )
+            break
 
     return {
-        "total_loss": epoch_loss / len(train_loader),
-        "pref_loss": epoch_pref_loss / len(train_loader),
-        "cls_loss": epoch_cls_loss / len(train_loader),
+        "total_loss": epoch_loss / max(1, batches_processed),
+        "pref_loss": epoch_pref_loss / max(1, batches_processed),
+        "cls_loss": epoch_cls_loss / max(1, batches_processed),
         "alpha": alpha,
         "beta": beta,
+        "batches_processed": batches_processed,
+        "optimizer_steps_this_epoch": optimizer_steps_this_epoch,
+        "global_optimizer_step": global_optimizer_step,
+        "stop_training": args.max_optimizer_steps > 0 and global_optimizer_step >= args.max_optimizer_steps,
     }
 
 def validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch):
@@ -357,7 +375,10 @@ def main(args):
         
     # 5.5 Setup LR Scheduler
     updates_per_epoch = math.ceil(len(train_loader) / args.grad_accum_steps)
-    total_steps = updates_per_epoch * args.epochs
+    planned_total_steps = updates_per_epoch * args.epochs
+    total_steps = planned_total_steps
+    if args.max_optimizer_steps > 0:
+        total_steps = min(planned_total_steps, args.max_optimizer_steps)
     scheduler = get_cosine_schedule_with_warmup(
         optimizer, 
         num_warmup_steps=max(1, int(total_steps * args.warmup_ratio)),
@@ -367,6 +388,11 @@ def main(args):
         f"Scheduler ready | updates_per_epoch={updates_per_epoch} total_steps={total_steps} "
         f"warmup_steps={max(1, int(total_steps * args.warmup_ratio))}"
     )
+    if args.max_optimizer_steps > 0:
+        log(
+            f"Fixed optimizer-step budget enabled | "
+            f"planned_full_schedule={planned_total_steps} capped_to={args.max_optimizer_steps}"
+        )
     
     log(
         f"Starting diagnostic-aware joint training loop | "
@@ -381,15 +407,35 @@ def main(args):
     os.makedirs(outputs_dir, exist_ok=True)
     best_dir = os.path.join(outputs_dir, f"{safe_model_name}-{args.mode}-best")
     log(f"Checkpoints will be saved under: {outputs_dir}")
+    global_optimizer_step = 0
     
     for epoch in range(args.epochs):
-        train_metrics = train_epoch(model, train_loader, optimizer, scheduler, device, ranking_loss_fn, classification_loss_fn, args, epoch)
+        if args.max_optimizer_steps > 0 and global_optimizer_step >= args.max_optimizer_steps:
+            log(f"Stopping before epoch {epoch+1}: fixed optimizer-step budget already reached.")
+            break
+        train_metrics = train_epoch(
+            model,
+            train_loader,
+            optimizer,
+            scheduler,
+            device,
+            ranking_loss_fn,
+            classification_loss_fn,
+            args,
+            epoch,
+            global_optimizer_step,
+        )
+        global_optimizer_step = train_metrics["global_optimizer_step"]
+        if train_metrics["batches_processed"] == 0:
+            log("No training batches were processed in this epoch; stopping.")
+            break
         val_metrics = validate_epoch(model, val_loader, device, ranking_loss_fn, classification_loss_fn, args, epoch)
         
         log(
             f"Epoch {epoch+1} Summary | "
             f"Train Total: {train_metrics['total_loss']:.4f} | Train Pref: {train_metrics['pref_loss']:.4f} | Train Cls: {train_metrics['cls_loss']:.4f} | "
             f"Val Total: {val_metrics['total_loss']:.4f} | Val Pref: {val_metrics['pref_loss']:.4f} | Val Cls: {val_metrics['cls_loss']:.4f} | "
+            f"OptSteps: {global_optimizer_step} | "
             f"Monitor: {val_metrics['monitor_loss']:.4f} | MonitorClsW: {val_metrics['monitor_cls_weight']:.4f}"
         )
         
@@ -409,6 +455,10 @@ def main(args):
             if epochs_without_improvement >= args.early_stopping_patience:
                 log("Early stopping triggered.")
                 break
+
+        if train_metrics["stop_training"]:
+            log("Fixed optimizer-step budget reached; ending training loop.")
+            break
 
     log("Training completed successfully.")
     if best_monitor_loss != float("inf"):
@@ -445,5 +495,6 @@ if __name__ == "__main__":
     parser.add_argument("--outputs_dir", type=str, default=os.path.join(os.path.dirname(__file__), "../outputs"), help="Directory where checkpoints will be written")
     parser.add_argument("--num_workers", type=int, default=0, help="Number of dataloader workers")
     parser.add_argument("--log_interval", type=int, default=50, help="Log every N train/val steps in addition to tqdm progress")
+    parser.add_argument("--max_optimizer_steps", type=int, default=0, help="If >0, stop training after this many optimizer steps for a fixed-budget comparison")
     args = parser.parse_args()
     main(args)

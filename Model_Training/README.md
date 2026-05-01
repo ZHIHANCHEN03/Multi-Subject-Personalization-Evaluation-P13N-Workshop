@@ -119,6 +119,7 @@ This writes:
 - `data_v2/train_v2.json`
 - `data_v2/val_v2.json`
 - `data_v2/test_v2.json`
+- `data_v2/v2_prefilter_candidates.json` when prefilter caching is enabled
 
 Useful builder output includes:
 
@@ -135,6 +136,7 @@ Recommended first run:
 
 ```bash
 cd Model_Training
+SKIP_BUILD=1 \
 MODEL_NAME=unsloth/Qwen3.5-0.8B \
 RUN_LAYER_ONLY=1 \
 RUN_LORA_LAYER=0 \
@@ -149,6 +151,32 @@ This script will:
 4. Train the selected mode
 5. Save checkpoints
 6. Run evaluation
+
+If you already have finalized `train_v2.json`, `val_v2.json`, and `test_v2.json`, you can skip the manifest build step entirely:
+
+```bash
+cd Model_Training
+SKIP_BUILD=1 \
+MODEL_NAME=unsloth/Qwen3.5-0.8B \
+RUN_LAYER_ONLY=1 \
+RUN_LORA_LAYER=0 \
+bash run_a100_pipeline.sh
+```
+
+For the paper-facing 8-run ablation setting, the default script now also enforces a shared fixed optimizer-step budget:
+
+```bash
+cd Model_Training
+SKIP_BUILD=1 \
+MAX_OPTIMIZER_STEPS=600 \
+SKIP_TEST=1 \
+MODEL_NAME=unsloth/Qwen3.5-0.8B \
+RUN_LAYER_ONLY=1 \
+RUN_LORA_LAYER=0 \
+bash run_a100_pipeline.sh
+```
+
+This keeps the 8 runs on a more comparable compute budget. After training finishes, rerun the desired checkpoint with `SKIP_TEST=0` or call `scripts/evaluate_pipeline.py` separately for final test reporting.
 
 ## Training Modes
 
@@ -181,6 +209,8 @@ The current defaults are set to be more reproducible and more reviewer-friendly:
 - `target optimizer updates = 6000`
 - `auto_scale_min_epochs = 2`
 - `auto_scale_max_epochs = 4`
+- `max_optimizer_steps = 600`
+- `skip_test = 1` during the main training pass to keep the 8-run ablation budget manageable; run test afterward with `SKIP_TEST=0` when needed
 
 These defaults are intended to keep training budgets comparable across model sizes and modes while staying reasonably strong in practice.
 
@@ -236,56 +266,56 @@ Run `0.8B + layer_only`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
 ```
 
 Run `0.8B + lora_layer`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
 ```
 
 Run `2B + layer_only`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
 ```
 
 Run `2B + lora_layer`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
 ```
 
 Run `4B + layer_only`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
 ```
 
 Run `4B + lora_layer`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
 ```
 
 Run `9B + layer_only`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
 ```
 
 Run `9B + lora_layer`:
 
 ```bash
 cd Model_Training
-MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
 ```
 
 ## Sanity Checks Before Training
