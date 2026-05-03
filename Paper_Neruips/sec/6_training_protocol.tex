@@ -14,7 +14,7 @@ The overall training loss is
 The ranking term teaches global ordering, while the classification term supplies interpretable structure. In the current implementation, the default weights are $\lambda_{\text{rank}} = 1.0$ and $\lambda_{\text{cls}} = 0.5$, which biases optimization toward preserving ranking quality while still forcing the shared representation to encode diagnostic cues.
 
 \subsection{Backbone Family and Training Modes}
-The current paper-facing training pipeline instantiates LENS on top of Qwen3.5-VL backbones using Unsloth acceleration. We run three backbone scales, \texttt{0.8B}, \texttt{2B}, and \texttt{4B}, and two parameter-update modes:
+The current paper-facing training pipeline instantiates AnchorScore on top of Qwen3.5-VL backbones using Unsloth acceleration. We run three backbone scales, \texttt{0.8B}, \texttt{2B}, and \texttt{4B}, and two parameter-update modes:
 \begin{itemize}
     \item \textbf{layer\_only}: unfreeze the last transformer layers and train the diagnostic heads;
     \item \textbf{lora\_layer}: attach LoRA adapters while also unfreezing the last transformer layers.
@@ -22,7 +22,7 @@ The current paper-facing training pipeline instantiates LENS on top of Qwen3.5-V
 This produces six paper-facing training configurations in total. The design goal is not to search for a separate hyperparameter optimum for every backbone, but to keep the comparison protocol reviewer-friendly and compute-balanced across scales and modes.
 
 \subsection{Why This Should Recover Score Separability}
-The training design is explicitly targeted at the failure mode of existing metrics. Global similarity methods lose separability because localized identity errors are averaged into a coarse representation. LENS instead receives repeated supervision that says: under identical prompts and references, one image is better, and the reason is linked to Existence, Appearance, or Interaction. Over many pairs, this teaches the model to build a score surface aligned with human preference in the high-subject regime.
+The training design is explicitly targeted at the failure mode of existing metrics. Global similarity methods lose separability because localized identity errors are averaged into a coarse representation. AnchorScore instead receives repeated supervision that says: under identical prompts and references, one image is better, and the reason is linked to Existence, Appearance, or Interaction. Over many pairs, this teaches the model to build a score surface aligned with human preference in the high-subject regime.
 
 \subsection{Data Filtering}
 The silver pipeline applies several quality filters before training. Preference conflicts across the two teacher sources are removed entirely, because they destroy the ordering target required by the margin-ranking objective. For the three diagnostic dimensions, the two teacher outputs are averaged rather than thresholded away, which converts mild disagreement into soft supervision. Samples are also removed if any required reference image or either generated candidate image is missing. This filtering stage is necessary because pairwise ranking models are especially sensitive to noisy preference labels. A slightly smaller but cleaner silver set is preferable to a larger set with ambiguous ordering signal.

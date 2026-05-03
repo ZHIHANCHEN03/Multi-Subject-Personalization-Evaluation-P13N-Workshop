@@ -1,7 +1,34 @@
-\section{PrismBench}
+\section{BindBench}
 
 \subsection{Dataset Overview}
-PrismBench is designed as a stress-test benchmark for multi-subject personalized generation. The benchmark spans subject counts $N \in \{2,4,6,8\}$ and is built around controlled pairwise comparison: for each task, the same prompt and the same reference subjects are paired with two generated candidates, denoted Image A and Image B. This setup suppresses nuisance variance from unrelated scene changes and turns the evaluation target into a clean ranking question under fixed task conditions.
+BindBench is designed as a stress-test benchmark for multi-subject personalized generation. The benchmark spans subject counts $N \in \{2,4,6,8\}$ and is built around controlled pairwise comparison: for each task, the same prompt and the same reference subjects are paired with two generated candidates, denoted Image A and Image B. This setup suppresses nuisance variance from unrelated scene changes and turns the evaluation target into a clean ranking question under fixed task conditions.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=8mm and 7mm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.1cm, minimum height=1.05cm, fill=blue!5},
+  smallbox/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.95cm, fill=green!6},
+  arrow/.style={-{Latex[length=2.5mm]}, thick}
+]
+\node[box] (prompts) {15K prompt seeds\\$\rightarrow$ 60K hierarchical prompts};
+\node[box, right=of prompts] (control) {36 controlled buckets\\relation $\times$ ratio $\times$ complexity};
+\node[box, right=of control] (paired) {paired generations\\same prompt + same references};
+
+\node[smallbox, below=of prompts] (silver) {60K silver resource\\Nano/Mosaic + dual teachers};
+\node[smallbox, below=of paired] (gold) {4K human set\\6 generators + double blind};
+\node[box, below=of control, yshift=-8mm] (uses) {community uses:\\metric training, generator benchmarking, RLHF/DPO data};
+
+\draw[arrow] (prompts) -- (control);
+\draw[arrow] (control) -- (paired);
+\draw[arrow] (prompts) -- (silver);
+\draw[arrow] (paired) -- (gold);
+\draw[arrow] (silver) -- (uses);
+\draw[arrow] (gold) -- (uses);
+\end{tikzpicture}
+\caption{BindBench overview: hierarchical prompts, controlled pairs, a silver training resource, and a broader human evaluation layer.}
+\label{fig:bindbench_overview}
+\end{figure}
 
 \subsection{Hierarchical Prompt Construction}
 To ensure rigorous control over scene complexity and interaction types, we construct a 60K prompt set for multi-entity image generation. The construction process is strictly hierarchical. We generate 60K prompts from 15K distinct seeds. Each seed produces four related prompts at complexity levels $N \in \{8, 6, 4, 2\}$. We first construct the most complex prompt ($N=8$) and then obtain lower-complexity versions by systematically removing entities and their corresponding relations. This ensures that prompt complexity decreases in a controlled and consistent way across levels, allowing us to isolate the exact point at which a generator or metric fails.
@@ -12,7 +39,8 @@ All prompts describe a scene in a white studio to minimize background distractor
 The prompts are grounded in a fixed pool of 80 reference images (resized to $512 \times 512$), consisting of 30 human references and 50 non-human references (animals and objects). The prompt space is factorized across two key axes:
 \begin{itemize}
     \item \textbf{Relation Category}: Prompts are assigned to one of three structural types: \texttt{no\_interaction\_\allowbreak no\_occlusion} (strictly non-contact), \texttt{occlusion\_\allowbreak no\_interaction} (spatial overlap without active engagement), and \texttt{occlusion\_\allowbreak interaction} (explicit physical verbs, excluding weak descriptions like gaze).
-    \item \textbf{Human/Object Ratio}: Each prompt follows a strict composition ratio: \texttt{balanced}, \texttt{human\_heavy}, or \texttt{object\_heavy}. The exact distribution of human (H) and non-human (N) entities across the four complexity levels is detailed in Table~\ref{tab:entity_ratio_levels}.
+    \item \textbf{Human/Object Ratio}: Each prompt follows a strict composition ratio:
+    \texttt{balanced}, \texttt{human\_heavy}, or \texttt{object\_heavy}. Table~\ref{tab:entity_ratio_levels} gives the exact human/non-human counts at each complexity level.
 \end{itemize}
 
 This creates $3 \times 3 \times 4 = 36$ distinct buckets, across which the 60,000 prompts are distributed approximately uniformly.
@@ -71,5 +99,5 @@ This policy is intentionally asymmetric. Preference disagreement destroys the ra
 \subsection{Annotation Protocol}
 The current training pipeline uses dual-teacher silver labels under a shared schema. Two teacher VLM outputs are collected for each task, then merged only if the ranking decision is consistent. The human evaluation layer is separated from this training pipeline and is designed for paper-facing metric comparison across a wider set of generators. This distinction matters: the silver set provides scale, while the human set provides stronger evidence of alignment and transfer.
 
-\subsection{Why PrismBench Matters}
-PrismBench is not simply another paired preference set. Its core purpose is to isolate the exact evaluation regime where existing metrics fail: shared prompt, shared references, multiple requested subjects, and controlled comparison between two generated images. This is the setting required to measure whether a metric still has discriminative power after identity complexity grows.
+\subsection{Why BindBench Matters}
+BindBench is not simply another paired preference set. Its core purpose is to isolate the exact evaluation regime where existing metrics fail: shared prompt, shared references, multiple requested subjects, and controlled comparison between two generated images. This is the setting required to measure whether a metric still has discriminative power after identity complexity grows.

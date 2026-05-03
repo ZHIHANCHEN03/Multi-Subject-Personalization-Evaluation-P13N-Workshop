@@ -4,22 +4,22 @@
 The empirical section is organized around four questions:
 \begin{enumerate}
     \item Do existing evaluators lose discriminative power as subject count increases?
-    \item Does LENS better align with pairwise human preference than standard image-text or image-image metrics?
+    \item Does AnchorScore better align with pairwise human preference than standard image-text or image-image metrics?
     \item Does multi-task diagnostic supervision improve over ranking-only training?
     \item How stable are the conclusions across backbone scales and update modes?
 \end{enumerate}
 
 \subsection{Ready-To-Run Experimental Setup}
-The current experiment plan is already fixed even though the final tables are still being collected. We train six LENS variants using Qwen3.5 backbones at \texttt{0.8B}, \texttt{2B}, and \texttt{4B} scales, each under \texttt{layer\_only} and \texttt{lora\_layer} modes. All six runs use the same paper-facing budget of 600 optimizer steps. This shared-budget design is intended to make the main comparison reviewer-friendly under a realistic compute constraint. Training is performed on the 60k-pair dual-teacher silver pipeline, while paper-facing comparison is centered on the broader 4k-pair human evaluation set.
+The current experiment plan is already fixed even though the final tables are still being collected. We train six AnchorScore variants using Qwen3.5 backbones at \texttt{0.8B}, \texttt{2B}, and \texttt{4B} scales, each under \texttt{layer\_only} and \texttt{lora\_layer} modes. All six runs use the same paper-facing budget of 600 optimizer steps. This shared-budget design is intended to make the main comparison reviewer-friendly under a realistic compute constraint. Training is performed on the 60k-pair dual-teacher silver pipeline, while paper-facing comparison is centered on the broader 4k-pair human evaluation set.
 
 \subsection{Baselines}
-The current baseline panel for metric comparison includes the evaluators that are already integrated into our analysis workflow: CLIP-T, CLIP-I, DINOv2, ArcFace, ImageReward, SCR, and REFVNL. These methods were selected because together they cover text-image similarity, image-image similarity, identity-oriented features, reward-model style preference signals, and specialized reference-aware scoring. In the final paper version, these baselines will be evaluated on the same multi-generator human set used to assess LENS.
+The current baseline panel for metric comparison includes the evaluators that are already integrated into our analysis workflow: CLIP-T, CLIP-I, DINOv2, ArcFace, ImageReward, SCR, and REFVNL. These methods were selected because together they cover text-image similarity, image-image similarity, identity-oriented features, reward-model style preference signals, and specialized reference-aware scoring. In the final paper version, these baselines will be evaluated on the same multi-generator human set used to assess AnchorScore.
 
 \subsection{What Can Be Written Now}
 Even before the final result tables are complete, the following parts of the section are ready to write and should remain in the paper draft:
 \begin{itemize}
     \item the evaluation questions and success criteria;
-    \item the fixed training-budget protocol for the six LENS variants;
+    \item the fixed training-budget protocol for the six AnchorScore variants;
     \item the distinction between the 60k-pair silver training set and the 4k-pair human evaluation set;
     \item the baseline list and why each baseline is included;
     \item the planned breakdown by subject count $N \in \{2,4,6,8\}$;
@@ -60,12 +60,12 @@ Table~\ref{tab:main_results_placeholder} is reserved for the final paper-facing 
         SCR & -- & -- & -- & subject completeness baseline \\
         REFVNL & -- & -- & -- & reference-aware baseline \\
         \midrule
-        LENS (0.8B, layer\_only) & -- & -- & -- & pending \\
-        LENS (0.8B, lora\_layer) & -- & -- & -- & pending \\
-        LENS (2B, layer\_only) & -- & -- & -- & pending \\
-        LENS (2B, lora\_layer) & -- & -- & -- & pending \\
-        LENS (4B, layer\_only) & -- & -- & -- & pending \\
-        LENS (4B, lora\_layer) & -- & -- & -- & pending \\
+        AnchorScore (0.8B, layer\_only) & -- & -- & -- & pending \\
+        AnchorScore (0.8B, lora\_layer) & -- & -- & -- & pending \\
+        AnchorScore (2B, layer\_only) & -- & -- & -- & pending \\
+        AnchorScore (2B, lora\_layer) & -- & -- & -- & pending \\
+        AnchorScore (4B, layer\_only) & -- & -- & -- & pending \\
+        AnchorScore (4B, lora\_layer) & -- & -- & -- & pending \\
         \bottomrule
     \end{tabular}
     }
@@ -78,7 +78,7 @@ Once the runs and evaluation files are complete, we will populate this section w
     \item \textbf{High-subject-count separability}: score-gap and overlap analysis between stronger and weaker generations for $N \in \{2,4,6,8\}$.
     \item \textbf{Cross-generator transfer}: comparison between generators seen in silver training data and generators appearing only in human evaluation.
     \item \textbf{Ablations}: ranking-only versus multi-task training, with and without agreement-based filtering.
-    \item \textbf{Qualitative case studies}: examples where global metrics collapse but LENS preserves the correct ordering.
+    \item \textbf{Qualitative case studies}: examples where global metrics collapse but AnchorScore preserves the correct ordering.
 \end{itemize}
 
 The central experimental claim to validate remains the same: existing metrics lose score separability as subject count increases, whereas a reference-conditioned evaluator trained with pairwise ranking and diagnostic supervision can remain more discriminative and better aligned with human preference.
