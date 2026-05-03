@@ -14,9 +14,3 @@ This is a minimal LaTeX project under `vlm_multisubject_eval` for writing a Neur
 - `sections/sop_alignment_subsection.tex`: the requested subsection draft
 - `refs.bib`: bibliography placeholder
 
-## Build
-
-```bash
-cd /Users/bytedance/Documents/multi_subject_generation/Multi-Subject-Personalization-Evaluation-P13N-Workshop/Model_Training/vlm_multisubject_eval/latex_neurips_sop_judge
-pdflatex main.tex
-```

@@ -1,5 +1,5 @@
-\subsection{SOP-Guided Alignment of LLM-as-Judge with Human Preference}
-\label{sec:sop_alignment}
+\subsection{SOP-Guided Alignment of LMM-as-Judge with Human Preference}
+\label{sec:method_sop_alignment}
 
 Developing a specialized, lightweight evaluation model for multi-subject personalized generation necessitates large-scale pairwise preference data. However, eliciting reliable preference labels in this domain is notoriously challenging. An evaluator must jointly verify the physical presence of multiple subjects, the fidelity of fine-grained identity and wardrobe attributes, and the correctness of complex cross-subject interactions. This multi-dimensional verification renders large-scale human annotation prohibitively expensive and highly susceptible to inter-annotator variance. 
 
@@ -18,33 +18,6 @@ Crucially, the SOP forces the judge to externalize its reasoning by generating a
 \paragraph{High-Confidence Label Aggregation via Cross-Model Consensus.}
 To further distill high-fidelity training signals and mitigate model-specific biases, we implement a cross-model consensus mechanism. We independently query two distinct frontier models (\texttt{gemini-2.5-flash} and \texttt{gemini-3.1-flash-lite-preview}) using the identical SOP. We then construct the final training set by taking the intersection of their predictions---retaining only the pairwise comparisons where both models yield the exact same preference. While this intersection rule reduces the total yield, it acts as a rigorous precision filter, effectively pruning examples where preference is driven by idiosyncratic model noise or ambiguous image quality. The resulting high-agreement subset provides a robust, conservative proxy for human preference.
 
-\begin{figure}[t]
-    \centering
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{figures/overall_agreement.pdf}
-        \caption{By Evaluation Dimension}
-        \label{fig:agree_dim}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{figures/agreement_by_subject.pdf}
-        \caption{By Subject Count}
-        \label{fig:agree_subj}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{figures/agreement_by_tag.pdf}
-        \caption{By Spatial Relationship}
-        \label{fig:agree_tag}
-    \end{subfigure}
-    \caption{Cross-model agreement analysis on $\sim$60K tasks between \texttt{gemini-2.5-flash} and \texttt{gemini-3.1-flash-lite-preview}. (a) Models reliably converge on global preference but exhibit higher variance on fine-grained appearance. (b) Counter-intuitively, preference agreement increases with the number of subjects, as catastrophic compositional failures in dense scenes make the ``less collapsed'' image trivially obvious. (c) Explicitly prompted interactions provide stronger contextual grounding, yielding the highest agreement.}
-    \label{fig:agreement_analysis}
-\end{figure}
-
-\paragraph{Label Yield and Reliability Analysis.}
-Applying this SOP to a large-scale corpus of $\sim$60K candidate pairs yields compelling insights into LMM evaluation behavior. Crucially, the two models achieve a robust \emph{Preference Agreement} of $95.1\%$ ($56,909 / 59,852$ valid overlapping tasks). Looking at the fundamental sub-scores, the models exhibit high consensus on \emph{Existence} ($89.1\%$) and substantial agreement on \emph{Interaction} ($71.9\%$) and \emph{Appearance} ($69.0\%$). This overwhelmingly high preference consensus demonstrates that the SOP effectively anchors the models' global decision-making, confirming that the intersection-filtered labels are highly reliable and well-suited for training our lightweight evaluator. 
-
-Furthermore, analyzing the preference agreement by scene complexity reveals a counter-intuitive trend: agreement \emph{increases} with the number of subjects. The preference consensus is $91.1\%$ for 2-subject prompts, but rises steadily to $93.4\%$ (4 subjects), $97.7\%$ (6 subjects), and $98.1\%$ (8 subjects). We hypothesize this is because dense multi-subject generation remains exceedingly difficult for current diffusion models; in 8-subject scenarios, candidate images often suffer from catastrophic compositional failures, making the choice between a partially successful image and a completely collapsed image trivially obvious to both judges. Finally, analyzing by spatial relationship (class tag) shows that scenes requiring \emph{occlusion with interaction} yield the highest agreement ($97.2\%$), whereas \emph{occlusion without interaction} yields the lowest ($92.8\%$), suggesting that explicitly prompted interactions provide stronger contextual grounding for the LMMs to anchor their judgments.
 The exact prompt used to enforce this SOP in our pipeline is reproduced below. It explicitly separates independent candidate scoring from the final pairwise decision, defines strict edge cases, and mandates a JSON schema that forces the LMM to articulate flaws before concluding.
 
 \begin{verbatim}
