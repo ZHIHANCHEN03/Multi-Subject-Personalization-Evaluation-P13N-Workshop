@@ -266,56 +266,64 @@ Run `0.8B + layer_only`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 \
+  bash run_a100_pipeline.sh > /workspace/lens_08b_layer.nohup.log 2>&1 &
 ```
 
 Run `0.8B + lora_layer`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-0.8B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 \
+  bash run_a100_pipeline.sh > /workspace/lens_08b_lora.nohup.log 2>&1 &
 ```
 
 Run `2B + layer_only`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 \
+  bash run_a100_pipeline.sh > /workspace/lens_2b_layer.nohup.log 2>&1 &
 ```
 
 Run `2B + lora_layer`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-2B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 \
+  bash run_a100_pipeline.sh > /workspace/lens_2b_lora.nohup.log 2>&1 &
 ```
 
 Run `4B + layer_only`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 \
+  bash run_a100_pipeline.sh > /workspace/lens_4b_layer.nohup.log 2>&1 &
 ```
 
 Run `4B + lora_layer`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-4B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 \
+  bash run_a100_pipeline.sh > /workspace/lens_4b_lora.nohup.log 2>&1 &
 ```
 
 Run `9B + layer_only`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=1 RUN_LORA_LAYER=0 \
+  bash run_a100_pipeline.sh > /workspace/lens_9b_layer.nohup.log 2>&1 &
 ```
 
 Run `9B + lora_layer`:
 
 ```bash
 cd Model_Training
-SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 bash run_a100_pipeline.sh
+nohup env SKIP_BUILD=1 MODEL_NAME=unsloth/Qwen3.5-9B RUN_LAYER_ONLY=0 RUN_LORA_LAYER=1 \
+  bash run_a100_pipeline.sh > /workspace/lens_9b_lora.nohup.log 2>&1 &
 ```
 
 ## Sanity Checks Before Training
