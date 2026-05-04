@@ -39,16 +39,30 @@ PY
 bootstrap_eval_venv() {
   local venv_dir="$1"
   local base_python="$2"
+  local pyvenv_cfg="$venv_dir/pyvenv.cfg"
 
   echo "[run_export_lens_scores] Bootstrapping local eval venv: $venv_dir"
+  if [ -f "$pyvenv_cfg" ] && grep -q "include-system-site-packages = true" "$pyvenv_cfg"; then
+    echo "[run_export_lens_scores] Removing contaminated eval venv (system-site-packages enabled)"
+    rm -rf "$venv_dir"
+  fi
   if [ ! -d "$venv_dir" ]; then
-    "$base_python" -m venv --system-site-packages "$venv_dir"
+    "$base_python" -m venv "$venv_dir"
   fi
 
   local venv_python="$venv_dir/bin/python"
+  local constraints_file="$venv_dir/constraints-export-lens.txt"
+
+  cat > "$constraints_file" <<'EOF'
+fsspec<=2025.9.0
+trl>=0.18.2,<=0.24.0,!=0.19.0
+torchao>=0.13.0
+EOF
+
   "$venv_python" -m pip install --upgrade pip setuptools wheel
   "$venv_python" -m pip install --upgrade --force-reinstall --no-cache-dir \
-    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "fsspec<=2025.9.0"
+    -c "$constraints_file" \
+    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao"
 
   echo "[run_export_lens_scores] Eval venv ready: $venv_python"
   printf '%s\n' "$venv_python"
@@ -145,6 +159,7 @@ echo "[run_export_lens_scores] Runs root      : ${RUNS_ROOT:-<auto-discover>}"
 echo "[run_export_lens_scores] Dataset base   : $DATASET_BASE_DIR"
 echo "[run_export_lens_scores] Python         : $PYTHON_BIN"
 echo "[run_export_lens_scores] Metric models  : all 5 ready models"
+echo "[run_export_lens_scores] Per-model out  : ${OUTPUT_PATH%.jsonl}__<metrics_alias>.jsonl"
 echo "[run_export_lens_scores] Log every      : $LOG_EVERY pairs"
 echo "============================================================"
 

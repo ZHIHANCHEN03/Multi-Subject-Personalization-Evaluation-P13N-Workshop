@@ -101,6 +101,12 @@ def write_jsonl(records: Iterable[Dict], output_path: Path) -> None:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def build_per_model_output_path(base_output_path: Path, metrics_alias: str) -> Path:
+    stem = base_output_path.stem
+    suffix = base_output_path.suffix or ".jsonl"
+    return base_output_path.with_name(f"{stem}__{metrics_alias}{suffix}")
+
+
 def find_first_existing(paths: Sequence[Path]) -> Path:
     for path in paths:
         if path.exists():
@@ -748,7 +754,10 @@ def main() -> None:
             log_every=args.log_every,
         )
         all_records.extend(metric_records)
+        per_model_output_path = build_per_model_output_path(output_path, metrics_alias)
+        write_jsonl(metric_records, per_model_output_path)
         log(f"Finished {metrics_alias}: {len(metric_records)} image-level records")
+        log(f"Wrote per-model output to {per_model_output_path}")
 
     write_jsonl(all_records, output_path)
     log(f"Wrote {len(all_records)} records to {output_path}")
