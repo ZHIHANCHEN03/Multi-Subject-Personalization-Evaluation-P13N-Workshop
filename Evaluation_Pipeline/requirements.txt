@@ -3,7 +3,7 @@ Pillow
 transformers
 accelerate
 bitsandbytes
-ImageReward
+image-reward
 insightface
 onnxruntime-gpu
 timm
