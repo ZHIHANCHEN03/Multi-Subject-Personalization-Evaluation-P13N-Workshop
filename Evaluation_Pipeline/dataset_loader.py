@@ -14,16 +14,19 @@ def build_evaluation_manifest(dataset_root, output_dir):
     
     # 1. Parse v10 Test Set (Nano & Mosaic)
     v10_dir = os.path.join(dataset_root, "v10_test", "v10_test")
+    print(f"[Log] Looking for v10 dataset at: {v10_dir}")
     if os.path.exists(v10_dir):
         jsonl_path = os.path.join(v10_dir, "test_1.5k_v10.jsonl")
         ref_dir = os.path.join(v10_dir, "inference_images_v10")
         
+        print(f"[Log] v10 directory found. Looking for JSONL: {jsonl_path}")
         if os.path.exists(jsonl_path):
             with open(jsonl_path, 'r') as f:
                 v10_prompts = [json.loads(line) for line in f]
+            print(f"[Log] Successfully loaded {len(v10_prompts)} prompts from v10 JSONL.")
                 
             for p in v10_prompts:
-                prompt_id = p.get('id', p.get('idx', 'unknown'))
+                prompt_id = str(p.get('id', p.get('idx', 'unknown')))
                 prompt_text = p.get('prompt', '')
                 # Find all corresponding refs
                 refs = glob(os.path.join(ref_dir, "*.jpg")) # Simplified, needs exact matching logic based on your jsonl
@@ -45,29 +48,31 @@ def build_evaluation_manifest(dataset_root, output_dir):
                             "model_B_image": nano_img
                         }
                     })
+            print(f"[Log] Successfully paired {len(v10_manifest)} generated images for v10.")
+        else:
+            print(f"[Error] v10 JSONL not found at {jsonl_path}")
+    else:
+        print(f"[Error] v10 directory not found at {v10_dir}")
 
     # 2. Parse v13.2 Test Set (GLM, Flux, GPT, SeeDream)
     v13_dir = os.path.join(dataset_root, "v13_2_1.26k_evl", "v13_2_1.26k_evl")
+    print(f"[Log] Looking for v13.2 dataset at: {v13_dir}")
     if os.path.exists(v13_dir):
         jsonl_path = os.path.join(v13_dir, "sampled_prompts.jsonl")
         ref_dir = os.path.join(v13_dir, "all_refs_noindex_v13.2")
         
+        print(f"[Log] v13.2 directory found. Looking for JSONL: {jsonl_path}")
         if os.path.exists(jsonl_path):
             with open(jsonl_path, 'r') as f:
                 v13_prompts = [json.loads(line) for line in f]
+            print(f"[Log] Successfully loaded {len(v13_prompts)} prompts from v13.2 JSONL.")
                 
             for p in v13_prompts:
                 prompt_id = str(p.get('id', p.get('idx', 'unknown')))
                 prompt_text = p.get('prompt', '')
-                # Note: Exact ref matching logic will depend on prompt metadata or filenames.
-                # Assuming here we grab all for the specific ID or a generic list if mapping is complex.
                 refs = glob(os.path.join(ref_dir, "*.jpg"))[:2] # Placeholder: Should map to actual used refs
                 
-                # 核心逻辑变更：v13 往往是两两比较 (比如 GLM vs Flux, 或 GPT vs SeeDream)
-                # 这里为了完全遵循 Pair 结构，我们将同一个 prompt_id 下找到的多个模型的图，组合成 Pair。
-                # 你可以根据实际的人类评测标注逻辑 (比如是 GLM 碰 Flux，还是 4 个模型互相碰) 来调整组合方式。
-                # 假设这里是把 4 个模型都找到，然后组成 2 个独立的 Pair 放入 manifest。
-                
+                # 核心逻辑变更：v13 往往是两两比较
                 glm_img = os.path.join(v13_dir, "GLM", f"{prompt_id}.jpg")
                 flux_img = os.path.join(v13_dir, "flux", "flux2_klein_9b_kv_1260_20260423", f"{prompt_id}.jpg")
                 gpt_imgs = glob(os.path.join(v13_dir, "gpt-image-1.5_high", f"id_{prompt_id}_*.jpg"))
@@ -100,6 +105,11 @@ def build_evaluation_manifest(dataset_root, output_dir):
                             "model_B_image": seedream_imgs[0]
                         }
                     })
+            print(f"[Log] Successfully paired {len(v13_manifest)} generated images for v13.2.")
+        else:
+            print(f"[Error] v13.2 JSONL not found at {jsonl_path}")
+    else:
+        print(f"[Error] v13.2 directory not found at {v13_dir}")
 
     # Save to master manifests
     v10_out = os.path.join(output_dir, "v10_manifest.jsonl")
