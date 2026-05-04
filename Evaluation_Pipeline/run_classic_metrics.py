@@ -190,44 +190,37 @@ def run_image_reward(manifest):
 # 6. SCR (Subject Collapse Rate via GroundingDINO)
 # ==========================================
 def run_scr(manifest):
-    print("Loading GroundingDINO for SCR...")
-    from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
-    model_id = "IDEA-Research/grounding-dino-base"
-    processor = AutoProcessor.from_pretrained(model_id)
-    model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id).to("cuda")
+    print("Loading Real DINOv2 Model for SCR...")
+    from transformers import AutoImageProcessor, AutoModel
+    processor = AutoImageProcessor.from_pretrained("facebook/dinov2-large")
+    model = AutoModel.from_pretrained("facebook/dinov2-large").to("cuda")
     
-    def count_subjects(img_path, prompt):
-        img = Image.open(img_path).convert("RGB")
-        inputs = processor(images=img, text=prompt, return_tensors="pt").to("cuda")
-        with torch.no_grad():
-            outputs = model(**inputs)
-        # Count bounding boxes with confidence > 0.25
-        target_sizes = torch.tensor([img.size[::-1]])
-        results = processor.post_process_grounded_object_detection(
-            outputs,
-            inputs.input_ids,
-            box_threshold=0.25,
-            text_threshold=0.25,
-            target_sizes=target_sizes
-        )[0]
-        return len(results["boxes"])
+    tau = 0.4  # as per paper
 
     for idx, item in enumerate(manifest):
         item = init_metrics_dict(item, "scr")
         if 'model_A_score' in item['classic_metrics']['scr']: continue
         print(f"[{idx}/{len(manifest)}] SCR: {item['task_id']}")
         
-        prompt = item['prompt']
-        # If detected boxes < number of reference images, we consider it collapsed (1.0), else (0.0)
-        expected_count = len(item['reference_images'])
+        refs = [Image.open(r).convert("RGB") for r in item['reference_images']]
+        img_a = Image.open(item['pair']['model_A_image']).convert("RGB")
+        img_b = Image.open(item['pair']['model_B_image']).convert("RGB")
         
-        count_a = count_subjects(item['pair']['model_A_image'], prompt)
-        count_b = count_subjects(item['pair']['model_B_image'], prompt)
-        
-        score_a = 1.0 if count_a < expected_count else 0.0
-        score_b = 1.0 if count_b < expected_count else 0.0
-        
-        item['classic_metrics']['scr'] = {"model_A_score": score_a, "model_B_score": score_b}
+        with torch.no_grad():
+            ref_inputs = processor(images=refs, return_tensors="pt").to("cuda")
+            ref_cls = model(**ref_inputs).last_hidden_state[:, 0, :] # [N, D]
+            
+            cls_a = model(**processor(images=img_a, return_tensors="pt").to("cuda")).last_hidden_state[:, 0, :] # [1, D]
+            cls_b = model(**processor(images=img_b, return_tensors="pt").to("cuda")).last_hidden_state[:, 0, :] # [1, D]
+            
+            sim_a = F.cosine_similarity(ref_cls, cls_a) # [N]
+            sim_b = F.cosine_similarity(ref_cls, cls_b) # [N]
+            
+            # Collapse if sim < tau
+            score_a = (sim_a < tau).float().mean().item()
+            score_b = (sim_b < tau).float().mean().item()
+            
+        item['classic_metrics']['scr'] = {"model_A_score": round(score_a, 4), "model_B_score": round(score_b, 4)}
         if idx % 10 == 0: save_manifest(manifest, args.manifest)
     return manifest
 
@@ -242,9 +235,9 @@ def run_refvnli(manifest):
     )
     FastVisionModel.for_inference(model)
     
-    def get_entailment(refs, gen_img_path):
+    def get_entailment(refs, gen_img_path, prompt):
         images = [Image.open(r).convert("RGB") for r in refs] + [Image.open(gen_img_path).convert("RGB")]
-        instruction = "The first images are references. The last is the generated image. Are all reference subjects present in the generated image? Output exactly 'Yes' or 'No'."
+        instruction = f"Given the reference images and the text prompt '{prompt}', does the generated image align with the text and preserve the visual identity of all reference subjects? Output exactly 'Yes' or 'No'."
         messages = [{"role": "user", "content": [{"type": "image"}] * len(images) + [{"type": "text", "text": instruction}]}]
         text = processor.apply_chat_template(messages, add_generation_prompt=True)
         inputs = processor(text=[text], images=images, return_tensors="pt", padding=True).to("cuda")
@@ -259,8 +252,9 @@ def run_refvnli(manifest):
         print(f"[{idx}/{len(manifest)}] REFVNLI: {item['task_id']}")
         
         refs = item['reference_images']
-        score_a = get_entailment(refs, item['pair']['model_A_image'])
-        score_b = get_entailment(refs, item['pair']['model_B_image'])
+        prompt = item['prompt']
+        score_a = get_entailment(refs, item['pair']['model_A_image'], prompt)
+        score_b = get_entailment(refs, item['pair']['model_B_image'], prompt)
         
         item['classic_metrics']['refvnli'] = {"model_A_score": score_a, "model_B_score": score_b}
         if idx % 10 == 0: save_manifest(manifest, args.manifest)
