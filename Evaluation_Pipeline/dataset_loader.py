@@ -1,6 +1,5 @@
 import os
 import json
-import pandas as pd
 from glob import glob
 
 def build_evaluation_manifest(dataset_root, output_dir):
