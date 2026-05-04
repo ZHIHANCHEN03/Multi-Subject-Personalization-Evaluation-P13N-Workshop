@@ -43,14 +43,14 @@ echo "✅ All classic & advanced metrics evaluation completed!"
 echo ""
 
 echo "============================================================"
-echo "🚀 [Step 3/3] Running LLM-as-Judge (Unsloth Qwen3.5)"
+echo "🚀 [Step 3/3] Running LLM-as-Judge (Unsloth Qwen2-VL)"
 echo "============================================================"
-# 遍历 Qwen3.5 的三个模型尺寸
-for SIZE in 0.8 2 4; do
-    echo "👉 Running [Qwen3.5 ${SIZE}B] for v10..."
+# 遍历 Qwen2-VL 的两个模型尺寸
+for SIZE in 2 7; do
+    echo "👉 Running [Qwen2-VL ${SIZE}B] for v10..."
     python3 $PIPELINE_DIR/run_llm_judge_unsloth.py --manifest $V10_MANIFEST --size $SIZE
     
-    echo "👉 Running [Qwen3.5 ${SIZE}B] for v13.2..."
+    echo "👉 Running [Qwen2-VL ${SIZE}B] for v13.2..."
     python3 $PIPELINE_DIR/run_llm_judge_unsloth.py --manifest $V13_MANIFEST --size $SIZE
 done
 echo "✅ LLM-as-Judge evaluation completed!"
