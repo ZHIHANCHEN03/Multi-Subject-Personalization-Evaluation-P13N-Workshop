@@ -1,4 +1,5 @@
 import argparse
+import gc
 import json
 import math
 import sys
@@ -7,6 +8,7 @@ from typing import Dict, Iterable, List, Sequence, Tuple
 
 import unsloth
 import torch
+from unsloth import FastVisionModel
 from peft import PeftModel
 from transformers import AutoProcessor
 from tqdm.auto import tqdm
@@ -431,13 +433,7 @@ def build_prompt_text(processor, prompt: str, num_refs: int) -> str:
 def prepare_inputs(processor, prompt: str, reference_images: Sequence[str], generated_image: str, device: torch.device) -> Dict:
     images = load_images(reference_images, generated_image)
     text_prompt = build_prompt_text(processor, prompt, num_refs=len(reference_images))
-    inputs = processor(
-        text=[text_prompt],
-        images=images,
-        return_tensors="pt",
-        padding=False,
-        truncation=False,
-    )
+    inputs = processor(text=[text_prompt], images=images, return_tensors="pt", padding=False, truncation=False)
 
     model_inputs = {
         "input_ids": inputs["input_ids"].to(device),
@@ -449,6 +445,48 @@ def prepare_inputs(processor, prompt: str, reference_images: Sequence[str], gene
     if "image_grid_thw" in inputs:
         model_inputs["image_grid_thw"] = inputs["image_grid_thw"].to(device)
     return model_inputs
+
+
+class PairInferencePreprocessor:
+    """Reuse prompt text and reference PIL images across A/B scoring without caching every generated image."""
+
+    def __init__(self, processor, device: torch.device):
+        self.processor = processor
+        self.device = device
+        self.reference_cache: Dict[Tuple[str, ...], List] = {}
+        self.prompt_cache: Dict[Tuple[str, int], str] = {}
+
+    def get_reference_images(self, reference_paths: Sequence[str]) -> List:
+        key = tuple(reference_paths)
+        cached = self.reference_cache.get(key)
+        if cached is not None:
+            return cached
+        images = [load_image_with_safety(path) for path in reference_paths]
+        self.reference_cache[key] = images
+        return images
+
+    def get_prompt_text(self, prompt: str, num_refs: int) -> str:
+        key = (prompt, num_refs)
+        cached = self.prompt_cache.get(key)
+        if cached is not None:
+            return cached
+        text_prompt = build_prompt_text(self.processor, prompt, num_refs=num_refs)
+        self.prompt_cache[key] = text_prompt
+        return text_prompt
+
+    def build_model_inputs(self, text_prompt: str, reference_images: Sequence, generated_image_path: str) -> Dict:
+        images = list(reference_images) + [load_image_with_safety(generated_image_path)]
+        inputs = self.processor(text=[text_prompt], images=images, return_tensors="pt", padding=False, truncation=False)
+        model_inputs = {
+            "input_ids": inputs["input_ids"].to(self.device),
+            "attention_mask": inputs["attention_mask"].to(self.device),
+            "pixel_values": inputs["pixel_values"].to(self.device),
+        }
+        if "mm_token_type_ids" in inputs:
+            model_inputs["mm_token_type_ids"] = inputs["mm_token_type_ids"].to(self.device)
+        if "image_grid_thw" in inputs:
+            model_inputs["image_grid_thw"] = inputs["image_grid_thw"].to(self.device)
+        return model_inputs
 
 
 def load_lens_checkpoint(checkpoint_dir: Path, device: torch.device) -> Tuple[LENS, AutoProcessor, Dict]:
@@ -487,6 +525,10 @@ def load_lens_checkpoint(checkpoint_dir: Path, device: torch.device) -> Tuple[LE
 
     model.eval()
     model.to(device)
+    try:
+        FastVisionModel.for_inference(model.backbone)
+    except Exception as exc:
+        log(f"FastVisionModel.for_inference skipped for {checkpoint_dir.name}: {exc}")
 
     processor = AutoProcessor.from_pretrained(cfg["base_model_name"], trust_remote_code=True)
     if getattr(processor, "tokenizer", None) and processor.tokenizer.pad_token is None:
@@ -497,14 +539,9 @@ def load_lens_checkpoint(checkpoint_dir: Path, device: torch.device) -> Tuple[LE
 
 def score_single_image(
     model: LENS,
-    processor,
-    prompt: str,
-    reference_images: Sequence[str],
-    generated_image: str,
-    device: torch.device,
+    model_inputs: Dict,
 ) -> Tuple[float, Dict[str, float]]:
-    model_inputs = prepare_inputs(processor, prompt, reference_images, generated_image, device)
-    with torch.no_grad():
+    with torch.inference_mode():
         score, logits = model(**model_inputs)
         raw_score = float(score.squeeze().item())
         probs = torch.sigmoid(logits.squeeze(0)).detach().cpu().tolist()
@@ -594,6 +631,7 @@ def run_export_for_metric_model(
     log(f"Loading metric model: {metrics_alias}")
     log(f"Checkpoint directory: {checkpoint_dir}")
     model, processor, _ = load_lens_checkpoint(checkpoint_dir, device)
+    preprocessor = PairInferencePreprocessor(processor, device)
     results: List[Dict] = []
 
     for index, item in enumerate(
@@ -605,23 +643,13 @@ def run_export_for_metric_model(
         refs = [str(normalize_path(path, dataset_base_dir)) for path in item["reference_images"]]
         gen_a = str(normalize_path(pair["model_A_image"], dataset_base_dir))
         gen_b = str(normalize_path(pair["model_B_image"], dataset_base_dir))
+        reference_images = preprocessor.get_reference_images(refs)
+        prompt_text = preprocessor.get_prompt_text(item.get("prompt", ""), num_refs=len(reference_images))
+        inputs_a = preprocessor.build_model_inputs(prompt_text, reference_images, gen_a)
+        inputs_b = preprocessor.build_model_inputs(prompt_text, reference_images, gen_b)
 
-        score_a, cats_a = score_single_image(
-            model=model,
-            processor=processor,
-            prompt=item.get("prompt", ""),
-            reference_images=refs,
-            generated_image=gen_a,
-            device=device,
-        )
-        score_b, cats_b = score_single_image(
-            model=model,
-            processor=processor,
-            prompt=item.get("prompt", ""),
-            reference_images=refs,
-            generated_image=gen_b,
-            device=device,
-        )
+        score_a, cats_a = score_single_image(model=model, model_inputs=inputs_a)
+        score_b, cats_b = score_single_image(model=model, model_inputs=inputs_b)
         results.extend(
             expand_pair_records(
                 pair_item=item,
@@ -641,6 +669,12 @@ def run_export_for_metric_model(
                 f"B={pair['model_B_name']} score={score_b:.4f}"
             )
 
+        del inputs_a, inputs_b
+
+    del preprocessor, processor, model
+    gc.collect()
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
     return results
 
 
