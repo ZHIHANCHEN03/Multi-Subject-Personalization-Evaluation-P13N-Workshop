@@ -1,9 +1,10 @@
 pandas
 Pillow
-transformers
+transformers>=4.36
 accelerate
 bitsandbytes
 image-reward
 insightface
 onnxruntime-gpu
+opencv-python
 timm
