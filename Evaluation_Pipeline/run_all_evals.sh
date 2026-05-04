@@ -11,7 +11,18 @@ V10_MANIFEST="$WORKSPACE_DIR/v10_manifest.jsonl"
 V13_MANIFEST="$WORKSPACE_DIR/v13_manifest.jsonl"
 
 echo "============================================================"
-echo "🚀 [Step 1/3] Generating Metadata Manifests (v10 and v13.2)"
+echo "� [Step 0/3] Checking Environment Dependencies..."
+echo "============================================================"
+if ! python3 -c "import unsloth" &> /dev/null; then
+    echo "⚠️ Unsloth or other dependencies not found. Auto-installing..."
+    bash "$PIPELINE_DIR/install_env.sh"
+else
+    echo "✅ Environment dependencies look good!"
+fi
+echo ""
+
+echo "============================================================"
+echo "�🚀 [Step 1/3] Generating Metadata Manifests (v10 and v13.2)"
 echo "============================================================"
 python3 $PIPELINE_DIR/dataset_loader.py
 echo "✅ Metadata manifests generated successfully!"
