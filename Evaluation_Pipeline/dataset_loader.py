@@ -118,5 +118,15 @@ def build_evaluation_manifest(dataset_root, output_dir):
     return v10_manifest, v13_manifest
 
 if __name__ == '__main__':
-    # Run this on the A100 server
-    build_evaluation_manifest("/workspace/Dataset_Eval", "/workspace")
+    # 动态获取路径，兼容不同的部署位置
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.dirname(script_dir)
+    
+    # 因为 Dataset_Eval 可能在 repo 根目录下，也可能在 /workspace 下，这里优先找 repo 下的
+    dataset_eval_dir = os.path.join(repo_root, "Dataset_Eval")
+    
+    # Fallback to /workspace/Dataset_Eval if not found in repo
+    if not os.path.exists(dataset_eval_dir):
+        dataset_eval_dir = "/workspace/Dataset_Eval"
+        
+    build_evaluation_manifest(dataset_eval_dir, repo_root)

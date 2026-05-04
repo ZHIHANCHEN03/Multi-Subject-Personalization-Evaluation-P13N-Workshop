@@ -3,9 +3,10 @@
 # 遇到错误立即停止
 set -e
 
-# 定义路径 (假设你把代码放到了 /workspace/Evaluation_Pipeline)
-WORKSPACE_DIR="/workspace"
-PIPELINE_DIR="$WORKSPACE_DIR/Evaluation_Pipeline"
+# 定义路径 (动态获取当前脚本所在目录)
+PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_DIR="$(dirname "$PIPELINE_DIR")" # 父目录 /Multi-Subject-Personalization-Evaluation-P13N-Workshop
+
 V10_MANIFEST="$WORKSPACE_DIR/v10_manifest.jsonl"
 V13_MANIFEST="$WORKSPACE_DIR/v13_manifest.jsonl"
 
