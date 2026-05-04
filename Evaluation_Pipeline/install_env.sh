@@ -6,8 +6,8 @@ set -e
 echo "============================================================"
 echo "🛠️  [Step 1/3] Installing Base Deep Learning Libraries..."
 echo "============================================================"
-# 确保安装了最新版的 PyTorch (假设你的 A100 是 CUDA 12.1 或 12.2)
-pip install torch torchvision torchaudio
+# 确保安装了最新版的 PyTorch (Unsloth 需要 PyTorch >= 2.4.0 来支持 _inductor.config)
+pip install --upgrade --force-reinstall "torch>=2.4.0" torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 echo "============================================================"
 echo "🦥 [Step 2/3] Installing Unsloth (for Extreme Fast Qwen3.5 4-bit Inference)..."
