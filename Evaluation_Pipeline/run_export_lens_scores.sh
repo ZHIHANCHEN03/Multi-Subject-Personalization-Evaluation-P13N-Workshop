@@ -25,6 +25,64 @@ discover_manifest() {
   return 0
 }
 
+python_can_import_unsloth() {
+  local py_bin="$1"
+  if [ ! -x "$py_bin" ]; then
+    return 1
+  fi
+  PYTHONNOUSERSITE=1 "$py_bin" - <<'PY' >/dev/null 2>&1
+import unsloth
+print(getattr(unsloth, "__version__", "unknown"))
+PY
+}
+
+bootstrap_eval_venv() {
+  local venv_dir="$1"
+  local base_python="$2"
+
+  echo "[run_export_lens_scores] Bootstrapping local eval venv: $venv_dir"
+  if [ ! -d "$venv_dir" ]; then
+    "$base_python" -m venv --system-site-packages "$venv_dir"
+  fi
+
+  local venv_python="$venv_dir/bin/python"
+  "$venv_python" -m pip install --upgrade pip setuptools wheel
+  "$venv_python" -m pip install --upgrade --force-reinstall --no-cache-dir \
+    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "fsspec<=2025.9.0"
+
+  echo "[run_export_lens_scores] Eval venv ready: $venv_python"
+  printf '%s\n' "$venv_python"
+}
+
+discover_python_bin() {
+  local candidates=()
+  local local_eval_venv="$SCRIPT_DIR/.venv-export-lens"
+  local local_eval_python="$local_eval_venv/bin/python"
+
+  if [ -n "${PYTHON_BIN:-}" ] && [ "$PYTHON_BIN" != "python3" ]; then
+    candidates+=("$PYTHON_BIN")
+  fi
+  candidates+=(
+    "$REPO_ROOT/Model_Training/.venv-a100-unsloth/bin/python"
+    "$REPO_ROOT/.venv-a100-unsloth/bin/python"
+    "$local_eval_python"
+  )
+
+  for candidate in "${candidates[@]}"; do
+    if python_can_import_unsloth "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  if python_can_import_unsloth "python3"; then
+    printf '%s\n' "python3"
+    return 0
+  fi
+
+  bootstrap_eval_venv "$local_eval_venv" "python3"
+}
+
 MANIFEST_PATH="${MANIFEST_PATH:-}"
 OUTPUT_PATH="${OUTPUT_PATH:-}"
 DATASET_ROOT="${DATASET_ROOT:-}"
@@ -70,11 +128,7 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 RUNS_ROOT="${RUNS_ROOT:-}"
 DATASET_BASE_DIR="${DATASET_BASE_DIR:-$REPO_ROOT}"
 LOG_EVERY="${LOG_EVERY:-20}"
-DEFAULT_VENV_PYTHON="$REPO_ROOT/Model_Training/.venv-a100-unsloth/bin/python"
-
-if [ -z "${PYTHON_BIN_OVERRIDE_APPLIED:-}" ] && [ "$PYTHON_BIN" = "python3" ] && [ -x "$DEFAULT_VENV_PYTHON" ]; then
-  PYTHON_BIN="$DEFAULT_VENV_PYTHON"
-fi
+PYTHON_BIN="$(discover_python_bin)"
 
 echo "============================================================"
 echo "[run_export_lens_scores] Starting LENS score export"
@@ -95,7 +149,7 @@ echo "[run_export_lens_scores] Log every      : $LOG_EVERY pairs"
 echo "============================================================"
 
 {
-  "$PYTHON_BIN" - <<'PY'
+  PYTHONNOUSERSITE=1 "$PYTHON_BIN" - <<'PY'
 import importlib
 import sys
 print("[env] python_executable =", sys.executable)
@@ -129,7 +183,7 @@ PY
     CMD+=(--runs_root "$RUNS_ROOT")
   fi
 
-  "${CMD[@]}"
+  PYTHONNOUSERSITE=1 "${CMD[@]}"
 } 2>&1 | tee "$LOG_PATH"
 
 echo "============================================================"
