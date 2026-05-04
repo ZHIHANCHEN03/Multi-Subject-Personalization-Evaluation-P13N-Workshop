@@ -10,6 +10,7 @@ import unsloth
 import torch
 from unsloth import FastVisionModel
 from peft import PeftModel
+from torch.nn.utils.rnn import pad_sequence
 from transformers import AutoProcessor
 from tqdm.auto import tqdm
 
@@ -56,6 +57,14 @@ READY_METRIC_MODELS = {
         "checkpoint_relpath": (
             "v2/unsloth_Qwen3.5-2B/20260503_033216/outputs/"
             "unsloth_Qwen3.5-2B-lora_layer-best"
+        ),
+    },
+    "qwen35_4b_layer_only": {
+        "model_name": "unsloth/Qwen3.5-4B",
+        "mode": "layer_only",
+        "checkpoint_relpath": (
+            "v2/unsloth_Qwen3.5-4B/20260503_044916/outputs/"
+            "unsloth_Qwen3.5-4B-layer_only-best"
         ),
     },
     "qwen35_4b_lora_layer": {
@@ -477,16 +486,28 @@ class PairInferencePreprocessor:
     def build_model_inputs(self, text_prompt: str, reference_images: Sequence, generated_image_path: str) -> Dict:
         images = list(reference_images) + [load_image_with_safety(generated_image_path)]
         inputs = self.processor(text=[text_prompt], images=images, return_tensors="pt", padding=False, truncation=False)
-        model_inputs = {
-            "input_ids": inputs["input_ids"].to(self.device),
-            "attention_mask": inputs["attention_mask"].to(self.device),
-            "pixel_values": inputs["pixel_values"].to(self.device),
-        }
-        if "mm_token_type_ids" in inputs:
-            model_inputs["mm_token_type_ids"] = inputs["mm_token_type_ids"].to(self.device)
-        if "image_grid_thw" in inputs:
-            model_inputs["image_grid_thw"] = inputs["image_grid_thw"].to(self.device)
-        return model_inputs
+        return inputs
+
+
+def collate_processor_inputs(batch_inputs: Sequence[Dict], device: torch.device) -> Dict:
+    out = {
+        "input_ids": pad_sequence([x["input_ids"].squeeze(0) for x in batch_inputs], batch_first=True, padding_value=0).to(device),
+        "attention_mask": pad_sequence(
+            [x["attention_mask"].squeeze(0) for x in batch_inputs],
+            batch_first=True,
+            padding_value=0,
+        ).to(device),
+        "pixel_values": torch.cat([x["pixel_values"] for x in batch_inputs], dim=0).to(device),
+    }
+    if "mm_token_type_ids" in batch_inputs[0]:
+        out["mm_token_type_ids"] = pad_sequence(
+            [x["mm_token_type_ids"].squeeze(0) for x in batch_inputs],
+            batch_first=True,
+            padding_value=0,
+        ).to(device)
+    if "image_grid_thw" in batch_inputs[0]:
+        out["image_grid_thw"] = torch.cat([x["image_grid_thw"] for x in batch_inputs], dim=0).to(device)
+    return out
 
 
 def load_lens_checkpoint(checkpoint_dir: Path, device: torch.device) -> Tuple[LENS, AutoProcessor, Dict]:
@@ -550,6 +571,78 @@ def score_single_image(
         for dim, prob in zip(DIAGNOSTIC_DIMENSIONS, probs)
     }
     return raw_score, category_scores
+
+
+def score_image_batch(model: LENS, model_inputs: Dict) -> List[Tuple[float, Dict[str, float]]]:
+    with torch.inference_mode():
+        scores, logits = model(**model_inputs)
+        scores = scores.squeeze(-1).detach().cpu().tolist()
+        logits = torch.sigmoid(logits).detach().cpu().tolist()
+    return [
+        (
+            float(score),
+            {dim: float(prob) for dim, prob in zip(DIAGNOSTIC_DIMENSIONS, probs)},
+        )
+        for score, probs in zip(scores, logits)
+    ]
+
+
+def prepare_pair_for_scoring(item: Dict, preprocessor: PairInferencePreprocessor, dataset_base_dir: Path) -> Dict:
+    pair = item["pair"]
+    refs = [str(normalize_path(path, dataset_base_dir)) for path in item["reference_images"]]
+    gen_a = str(normalize_path(pair["model_A_image"], dataset_base_dir))
+    gen_b = str(normalize_path(pair["model_B_image"], dataset_base_dir))
+    reference_images = preprocessor.get_reference_images(refs)
+    prompt_text = preprocessor.get_prompt_text(item.get("prompt", ""), num_refs=len(reference_images))
+    raw_inputs_a = preprocessor.build_model_inputs(prompt_text, reference_images, gen_a)
+    raw_inputs_b = preprocessor.build_model_inputs(prompt_text, reference_images, gen_b)
+    return {
+        "item": item,
+        "pair": pair,
+        "raw_inputs_a": raw_inputs_a,
+        "raw_inputs_b": raw_inputs_b,
+    }
+
+
+def score_prepared_pairs(
+    model: LENS,
+    prepared_pairs: Sequence[Dict],
+    device: torch.device,
+    oom_state: Dict[str, int],
+) -> List[Tuple[Dict, float, Dict[str, float], float, Dict[str, float]]]:
+    if not prepared_pairs:
+        return []
+
+    try:
+        batch_inputs = collate_processor_inputs(
+            [sample for pair_data in prepared_pairs for sample in (pair_data["raw_inputs_a"], pair_data["raw_inputs_b"])],
+            device,
+        )
+        flat_scores = score_image_batch(model=model, model_inputs=batch_inputs)
+        del batch_inputs
+        pair_results = []
+        for i, pair_data in enumerate(prepared_pairs):
+            score_a, cats_a = flat_scores[2 * i]
+            score_b, cats_b = flat_scores[2 * i + 1]
+            pair_results.append((pair_data["item"], score_a, cats_a, score_b, cats_b))
+        return pair_results
+    except torch.cuda.OutOfMemoryError:
+        oom_state["count"] += 1
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+        if len(prepared_pairs) == 1:
+            pair_data = prepared_pairs[0]
+            inputs_a = collate_processor_inputs([pair_data["raw_inputs_a"]], device)
+            inputs_b = collate_processor_inputs([pair_data["raw_inputs_b"]], device)
+            score_a, cats_a = score_single_image(model=model, model_inputs=inputs_a)
+            score_b, cats_b = score_single_image(model=model, model_inputs=inputs_b)
+            del inputs_a, inputs_b
+            return [(pair_data["item"], score_a, cats_a, score_b, cats_b)]
+
+        mid = max(1, len(prepared_pairs) // 2)
+        left = score_prepared_pairs(model, prepared_pairs[:mid], device, oom_state)
+        right = score_prepared_pairs(model, prepared_pairs[mid:], device, oom_state)
+        return left + right
 
 
 def infer_dataset_name(task_id: str) -> str:
@@ -627,54 +720,64 @@ def run_export_for_metric_model(
     device: torch.device,
     dataset_base_dir: Path,
     log_every: int,
+    pair_batch_size: int,
 ) -> List[Dict]:
     log(f"Loading metric model: {metrics_alias}")
     log(f"Checkpoint directory: {checkpoint_dir}")
     model, processor, _ = load_lens_checkpoint(checkpoint_dir, device)
     preprocessor = PairInferencePreprocessor(processor, device)
     results: List[Dict] = []
+    oom_state = {"count": 0}
+    requested_pair_batch_size = max(1, pair_batch_size)
+    progress = tqdm(total=len(manifest_items), desc=f"Scoring {metrics_alias}", unit=" pair", mininterval=1.0)
+    index = 0
+    while index < len(manifest_items):
+        chunk_items = manifest_items[index:index + requested_pair_batch_size]
+        prepared_pairs = []
+        for item in chunk_items:
+            validate_manifest_item(item)
+            prepared_pairs.append(prepare_pair_for_scoring(item, preprocessor, dataset_base_dir))
 
-    for index, item in enumerate(
-        tqdm(manifest_items, desc=f"Scoring {metrics_alias}", unit=" pair", mininterval=1.0),
-        start=1,
-    ):
-        validate_manifest_item(item)
-        pair = item["pair"]
-        refs = [str(normalize_path(path, dataset_base_dir)) for path in item["reference_images"]]
-        gen_a = str(normalize_path(pair["model_A_image"], dataset_base_dir))
-        gen_b = str(normalize_path(pair["model_B_image"], dataset_base_dir))
-        reference_images = preprocessor.get_reference_images(refs)
-        prompt_text = preprocessor.get_prompt_text(item.get("prompt", ""), num_refs=len(reference_images))
-        inputs_a = preprocessor.build_model_inputs(prompt_text, reference_images, gen_a)
-        inputs_b = preprocessor.build_model_inputs(prompt_text, reference_images, gen_b)
-
-        score_a, cats_a = score_single_image(model=model, model_inputs=inputs_a)
-        score_b, cats_b = score_single_image(model=model, model_inputs=inputs_b)
-        results.extend(
-            expand_pair_records(
-                pair_item=item,
-                metrics_alias=metrics_alias,
-                checkpoint_dir=checkpoint_dir,
-                score_a=score_a,
-                cats_a=cats_a,
-                score_b=score_b,
-                cats_b=cats_b,
+        batch_pair_results = score_prepared_pairs(model=model, prepared_pairs=prepared_pairs, device=device, oom_state=oom_state)
+        for pair_item, score_a, cats_a, score_b, cats_b in batch_pair_results:
+            results.extend(
+                expand_pair_records(
+                    pair_item=pair_item,
+                    metrics_alias=metrics_alias,
+                    checkpoint_dir=checkpoint_dir,
+                    score_a=score_a,
+                    cats_a=cats_a,
+                    score_b=score_b,
+                    cats_b=cats_b,
+                )
             )
-        )
+
+        index += len(chunk_items)
+        progress.update(len(chunk_items))
+
         if log_every > 0 and (index % log_every == 0 or index == len(manifest_items)):
+            last_item, last_score_a, _, last_score_b, _ = batch_pair_results[-1]
+            last_pair = last_item["pair"]
             log(
                 f"{metrics_alias} progress {index}/{len(manifest_items)} | "
-                f"task_id={item.get('task_id', 'unknown')} | "
-                f"A={pair['model_A_name']} score={score_a:.4f} | "
-                f"B={pair['model_B_name']} score={score_b:.4f}"
+                f"last_task_id={last_item.get('task_id', 'unknown')} | "
+                f"A={last_pair['model_A_name']} score={last_score_a:.4f} | "
+                f"B={last_pair['model_B_name']} score={last_score_b:.4f} | "
+                f"target_pair_batch={requested_pair_batch_size} | "
+                f"oom_fallbacks={oom_state['count']}"
             )
 
-        del inputs_a, inputs_b
+        for pair_data in prepared_pairs:
+            del pair_data["raw_inputs_a"], pair_data["raw_inputs_b"]
+
+    progress.close()
 
     del preprocessor, processor, model
     gc.collect()
     if device.type == "cuda":
         torch.cuda.empty_cache()
+    if oom_state["count"] > 0:
+        log(f"{metrics_alias} completed with {oom_state['count']} CUDA OOM fallbacks while trying pair batching")
     return results
 
 
@@ -726,7 +829,7 @@ def parse_args() -> argparse.Namespace:
         "--metric_models",
         nargs="+",
         default=list(READY_METRIC_MODELS.keys()),
-        help="Metric model aliases to run. Default: all 5 ready models.",
+        help="Metric model aliases to run. Default: all 6 ready models.",
     )
     parser.add_argument(
         "--log_every",
@@ -745,6 +848,12 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         help="Where to write the auto-built manifest. Defaults to <output_dir>/auto_manifest.jsonl.",
+    )
+    parser.add_argument(
+        "--pair_batch_size",
+        type=int,
+        default=5,
+        help="Target number of pairs to score together. Falls back automatically on CUDA OOM. Default: 5.",
     )
     return parser.parse_args()
 
@@ -786,6 +895,7 @@ def main() -> None:
             device=device,
             dataset_base_dir=dataset_base_dir,
             log_every=args.log_every,
+            pair_batch_size=args.pair_batch_size,
         )
         all_records.extend(metric_records)
         per_model_output_path = build_per_model_output_path(output_path, metrics_alias)

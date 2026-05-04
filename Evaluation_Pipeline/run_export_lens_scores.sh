@@ -126,7 +126,7 @@ if [ -z "$OUTPUT_PATH" ]; then
   else
     MANIFEST_STEM="auto_manifest"
   fi
-  OUTPUT_PATH="$SCRIPT_DIR/${MANIFEST_STEM}_lens_scores_all5.jsonl"
+  OUTPUT_PATH="$SCRIPT_DIR/${MANIFEST_STEM}_lens_scores_all6.jsonl"
 fi
 
 if [ -n "$MANIFEST_PATH" ]; then
@@ -136,12 +136,13 @@ else
   MANIFEST_STEM="auto_manifest"
 fi
 TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
-LOG_PATH="${LOG_PATH:-$SCRIPT_DIR/${MANIFEST_STEM}_lens_scores_all5_${TIMESTAMP}.log}"
+LOG_PATH="${LOG_PATH:-$SCRIPT_DIR/${MANIFEST_STEM}_lens_scores_all6_${TIMESTAMP}.log}"
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 RUNS_ROOT="${RUNS_ROOT:-}"
 DATASET_BASE_DIR="${DATASET_BASE_DIR:-$REPO_ROOT}"
 LOG_EVERY="${LOG_EVERY:-20}"
+PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-5}"
 PYTHON_BIN="$(discover_python_bin)"
 
 echo "============================================================"
@@ -158,9 +159,10 @@ echo "[run_export_lens_scores] Log file       : $LOG_PATH"
 echo "[run_export_lens_scores] Runs root      : ${RUNS_ROOT:-<auto-discover>}"
 echo "[run_export_lens_scores] Dataset base   : $DATASET_BASE_DIR"
 echo "[run_export_lens_scores] Python         : $PYTHON_BIN"
-echo "[run_export_lens_scores] Metric models  : all 5 ready models"
+echo "[run_export_lens_scores] Metric models  : all 6 ready models"
 echo "[run_export_lens_scores] Per-model out  : ${OUTPUT_PATH%.jsonl}__<metrics_alias>.jsonl"
 echo "[run_export_lens_scores] Log every      : $LOG_EVERY pairs"
+echo "[run_export_lens_scores] Pair batch     : $PAIR_BATCH_SIZE"
 echo "============================================================"
 
 {
@@ -184,6 +186,7 @@ PY
     --dataset_base_dir "$DATASET_BASE_DIR"
     --log_every "$LOG_EVERY"
     --auto_manifest_output "$AUTO_MANIFEST_OUTPUT"
+    --pair_batch_size "$PAIR_BATCH_SIZE"
   )
 
   if [ -n "$MANIFEST_PATH" ]; then
