@@ -1,0 +1,9 @@
+pandas
+Pillow
+transformers
+accelerate
+bitsandbytes
+ImageReward
+insightface
+onnxruntime-gpu
+timm
