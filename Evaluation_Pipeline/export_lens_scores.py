@@ -64,6 +64,7 @@ READY_METRIC_MODELS = {
 }
 
 DIAGNOSTIC_DIMENSIONS = ("existence", "appearance", "interaction")
+IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
 
 def log(message: str) -> None:
@@ -95,6 +96,299 @@ def write_jsonl(records: Iterable[Dict], output_path: Path) -> None:
     with output_path.open("w", encoding="utf-8") as f:
         for record in records:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def find_first_existing(paths: Sequence[Path]) -> Path:
+    for path in paths:
+        if path.exists():
+            return path
+    raise FileNotFoundError(f"None of these paths exist: {[str(p) for p in paths]}")
+
+
+def discover_dataset_root(repo_root: Path) -> Path:
+    candidates = [
+        repo_root / "Dataset_Eval",
+        repo_root / "Evaluation_Pipeline" / "Dataset_Eval",
+        repo_root.parent / "Dataset_Eval",
+        Path("/workspace/Dataset_Eval"),
+        Path("/root/Dataset_Eval"),
+    ]
+    return find_first_existing(candidates)
+
+
+def discover_runs_root(repo_root: Path) -> Path:
+    candidates = [
+        repo_root / "Model_Training_runs",
+        repo_root.parent / "Model_Training_runs",
+        Path("/workspace/Model_Training_runs"),
+        Path("/root/Model_Training_runs"),
+    ]
+    return find_first_existing(candidates)
+
+
+def read_jsonl_records(path: Path) -> List[Dict]:
+    with path.open("r", encoding="utf-8") as f:
+        return [json.loads(line) for line in f if line.strip()]
+
+
+def safe_str(value) -> str:
+    if value is None:
+        return ""
+    return str(value)
+
+
+def extract_prompt(record: Dict) -> str:
+    for key in ("prompt", "prompt_en", "text", "caption", "instruction"):
+        value = record.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def collect_subject_names(record: Dict) -> List[str]:
+    names: List[str] = []
+    for key in ("people_names", "object_names", "subjects", "subject_names", "entities"):
+        value = record.get(key)
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, str) and item.strip():
+                    names.append(item.strip())
+                elif isinstance(item, dict):
+                    for inner_key in ("id", "name", "subject", "image_id"):
+                        inner = item.get(inner_key)
+                        if isinstance(inner, str) and inner.strip():
+                            names.append(inner.strip())
+                            break
+    subject_refs = record.get("subject_refs")
+    if isinstance(subject_refs, list):
+        for item in subject_refs:
+            if not isinstance(item, dict):
+                continue
+            for inner_key in ("id", "name", "subject", "image_id"):
+                inner = item.get(inner_key)
+                if isinstance(inner, str) and inner.strip():
+                    names.append(inner.strip())
+                    break
+    # Keep order while removing duplicates.
+    unique_names: List[str] = []
+    seen = set()
+    for name in names:
+        if name not in seen:
+            seen.add(name)
+            unique_names.append(name)
+    return unique_names
+
+
+def build_ref_index(ref_dir: Path) -> Dict[str, str]:
+    index: Dict[str, str] = {}
+    for path in ref_dir.iterdir():
+        if not path.is_file():
+            continue
+        if path.name.startswith("._") or path.name == ".DS_Store":
+            continue
+        if path.suffix.lower() not in IMAGE_EXTS:
+            continue
+        index[path.stem] = str(path.resolve())
+    return index
+
+
+def resolve_reference_images(record: Dict, ref_index: Dict[str, str]) -> List[str]:
+    names = collect_subject_names(record)
+    refs: List[str] = []
+    missing: List[str] = []
+    for name in names:
+        path = ref_index.get(name)
+        if path:
+            refs.append(path)
+        else:
+            missing.append(name)
+    if missing:
+        raise ValueError(f"Missing reference images for subject names: {missing}")
+    if refs:
+        return refs
+
+    # Fallback: accept explicit paths embedded in the prompt record.
+    subject_refs = record.get("subject_refs")
+    if isinstance(subject_refs, list):
+        explicit_refs = []
+        for item in subject_refs:
+            if isinstance(item, dict):
+                path = item.get("image_path")
+                if isinstance(path, str) and path.strip():
+                    explicit_refs.append(path)
+        if explicit_refs:
+            return explicit_refs
+
+    raise ValueError("Could not resolve any reference images from prompt record")
+
+
+def build_prompt_index(jsonl_path: Path) -> Dict[str, Dict]:
+    prompt_index: Dict[str, Dict] = {}
+    for record in read_jsonl_records(jsonl_path):
+        candidates = [
+            record.get("id"),
+            record.get("task_id"),
+            record.get("idx"),
+            record.get("prompt_id"),
+        ]
+        task_id = next((safe_str(value) for value in candidates if value is not None and safe_str(value)), "")
+        if task_id:
+            prompt_index[task_id] = record
+    return prompt_index
+
+
+def choose_existing_pair(
+    dataset: str,
+    prompt_id: str,
+    prompt: str,
+    reference_images: List[str],
+    pair_name: str,
+    model_a_name: str,
+    model_a_image: Path,
+    model_b_name: str,
+    model_b_image: Path,
+) -> Dict:
+    return {
+        "task_id": f"{dataset}_pair_{pair_name}_{prompt_id}",
+        "dataset": dataset,
+        "prompt": prompt,
+        "reference_images": reference_images,
+        "pair": {
+            "model_A_name": model_a_name,
+            "model_A_image": str(model_a_image.resolve()),
+            "model_B_name": model_b_name,
+            "model_B_image": str(model_b_image.resolve()),
+        },
+    }
+
+
+def build_v10_manifest(dataset_root: Path) -> List[Dict]:
+    base_dir = dataset_root / "v10_test" / "v10_test"
+    jsonl_path = base_dir / "test_1.5k_v10.jsonl"
+    refs_dir = base_dir / "inference_images_v10"
+    mosaic_dir = base_dir / "mosaic_images"
+    nano_dir = base_dir / "nano_banana_v10_full1500_512"
+    if not jsonl_path.exists():
+        log(f"Skipping v10 manifest build; file not found: {jsonl_path}")
+        return []
+
+    prompt_index = build_prompt_index(jsonl_path)
+    ref_index = build_ref_index(refs_dir)
+    manifest: List[Dict] = []
+
+    for prompt_id, record in prompt_index.items():
+        mosaic_path = mosaic_dir / f"{prompt_id}.jpg"
+        nano_path = nano_dir / f"{prompt_id}.png"
+        if not mosaic_path.exists() or not nano_path.exists():
+            continue
+        try:
+            prompt = extract_prompt(record)
+            refs = resolve_reference_images(record, ref_index)
+            manifest.append(
+                choose_existing_pair(
+                    dataset="v10",
+                    prompt_id=prompt_id,
+                    prompt=prompt,
+                    reference_images=refs,
+                    pair_name="mosaic_vs_nano",
+                    model_a_name="mosaic",
+                    model_a_image=mosaic_path,
+                    model_b_name="nano_banana",
+                    model_b_image=nano_path,
+                )
+            )
+        except Exception as exc:
+            log(f"Skipping v10 prompt_id={prompt_id}: {exc}")
+    log(f"Built v10 manifest with {len(manifest)} pairs")
+    return manifest
+
+
+def build_seedream_index(seedream_dir: Path) -> Dict[str, Path]:
+    index: Dict[str, Path] = {}
+    for path in seedream_dir.glob("*.jpg"):
+        name = path.stem
+        marker = "_id_"
+        if marker not in name:
+            continue
+        prompt_id = name.split(marker)[-1]
+        index[prompt_id] = path
+    return index
+
+
+def build_v13_manifest(dataset_root: Path) -> List[Dict]:
+    base_dir = dataset_root / "v13_2_1.26k_evl" / "v13_2_1.26k_evl"
+    jsonl_path = base_dir / "sampled_prompts.jsonl"
+    refs_dir = base_dir / "all_refs_noindex_v13.2"
+    glm_dir = base_dir / "GLM"
+    flux_dir = base_dir / "flux" / "flux2_klein_9b_kv_1260_20260423"
+    gpt_dir = base_dir / "gpt-image-1.5_high"
+    seedream_dir = base_dir / "seedream4.5" / "ark_seedream45_full1260_20260424_jpeg_only"
+    if not jsonl_path.exists():
+        log(f"Skipping v13 manifest build; file not found: {jsonl_path}")
+        return []
+
+    prompt_index = build_prompt_index(jsonl_path)
+    ref_index = build_ref_index(refs_dir)
+    seedream_index = build_seedream_index(seedream_dir)
+    manifest: List[Dict] = []
+
+    for prompt_id, record in prompt_index.items():
+        try:
+            prompt = extract_prompt(record)
+            refs = resolve_reference_images(record, ref_index)
+
+            glm_path = glm_dir / f"{prompt_id}.jpg"
+            flux_path = flux_dir / f"{prompt_id}.jpg"
+            if glm_path.exists() and flux_path.exists():
+                manifest.append(
+                    choose_existing_pair(
+                        dataset="v13",
+                        prompt_id=prompt_id,
+                        prompt=prompt,
+                        reference_images=refs,
+                        pair_name="glm_vs_flux",
+                        model_a_name="glm",
+                        model_a_image=glm_path,
+                        model_b_name="flux",
+                        model_b_image=flux_path,
+                    )
+                )
+
+            gpt_candidates = list(gpt_dir.glob(f"id_{prompt_id}_*.jpg"))
+            seedream_path = seedream_index.get(prompt_id)
+            if gpt_candidates and seedream_path and seedream_path.exists():
+                manifest.append(
+                    choose_existing_pair(
+                        dataset="v13",
+                        prompt_id=prompt_id,
+                        prompt=prompt,
+                        reference_images=refs,
+                        pair_name="gpt_vs_seedream",
+                        model_a_name="gpt-image-1.5",
+                        model_a_image=gpt_candidates[0],
+                        model_b_name="seedream4.5",
+                        model_b_image=seedream_path,
+                    )
+                )
+        except Exception as exc:
+            log(f"Skipping v13 prompt_id={prompt_id}: {exc}")
+    log(f"Built v13 manifest with {len(manifest)} pairs")
+    return manifest
+
+
+def build_auto_manifest(dataset_root: Path, output_path: Path) -> Path:
+    log(f"Auto-building manifest from dataset root: {dataset_root}")
+    combined = []
+    combined.extend(build_v10_manifest(dataset_root))
+    combined.extend(build_v13_manifest(dataset_root))
+    if not combined:
+        raise ValueError(
+            f"Auto manifest build produced 0 pairs under {dataset_root}. "
+            "Please verify the dataset structure and prompt jsonl files."
+        )
+    write_jsonl(combined, output_path)
+    log(f"Auto-built manifest with {len(combined)} pairs at {output_path}")
+    return output_path
 
 
 def load_images(reference_images: Sequence[str], generated_image: str) -> List:
@@ -364,8 +658,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--manifest",
         type=str,
-        required=True,
-        help="Path to a pair-level manifest JSONL, e.g. v10_manifest.jsonl or v13_manifest.jsonl",
+        default=None,
+        help="Optional path to a pair-level manifest JSONL. If omitted, the script auto-builds one from Dataset_Eval.",
     )
     parser.add_argument(
         "--output",
@@ -376,8 +670,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--runs_root",
         type=str,
-        default="/workspace/Model_Training_runs",
-        help="Root directory containing Model_Training_runs",
+        default=None,
+        help="Optional root directory containing Model_Training_runs. If omitted, the script auto-discovers it.",
     )
     parser.add_argument(
         "--dataset_base_dir",
@@ -397,15 +691,40 @@ def parse_args() -> argparse.Namespace:
         default=20,
         help="Emit explicit progress logs every N pairs for each metric model. Set <=0 to disable.",
     )
+    parser.add_argument(
+        "--dataset_root",
+        type=str,
+        default=None,
+        help="Optional Dataset_Eval root. If omitted and --manifest is empty, the script auto-discovers it.",
+    )
+    parser.add_argument(
+        "--auto_manifest_output",
+        type=str,
+        default=None,
+        help="Where to write the auto-built manifest. Defaults to <output_dir>/auto_manifest.jsonl.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    manifest_path = Path(args.manifest).resolve()
     output_path = Path(args.output).resolve()
-    runs_root = Path(args.runs_root).resolve()
     dataset_base_dir = Path(args.dataset_base_dir).resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if args.manifest:
+        manifest_path = Path(args.manifest).resolve()
+    else:
+        dataset_root = Path(args.dataset_root).resolve() if args.dataset_root else discover_dataset_root(REPO_ROOT)
+        auto_manifest_output = (
+            Path(args.auto_manifest_output).resolve()
+            if args.auto_manifest_output
+            else output_path.parent / "auto_manifest.jsonl"
+        )
+        manifest_path = build_auto_manifest(dataset_root, auto_manifest_output)
+
+    runs_root = Path(args.runs_root).resolve() if args.runs_root else discover_runs_root(REPO_ROOT)
+    log(f"Using runs root: {runs_root}")
 
     manifest_items = load_manifest(manifest_path)
     log(f"Loaded {len(manifest_items)} pair items from {manifest_path}")
