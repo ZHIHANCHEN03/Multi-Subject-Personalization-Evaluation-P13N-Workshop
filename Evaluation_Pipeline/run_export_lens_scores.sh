@@ -70,6 +70,11 @@ PYTHON_BIN="${PYTHON_BIN:-python3}"
 RUNS_ROOT="${RUNS_ROOT:-}"
 DATASET_BASE_DIR="${DATASET_BASE_DIR:-$REPO_ROOT}"
 LOG_EVERY="${LOG_EVERY:-20}"
+DEFAULT_VENV_PYTHON="$REPO_ROOT/Model_Training/.venv-a100-unsloth/bin/python"
+
+if [ -z "${PYTHON_BIN_OVERRIDE_APPLIED:-}" ] && [ "$PYTHON_BIN" = "python3" ] && [ -x "$DEFAULT_VENV_PYTHON" ]; then
+  PYTHON_BIN="$DEFAULT_VENV_PYTHON"
+fi
 
 echo "============================================================"
 echo "[run_export_lens_scores] Starting LENS score export"
@@ -90,6 +95,19 @@ echo "[run_export_lens_scores] Log every      : $LOG_EVERY pairs"
 echo "============================================================"
 
 {
+  "$PYTHON_BIN" - <<'PY'
+import importlib
+import sys
+print("[env] python_executable =", sys.executable)
+print("[env] python_version    =", sys.version.replace("\n", " "))
+for name in ["unsloth", "unsloth_zoo", "transformers", "peft", "torch"]:
+    try:
+        mod = importlib.import_module(name)
+        print(f"[env] {name:14s} =", getattr(mod, "__version__", "unknown"))
+    except Exception as exc:
+        print(f"[env] {name:14s} = IMPORT_FAIL ({type(exc).__name__}: {exc})")
+PY
+
   CMD=(
     "$PYTHON_BIN" "$SCRIPT_DIR/export_lens_scores.py"
     --output "$OUTPUT_PATH"

@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, Tuple
 
+import unsloth
 import torch
 from peft import PeftModel
 from transformers import AutoProcessor
@@ -18,6 +19,8 @@ if str(MODEL_TRAINING_ROOT) not in sys.path:
 
 from lens.model import LENS  # noqa: E402
 from lens.utils.image_processing import load_image_with_safety  # noqa: E402
+
+_ = unsloth
 
 
 READY_METRIC_MODELS = {
