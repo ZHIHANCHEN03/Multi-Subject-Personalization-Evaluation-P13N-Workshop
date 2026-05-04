@@ -1,0 +1,97 @@
+Dataset_Eval/
+    v10_test/
+        v10_test/
+            __MACOSX/
+                inference_images_v10/
+                    ._acoustic_guitar.jpg
+                    ._adult_man_beard.jpg
+                    ._adult_woman_curly_hair.jpg
+                    ._apple.jpg
+                    ._black_cat.jpg
+                    ... (75 more files)
+                mosaic_images/
+                    ._60001.jpg
+                    ._60002.jpg
+                    ._60003.jpg
+                    ._60004.jpg
+                    ._60005.jpg
+                    ... (1495 more files)
+                nano_banana_v10_full1500_512/
+                    ._60001.png
+                    ._60002.png
+                    ._60003.png
+                    ._60004.png
+                    ._60005.png
+                    ... (1496 more files)
+                ._inference_images_v10
+                ._mosaic_images
+                ._nano_banana_v10_full1500_512
+            inference_images_v10/
+                acoustic_guitar.jpg
+                adult_man_beard.jpg
+                adult_woman_curly_hair.jpg
+                apple.jpg
+                black_cat.jpg
+                ... (75 more files)
+            mosaic_images/
+                60001.jpg
+                60002.jpg
+                60003.jpg
+                60004.jpg
+                60005.jpg
+                ... (1495 more files)
+            nano_banana_v10_full1500_512/
+                60001.png
+                60002.png
+                60003.png
+                60004.png
+                60005.png
+                ... (1496 more files)
+            inference_images_v10.zip
+            mosaic_images_test_v10_1.5k.zip
+            nano_banana_test_v10_1.5k.zip
+            round10_annotations_latest.csv
+            test_1.5k_v10.jsonl
+    v13_2_1.26k_evl/
+        v13_2_1.26k_evl/
+            GLM/
+                10009.jpg
+                10010.jpg
+                10011.jpg
+                10012.jpg
+                10121.jpg
+                ... (1272 more files)
+            all_refs_noindex_v13.2/
+                .DS_Store
+                acoustic_guitar.jpg
+                adult_man_beard.jpg
+                adult_woman_curly_hair.jpg
+                apple.jpg
+                ... (76 more files)
+            flux/
+                flux2_klein_9b_kv_1260_20260423/
+                    10009.jpg
+                    10010.jpg
+                    10011.jpg
+                    10012.jpg
+                    10121.jpg
+                    ... (1257 more files)
+            gpt-image-1.5_high/
+                id_10009_seed_22659_L8.jpg
+                id_10010_seed_22659_L6.jpg
+                id_10011_seed_22659_L4.jpg
+                id_10012_seed_22659_L2.jpg
+                id_10121_seed_22694_L8.jpg
+                ... (1255 more files)
+            seedream4.5/
+                ark_seedream45_full1260_20260424_jpeg_only/
+                    idx_00000_seed_20014_L2_id_60.jpg
+                    idx_00001_seed_20048_L2_id_196.jpg
+                    idx_00002_seed_20146_L2_id_588.jpg
+                    idx_00003_seed_20168_L2_id_676.jpg
+                    idx_00004_seed_20220_L2_id_884.jpg
+                    ... (1255 more files)
+            export_round1260_20260503.csv
+            sampled_prompts.jsonl
+    v10_test-20260503T175603Z-3-001.zip
+    v13_2_1.26k_evl-20260503T175604Z-3-001.zip
