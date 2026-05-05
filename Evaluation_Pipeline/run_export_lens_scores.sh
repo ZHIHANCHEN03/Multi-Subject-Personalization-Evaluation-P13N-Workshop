@@ -143,6 +143,8 @@ RUNS_ROOT="${RUNS_ROOT:-}"
 DATASET_BASE_DIR="${DATASET_BASE_DIR:-$REPO_ROOT}"
 LOG_EVERY="${LOG_EVERY:-20}"
 PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-5}"
+PAIR_BATCH_SIZE_4B="${PAIR_BATCH_SIZE_4B:-2}"
+MODEL_GROUP="${MODEL_GROUP:-all}"
 PYTHON_BIN="$(discover_python_bin)"
 
 echo "============================================================"
@@ -163,6 +165,8 @@ echo "[run_export_lens_scores] Metric models  : all 6 ready models"
 echo "[run_export_lens_scores] Per-model out  : ${OUTPUT_PATH%.jsonl}__<metrics_alias>.jsonl"
 echo "[run_export_lens_scores] Log every      : $LOG_EVERY pairs"
 echo "[run_export_lens_scores] Pair batch     : $PAIR_BATCH_SIZE"
+echo "[run_export_lens_scores] 4B pair batch  : $PAIR_BATCH_SIZE_4B"
+echo "[run_export_lens_scores] Model group    : $MODEL_GROUP"
 echo "============================================================"
 
 {
@@ -187,6 +191,8 @@ PY
     --log_every "$LOG_EVERY"
     --auto_manifest_output "$AUTO_MANIFEST_OUTPUT"
     --pair_batch_size "$PAIR_BATCH_SIZE"
+    --pair_batch_size_4b "$PAIR_BATCH_SIZE_4B"
+    --metric_model_group "$MODEL_GROUP"
   )
 
   if [ -n "$MANIFEST_PATH" ]; then

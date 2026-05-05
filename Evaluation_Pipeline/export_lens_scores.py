@@ -77,6 +77,13 @@ READY_METRIC_MODELS = {
     },
 }
 
+METRIC_MODEL_GROUPS = {
+    "all": list(READY_METRIC_MODELS.keys()),
+    "08b": ["qwen35_08b_layer_only", "qwen35_08b_lora_layer"],
+    "2b": ["qwen35_2b_layer_only", "qwen35_2b_lora_layer"],
+    "4b": ["qwen35_4b_layer_only", "qwen35_4b_lora_layer"],
+}
+
 DIAGNOSTIC_DIMENSIONS = ("existence", "appearance", "interaction")
 IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
@@ -721,6 +728,7 @@ def run_export_for_metric_model(
     dataset_base_dir: Path,
     log_every: int,
     pair_batch_size: int,
+    pair_batch_size_4b: int,
 ) -> List[Dict]:
     log(f"Loading metric model: {metrics_alias}")
     log(f"Checkpoint directory: {checkpoint_dir}")
@@ -728,7 +736,8 @@ def run_export_for_metric_model(
     preprocessor = PairInferencePreprocessor(processor, device)
     results: List[Dict] = []
     oom_state = {"count": 0}
-    requested_pair_batch_size = max(1, pair_batch_size)
+    requested_pair_batch_size = get_effective_pair_batch_size(metrics_alias, pair_batch_size, pair_batch_size_4b)
+    log(f"{metrics_alias} effective pair batch size: {requested_pair_batch_size}")
     progress = tqdm(total=len(manifest_items), desc=f"Scoring {metrics_alias}", unit=" pair", mininterval=1.0)
     index = 0
     while index < len(manifest_items):
@@ -797,6 +806,22 @@ def resolve_metric_model_specs(runs_root: Path, selected_aliases: Sequence[str])
     return specs
 
 
+def expand_metric_model_group(group_name: str) -> List[str]:
+    if group_name not in METRIC_MODEL_GROUPS:
+        raise ValueError(
+            f"Unknown metric model group: {group_name}. "
+            f"Available: {', '.join(sorted(METRIC_MODEL_GROUPS))}"
+        )
+    return list(METRIC_MODEL_GROUPS[group_name])
+
+
+def get_effective_pair_batch_size(metrics_alias: str, requested_batch_size: int, pair_batch_size_4b: int) -> int:
+    requested_batch_size = max(1, requested_batch_size)
+    if "4b" in metrics_alias:
+        return max(1, min(requested_batch_size, pair_batch_size_4b))
+    return requested_batch_size
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Export LENS preference/category scores for all generated images in a pair manifest."
@@ -832,6 +857,13 @@ def parse_args() -> argparse.Namespace:
         help="Metric model aliases to run. Default: all 6 ready models.",
     )
     parser.add_argument(
+        "--metric_model_group",
+        type=str,
+        default="all",
+        choices=sorted(METRIC_MODEL_GROUPS.keys()),
+        help="Convenience selector for model size groups. Example: '4b' runs layer_only + lora_layer for 4B only.",
+    )
+    parser.add_argument(
         "--log_every",
         type=int,
         default=20,
@@ -854,6 +886,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=5,
         help="Target number of pairs to score together. Falls back automatically on CUDA OOM. Default: 5.",
+    )
+    parser.add_argument(
+        "--pair_batch_size_4b",
+        type=int,
+        default=2,
+        help="Maximum pair batch size to use for 4B models before OOM fallback logic. Default: 2.",
     )
     return parser.parse_args()
 
@@ -880,7 +918,12 @@ def main() -> None:
 
     manifest_items = load_manifest(manifest_path)
     log(f"Loaded {len(manifest_items)} pair items from {manifest_path}")
-    metric_specs = resolve_metric_model_specs(runs_root, args.metric_models)
+    selected_metric_aliases = (
+        expand_metric_model_group(args.metric_model_group)
+        if args.metric_model_group != "all"
+        else list(args.metric_models)
+    )
+    metric_specs = resolve_metric_model_specs(runs_root, selected_metric_aliases)
     log(f"Will run {len(metric_specs)} metric models")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -896,6 +939,7 @@ def main() -> None:
             dataset_base_dir=dataset_base_dir,
             log_every=args.log_every,
             pair_batch_size=args.pair_batch_size,
+            pair_batch_size_4b=args.pair_batch_size_4b,
         )
         all_records.extend(metric_records)
         per_model_output_path = build_per_model_output_path(output_path, metrics_alias)
