@@ -1,0 +1,587 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2026
+
+% The authors should use one of these tracks.
+% Before accepting by the NeurIPS conference, select one of the options below.
+% 0. "default" for submission
+% \usepackage{neurips_2026}
+% \usepackage[eandd]{neurips_2026}
+% the "default" option is equal to the "main" option, which is used for the Main Track with double-blind reviewing.
+% 1. "main" option is used for the Main Track
+%  \usepackage[main]{neurips_2026}
+% 2. "position" option is used for the Position Paper Track
+%  \usepackage[position]{neurips_2026}
+% 3. "eandd" option is used for the Evaluations & Datasets Track
+ \usepackage[eandd]{neurips_2026}
+% 4. "creativeai" option is used for the Creative AI Track
+%  \usepackage[creativeai]{neurips_2026}
+% 5. "sglblindworkshop" option is used for the Workshop with single-blind reviewing
+ % \usepackage[sglblindworkshop]{neurips_2026}
+% 6. "dblblindworkshop" option is used for the Workshop with double-blind reviewing
+%  \usepackage[dblblindworkshop]{neurips_2026}
+
+\usepackage{amssymb}
+\newcommand{\cmark}{\checkmark}
+\newcommand{\xmark}{$\times$}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{float}
+% After being accepted, the authors should add "final" behind the track to compile a camera-ready version.
+% 1. Main Track
+ % \usepackage[main, final]{neurips_2026}
+% 2. Position Paper Track
+%  \usepackage[position, final]{neurips_2026}
+% 3. Evaluations & Datasets Track
+ % \usepackage[eandd, final]{neurips_2026}
+% 4. Creative AI Track
+%  \usepackage[creativeai, final]{neurips_2026}
+% 5. Workshop with single-blind reviewing
+%  \usepackage[sglblindworkshop, final]{neurips_2026}
+% 6. Workshop with double-blind reviewing
+%  \usepackage[dblblindworkshop, final]{neurips_2026}
+% Note. For the workshop paper template, both \title{} and \workshoptitle{} are required, with the former indicating the paper title shown in the title and the latter indicating the workshop title displayed in the footnote.
+% For workshops (5., 6.), the authors should add the name of the workshop, "\workshoptitle" command is used to set the workshop title.
+% \workshoptitle{WORKSHOP TITLE}
+
+% "preprint" option is used for arXiv or other preprint submissions
+ % \usepackage[preprint]{neurips_2026}
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2026}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+% Note. For the workshop paper template, both \title{} and \workshoptitle{} are required, with the former indicating the paper title shown in the title and the latter indicating the workshop title displayed in the footnote. 
+\title{MIBE: Multi-subject Interaction Benchmark and Evaluator for Personalized Image Generation}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+\author{%
+    Zhihan Chen\thanks{Equal contribution}\\
+    University of California, Los Angeles\\
+    % Los Angeles, CA 90095\\
+    \texttt{chenz23@ucla.edu}\\
+    \AND
+    Yuhuan Zhao\footnotemark[1]\\
+    University of Southern California\\
+    % Los Angeles, CA 90007\\
+    \texttt{yuhuanzh@usc.edu}\\
+    \AND
+    Yijie Zhu\footnotemark[1]\\
+    DeerLab LLC\\
+    % Mountain View, CA 94043\\
+    \texttt{ ejzhu2025@gmail.com}\\
+    \AND
+    Xinyu Yao\footnotemark[1] \\
+    Carnegie Mellon University\\
+    % Pittsburgh, PA 15213 \\
+    \texttt{xinyuyao@andrew.cmu.edu} \\
+    \AND
+    Mengcong Ren\\
+    Clemson University\\
+    % Clemson, SC 29634\\
+    \texttt{mengcongren@gmail.com}
+    \AND
+    Suwen Wang\\
+    University of California, Los Angeles\\
+    \AND
+    Qiuyang Yin\\
+    Google\\
+    \texttt{davidyqy@google.com}
+    \AND
+    Yuchen Sun\\
+    San Jose State University\\
+    \AND
+    Qin Wang\\
+    University of Illinois at Urbana-Champaign\\
+    \AND 
+    Lu Xin\\
+    DeerLab LLC\\
+    \texttt{lucasxinlu@outlook.com}
+  % examples of more authors
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+
+\begin{document}
+
+
+\maketitle
+
+
+\begin{abstract}
+Multi-subject personalized image generation requires the precise rendering of all requested reference identities and their specified interactions based on a guiding prompt. However, state-of-the-art models still struggle with this process, frequently omitting subjects, failing to preserve reference appearances, or misattributing interactions. Furthermore, existing metrics designed primarily for single-subject fidelity cannot reliably capture these errors, suffering severe degradation in ranking separability and failing to align with human preference as the subject count increases. To address this gap, we introduce Multi-subject Interaction Benchmark and Evaluator (MIBE), a unified framework comprising a Multi-subject Interaction Benchmark (MIB) and a Multi-subject Interaction Evaluator (MIE). MIB systematically covers diverse relation types and scene complexities through a decoupled data regime. This consists of a 60K-pair LLM-labeled Silver Set for scalable metric training and a 4K-pair double-blind Human Evaluation Gold Set covering a diverse range of state-of-the-art generators. To demonstrate the utility of this benchmark, we present MIE, a lightweight, reference-conditioned evaluator trained exclusively on the Silver Set with a dual-head ranking and diagnosis objective. MIE exhibits strong cross-generator generalization on the Gold Set and achieves a significantly higher correlation with human preference. By outperforming a broad spectrum of baseline metrics, including CLIP and DINO variants, MIE demonstrates that diagnostic supervision can preserve ranking separability and human alignment where traditional evaluators collapse. Ultimately, by providing data with the diagnostic and preference labels required to train robust evaluators, MIBE serves as a comprehensive framework to benchmark multi-subject image generation and guide future model alignment.
+\end{abstract}
+
+
+
+\section{Introduction}
+Personalized text-to-image generation has progressed rapidly in recent years, especially in the single-subject regime where a model must preserve one reference identity while following a textual prompt. However, practical deployment increasingly requires multiple distinct reference identities to co-exist in one image, often with explicit interactions, physical contact, asymmetric role assignments, or object bindings. In this regime, the problem is no longer just recognition or prompt following. The real bottleneck is \emph{binding}: the model must preserve who is who, which appearance belongs to whom, and which interaction is assigned to which subject.
+
+The evaluation layer has not kept pace with this difficulty. In many current pipelines, quality is still measured with global similarity metrics (e.g., CLIP \cite{radford2021learning}) or general preference models (e.g., ImageReward \cite{xu2023imagereward}). These tools are useful for coarse semantic plausibility, but they are poorly matched to the real errors that dominate multi-subject personalization. A generated image can mention the right scene, contain approximately the right colors, and still be unusable because one subject is missing, two identities collapse into generic clones, clothing attributes bleed across people, or a requested interaction is assigned to the wrong subject. In such cases, a useful evaluator must preserve ranking separability even when the number of requested subjects becomes large.
+
+This paper is motivated by a simple empirical observation: once the subject count increases, existing metrics often lose the ability to separate obviously better generations from obviously worse ones. If a benchmark cannot distinguish ``missing one subject'' from ``missing most subjects,'' then it cannot support real model development or credible ablation. In other words, binding is not only the bottleneck for generation; it is also the bottleneck for evaluation.
+
+Constructing a high-quality, human-annotated dataset for multi-subject personalization at scale is prohibitively expensive, which has stalled the development of better evaluation tools. To overcome this, we introduce \textbf{MIBE}, a unified framework consisting of a \textbf{Multi-subject Interaction Benchmark (MIB)} and a \textbf{Multi-subject Interaction Evaluator (MIE)}. MIBE is designed around a decoupled paradigm that balances scale and rigor:
+
+\begin{itemize}
+    \item \textbf{MIB-Silver (60K pairs):} A massive training ground generated by internal models and labeled by dual teacher LLMs (Gemini 2.5 Flash and Gemini 3.1 Flash Lite). The prompts are generated via a strict hierarchical construction, spanning $N \in \{2,4,6,8\}$ entities across 36 controlled buckets of interaction types and human/object ratios.
+    \item \textbf{MIB-Gold (4K pairs):} A carefully curated, double-blind human-annotated evaluation set covering six diverse state-of-the-art generators, including unseen models like Flux, Seedream 4.5, and GLM. This serves as the ultimate cross-generator meta-evaluation ground.
+\end{itemize}
+
+By decoupling the data, MIBE provides both an abundant, low-cost training bed for automated metrics and an unbiased testbed for evaluating generation quality. Figure~\ref{fig:mibe_overview} provides an overview of the full framework.
+
+To demonstrate the utility of this benchmark, we propose \textbf{MIE}, a learned evaluator trained exclusively on the 60K silver set. MIE takes the references, prompt, and generated image pair as input, then predicts both pairwise preference and three interpretable image-level diagnostic dimensions: \emph{Existence}, \emph{Appearance}, and \emph{Interaction}. Our experiments reveal that MIE exhibits strong cross-generator generalization on the 4K gold set without any target-generator fine-tuning, outperforming standard metrics on unseen generators. This validates our core thesis: the highly structured 60K silver set is a powerful asset not just for training robust evaluators, but potentially for aligning generative models (e.g., via DPO/RLHF) to solve multi-subject entanglement.
+
+In summary, this paper makes three contributions:
+\begin{itemize}
+    \item We introduce \textbf{MIB}, a controlled benchmark with hierarchical prompt construction, factorized scene buckets, a 60K silver training resource, and a 4K cross-generator human evaluation set.
+    \item We propose \textbf{MIE}, a reference-conditioned evaluator that couples pairwise ranking with interpretable diagnostic prediction over Existence, Appearance, and Interaction.
+    \item We establish a benchmark protocol that simultaneously measures generator quality, metric failure, and cross-generator generalization in high-subject-count personalized generation.
+\end{itemize}
+
+Section~2 reviews existing evaluation paradigms. Section~3 defines the problem setup. Section~4 introduces the hierarchical construction of MIB. Section~5 presents the MIE baseline evaluator. Section~6 describes our compute-controlled fair ablation protocol. Section~7 outlines the experiments benchmarking both the generators and the metrics, and Section~8 concludes with future work.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig1_overall_workflow.png}
+  \caption{\textbf{The MIBE Framework.} Starting from a shared reference pool and hierarchically constructed prompts, MIBE builds two decoupled pipelines: a \textbf{60K silver set} generated by Nano and Mosaic and annotated by dual LLMs (Gemini 2.5 Flash and Gemini 3.1 Flash Lite) for evaluator training, and a \textbf{4K gold set} covering six diverse generators annotated via double-blind human judgment for cross-generator meta-evaluation. MIE is trained exclusively on the silver set and evaluated on the gold set without any target-generator fine-tuning, validating that large-scale structured supervision transfers to unseen generators.}
+  \label{fig:mibe_overview}
+\end{figure*}
+
+\section{Related Work}
+
+\subsection{Personalized Image Generation}
+Early approaches to personalized image generation sought to encode subject identity through fine-tuning or inversion techniques applied to pretrained diffusion models. Textual Inversion \cite{gal2022image} pioneered the idea of representing a new concept as a learned token in the text embedding space, optimizing a pseudo-word to capture the appearance of a reference subject from a small set of images. DreamBooth \cite{ruiz2023dreambooth} extended this paradigm by fine-tuning the entire diffusion model on subject-specific images paired with a rare identifier token, achieving high-fidelity reconstruction at the cost of per-subject optimization. Similarly, Custom Diffusion \cite{kumari2023multi} proposed a more parameter-efficient alternative by selectively fine-tuning only the cross-attention layers, enabling faster adaptation while retaining the ability to compose multiple concepts.
+
+Despite their strong reconstruction quality, fine-tuning-based methods suffer from a fundamental scalability limitation: they require a separate optimization procedure for each new identity, making them impractical in scenarios that demand real-time or zero-shot personalization. To address this, encoder-based methods were proposed to amortize the identity encoding process into a single forward pass. IP-Adapter \cite{ye2023ip} introduced a lightweight adapter that decouples image prompt conditioning from text, injecting reference image features into the cross-attention layers of a frozen diffusion model. InstantID \cite{wang2024instantid} and PhotoMaker \cite{li2024photomaker} further pushed this direction by leveraging face-specific priors, achieving compelling identity preservation from a single reference image without any test-time fine-tuning.
+
+However, the majority of these methods are designed for the single-subject setting, where the generation task involves one reference identity per image. When extended naively to multi-subject scenarios, they exhibit well-documented failure modes including identity leakage, where features of one subject bleed into another, and feature entanglement, where the model fails to maintain a clean correspondence between each reference and its corresponding generated subject \cite{xiao2023fastcomposer, wang2024ms, she2025mosaic}. FastComposer \cite{xiao2023fastcomposer} was among the first to explicitly address multi-subject generation in a tuning-free manner, introducing localized cross-attention to suppress identity blending across subjects. Mix-of-Show \cite{gu2024mix} and MS-Diffusion \cite{wang2024ms} further tackled multi-subject personalization by introducing subject-specific spatial guidance or disentangled attention mechanisms, yet they typically rely on layout priors or bounding box conditions that are difficult to specify in natural interaction scenarios. UniPortrait \cite{he2024uniportrait} proposed a unified single- and multi-identity customization framework consisting of an ID embedding module and an ID routing module, where the routing mechanism adaptively distributes per-identity embeddings to their corresponding spatial regions in the generated image, effectively mitigating identity blending without requiring explicit layout supervision. AnyStory \cite{he2025anystory} adopted a complementary encode-then-route paradigm, combining a ReferenceNet-based subject encoder with a decoupled instance-aware router that predicts each subject's potential location in the latent space during denoising, enabling unified handling of both single- and multi-subject personalization within a single framework.
+
+More recently, a new wave of methods has further advanced the state of the art through improved training objectives and optimization strategies. MOSAIC \cite{she2025mosaic} reformulates multi-subject generation as a representation optimization problem, introducing explicit semantic correspondence supervision and an inter-subject disentanglement loss that pushes different subjects' attention distributions into orthogonal subspaces, effectively suppressing cross-subject feature interference. Notably, MOSAIC maintains high identity fidelity even when the number of reference subjects exceeds four, a regime where most prior methods degrade substantially. XVerse \cite{chen2025xverse} takes a complementary approach by modulating the text stream of a Diffusion Transformer with reference-image-derived token-level offsets, enabling precise and independent control over each subject's identity and semantic attributes without disrupting the base model's generative capacity. FocusDPO \cite{jin2025focusdpo} introduces dynamic preference optimization into the multi-subject personalization pipeline, adaptively identifying focus regions based on semantic correspondence and image complexity to improve subject-level fidelity via reinforcement-style training signals. PSR \cite{wang2025psr} addresses the problem from a data and reward perspective, proposing a scalable multi-subject data generation pipeline paired with pairwise subject-consistency rewards that jointly optimize identity preservation and text adherence during post-training.
+
+Despite these advances, existing multi-subject personalization methods are predominantly evaluated on scenarios where subjects appear in relative isolation or with only loose spatial relationships. Our work addresses a more challenging and underexplored regime: reference-conditioned multi-subject generation under non-trivial interactions and occlusion, where subjects are in close physical proximity and no explicit spatial layout is provided. In this setting, even recent methods such as MOSAIC, XVerse, and UniPortrait face non-trivial degradation, and dedicated evaluation protocols are required to measure identity fidelity at the subject level under these more demanding conditions.
+
+\subsection{Benchmarks for Personalized Image Generation}
+Prior composition-oriented benchmarks such as T2I-CompBench \cite{huang2023t2i} evaluate whether text-to-image models can satisfy multiple attributes or spatial relations simultaneously.
+However, most of these settings assume text-only specification rather than explicit reference subjects. This distinction matters: in multi-subject personalization, the task is not only to realize a caption, but to correctly bind the right visual identity to the right local attributes and interactions. A benchmark that ignores reference images cannot fully evaluate identity collapse, clone failure, or cross-subject appearance leakage. Similarly, DreamBench \cite{ruiz2023dreambooth} and DreamBench++ \cite{peng2024dreambench} provide useful single-subject evaluation protocols but do not address the combinatorial complexity that arises when multiple reference identities must be jointly preserved. CustomConcept101 \cite{kumari2023multi} extends evaluation to multi-concept settings but does not isolate identity binding failures under contact-rich or occluded scenes. More recent benchmarks such as XVerseBench \cite{chen2025xverse} and PSRBench \cite{wang2025psr} begin to address multi-subject evaluation, yet they remain limited in their treatment of physical interaction and occlusion, which are precisely the conditions under which identity fidelity is most likely to degrade. Table~\ref{tab:benchmark_comparison} summarizes these comparisons across key dimensions.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{l c ccccc p{2.8cm}}
+\toprule
+\textbf{Benchmark} 
+& \textbf{Year}
+& \textbf{Ref. Images} 
+& \textbf{Multi-subject} 
+& \textbf{Interaction} 
+& \textbf{Human Eval} 
+& \textbf{Train Data}
+& \textbf{Key Limitation} \\
+\midrule
+T2I-CompBench~\cite{huang2023t2i}
+& 2023 & \xmark & Text-only & Limited & \xmark & \xmark
+& No reference images; cannot measure identity collapse or appearance leakage. \\
+\addlinespace[2pt]
+DreamBench~\cite{ruiz2023dreambooth}
+& 2023 & \cmark & Single-subject & \xmark & \xmark & \xmark
+& No multi-subject interaction or occlusion evaluation. \\
+\addlinespace[2pt]
+DreamBench++~\cite{peng2024dreambench}
+& 2024 & \cmark & Single-subject & Limited & \cmark & \xmark
+& Does not factorize high-subject-count interaction failures. \\
+\addlinespace[2pt]
+CustomConcept101~\cite{kumari2023multi}
+& 2023 & \cmark & Multi-concept & Limited & \xmark & \xmark
+& Does not isolate identity binding under contact-rich scenes. \\
+\addlinespace[2pt]
+XVerseBench~\cite{chen2025xverse}
+& 2025 & \cmark & Multi-subject & \xmark & \xmark & \xmark
+& Detection-based evaluation; does not assess identity fidelity under occlusion or physical interaction. \\
+\addlinespace[2pt]
+PSRBench~\cite{wang2025psr}
+& 2025 & \cmark & Multi-subject & Limited & \xmark & \cmark
+& Covers seven subsets but lacks factorized evaluation of close-proximity contact and occlusion scenarios. \\
+\midrule
+\textbf{MIBE (Ours)}
+& \textbf{2026} & \cmark & \textbf{Multi-subject} & \textbf{Factorized} & \cmark & \cmark
+& \\
+\bottomrule
+\end{tabular}
+\caption{Comparison with existing compositional and personalized generation benchmarks. Existing
+benchmarks mainly focus on text-only composition, single-subject personalization, or limited multi-subject stress testing. Our benchmark targets reference-conditioned multi-subject personalization under controlled interaction and occlusion settings.}
+\label{tab:benchmark_comparison}
+\end{table*}
+
+\subsection{Evaluation of Personalized Image Generation}
+Most current image generation metrics were not designed for reference-conditioned multi-subject identity preservation, and this gap becomes increasingly apparent as generative models are applied to more demanding real-world scenarios. Global embedding metrics such as CLIP \cite{radford2021learning} and DINOv2 \cite{oquab2023dinov2} are effective when the dominant question is whether an image matches a caption at a coarse semantic level, but they tend to average away localized identity failures. Specifically, when multiple subjects are present in a single generated image, these metrics compute a holistic similarity score over the entire image embedding, making it difficult to isolate whether each individual subject faithfully reflects its corresponding reference. A generated image may achieve a high CLIP score simply by preserving overall scene composition or dominant visual attributes, even when specific facial features, body characteristics, or distinguishing details of one or more subjects are substantially distorted or conflated with one another.
+
+General reward and preference models, such as ImageReward \cite{xu2023imagereward} and PickScore \cite{kirstain2023pick}, can provide useful aesthetic or holistic judgments, yet they usually remain black-box signals and often prioritize visual appeal over strict identity fidelity. These models are typically trained on large-scale human preference data collected in the context of text-to-image generation, where annotators reward images that appear visually pleasing, compositionally balanced, or semantically coherent. As a result, they are poorly calibrated for the more fine-grained task of verifying whether the identity of a specific individual, as defined by a reference image, has been accurately reproduced in the output. A photorealistic and aesthetically compelling image may still receive a high preference score even if the depicted person bears only a superficial resemblance to the intended subject.
+
+These limitations are further compounded when moving from single-subject to multi-subject settings. In the single-subject case, even imperfect metrics can provide a useful, if noisy, approximation of identity consistency. However, when a model must simultaneously preserve the distinct identities of two or more reference subjects, each with their own facial geometry, texture, and appearance, any metric that operates over the full image without explicit subject-level grounding becomes fundamentally ill-suited for the evaluation task. Identity errors may be spatially localized to one subject while the rest of the image remains intact, a nuance that global aggregation cannot capture.
+
+Our work focuses on the regime where these shortcomings become critical: multiple reference identities, non-trivial interactions, and identity-preserving generation under the same prompt. In this setting, we argue that meaningful evaluation requires subject-aware, reference-grounded metrics that can independently assess the fidelity of each generated identity relative to its corresponding reference. Without such fine-grained evaluation, progress in multi-subject identity-preserving generation risks being obscured by metrics that are insensitive to the precise failure modes that matter most.
+
+\section{Methods}
+
+\subsection{MIB Construction}
+
+MIB consists of controlled prompt-reference tasks and paired generated candidates. Each task specifies a guiding prompt, a set of reference subjects, and two candidate generations produced under the same prompt-reference condition, enabling controlled comparison across subject counts, relation types, and generator outputs.
+
+\subsubsection{Prompt Construction}
+We construct hierarchical prompt families over $N \in \{2,4,6,8\}$ subjects. Each family starts from an eight-subject scene and is reduced into six-, four-, and two-subject variants by removing entities and their associated relations. This hierarchy keeps the core scene structure consistent across complexity levels, allowing performance changes to be attributed to increasing subject count rather than unrelated prompt variation.
+
+The prompt space is factorized by subject count, human/object ratio, and relation category. Human/object composition includes balanced, human-heavy, and object-heavy configurations. Relation structure includes three regimes:
+\texttt{no\_interaction\_no\_occlusion} for non-contact spatial or perceptual relations,
+\texttt{occlusion\_no\_interaction} for partial overlap without active engagement,
+and \texttt{occlusion\_interaction} for occluded scenes with explicit physical interactions.
+Representative phrases include \textit{stands beside}, \textit{faces}, and \textit{gazes at} for non-contact relations;
+\textit{stands behind the} and \textit{blocks part of} for occlusion;
+and \textit{holds the}, \textit{feeds the}, \textit{pets the}, \textit{shakes hands with}, and \textit{hugs} for physical interactions. All prompts are grounded in a white-studio setting with a global scale constraint to reduce background and layout confounders.
+
+We apply automatic consistency checks to ensure that assigned entities are explicitly mentioned, unassigned entities are excluded, human/non-human counts match the target bucket, lower-complexity prompts remain strict subsets of higher-complexity prompts, and duplicate prompts are removed.
+
+\subsubsection{Reference Image Generation}
+MIB uses a fixed pool of 80 reference subjects, including 30 human references and 50 non-human references. Human references cover diverse age groups, gender presentations, ethnicities, clothing styles, hairstyles, and visual appearances. Non-human references include animals, furniture, tools, wearable items, and common manipulable objects. All references are standardized as single-subject studio images at $512 \times 512$, providing clean identity anchors for reference-conditioned generation. The fixed pool allows the same subjects to be recombined across different prompts, making comparisons across complexity levels and relation types more controlled.
+
+\subsubsection{Multi-subject Personalized Image Generation}
+For each prompt-reference task, a personalized image generator receives the prompt and corresponding reference subjects and produces a candidate image. MIB constructs paired comparisons by placing two candidate generations under the same prompt-reference condition. For the Gold Set, each prompt is generated by four models, yielding two pairwise comparisons: GPT-Image-1.5 versus Flux2, and Seedream 4.5 versus GLM. Candidate order is randomized as Image A or Image B. Before annotation, we remove missing, corrupted, or blank generations through automatic validity checks.
+
+\subsection{Benchmark Label Construction}
+
+\paragraph{Metrics: Pairwise Preference as the Global Ranking Signal}
+Rather than assigning absolute scores to individual images, we adopt a pairwise preference paradigm as the primary ranking signal: given two generated images $A$ and $B$ produced under the same prompt and reference set, the annotator is asked solely to determine which image is the better overall result, without assigning any numerical score to either candidate in isolation.
+
+This design choice is motivated by two complementary considerations. First, absolute scoring in multi-subject personalized generation is inherently ill-defined: the space of possible failures is heterogeneous, and different annotators may apply inconsistent severity scales when mapping compositional defects to scalar values. Pairwise judgment sidesteps this calibration problem entirely, as relative comparisons are cognitively simpler and empirically more consistent across annotators. Second, pairwise preference naturally encodes graded severity information that cannot be captured by categorical labels alone. Two images may exhibit the same type of failure yet differ substantially in its degree; the preference signal resolves this ambiguity by reflecting which failure is more tolerable, providing a continuous severity proxy that complements the finer-grained diagnostic structure described below.
+
+\paragraph{Metrics: Three Diagnostic Dimensions}
+While pairwise preference captures overall quality ranking, it does not localize \textit{where} or \textit{why} a generated image fails. To provide this finer-grained diagnostic signal, we further decompose multi-subject failure into three orthogonal image-level dimensions:
+\begin{itemize}
+    \item \textbf{Existence}: whether all requested reference subjects are present without omission, cloning, or severe unidentifiable collapse.
+    \item \textbf{Appearance}: whether the generated image preserves correct physical structure and local appearance for the requested reference subjects, without severe distortion or cross-subject feature bleeding.
+    \item \textbf{Interaction}: whether subject-to-subject relations, actions, and prop assignments are aligned with the prompt.
+\end{itemize}
+
+For the three diagnostic dimensions, we adopt a softer aggregation strategy: in cases of disagreement, the final dimension score is computed as the average of the two annotations. For example, if annotator A assigns scores $(1, 1, 0)$ and annotator B assigns $(1, 0, 0)$ across the Existence, Appearance, and Interaction dimensions respectively, the resolved label is $(1, 0.5, 0)$. This asymmetric treatment reflects the differing roles of the two label types: the pairwise winner must be unambiguous to serve as a reliable ranking target, whereas fractional diagnostic scores naturally encode annotator uncertainty and provide a softer supervision signal during evaluation.
+
+\paragraph{Training Label: Silver Dataset Label Generation with SOP-Guided LLMs Annotator}
+\label{sec:method_sop_alignment}
+
+Training our lightweight evaluator requires large-scale pairwise preference data. However, manually annotating our 60K-pair training set is prohibitively slow and expensive given the complex, multi-dimensional verification required for multi-subject generation. To overcome this bottleneck, we construct a \textit{Silver Dataset} for training using frontier LLMs as scalable annotators, while strictly reserving human annotations for the \textit{Gold Dataset} test set. To align machine and human judgments, we enforce a unified Standard Operating Procedure (SOP). By constraining both LLMs and humans to follow the exact same reasoning rubric, we ensure the silver training labels faithfully proxy the human decision-making process.
+
+Unlike generic preference prompting, which often collapses into uninterpretable holistic judgments (e.g., favoring global aesthetics over prompt faithfulness), our SOP decomposes the pairwise comparison into a systematic, three-stage verification process: 1) \emph{Existence}: verifying the physical presence of all referenced subjects; 2) \emph{Appearance}: scrutinizing structural integrity and identity/wardrobe fidelity against the references; and 3) \emph{Interaction}: assessing the spatial arrangement and physical realism of the specified relations. Crucially, the SOP forces the judge to externalize its reasoning by generating a candidate-specific \emph{flaw log} before rendering a final binary preference. By explicitly penalizing missing entities, identity swapping, and interaction violations, this ``errors-first'' scaffolding acts as a regularizer, anchoring the LLM's latent preference policy to concrete compositional metrics rather than spurious visual correlations.
+
+To further distill high-fidelity training signals and mitigate model-specific biases, we implement a cross-model consensus mechanism. We independently query two distinct frontier models (\texttt{gemini-2.5-flash} and \texttt{gemini-3.1-flash-lite-preview}) using the identical SOP. We then construct the final training set by taking the intersection of their predictions, retaining only the pairwise comparisons where both models yield the exact same preference. While this intersection rule reduces the total yield, it acts as a rigorous precision filter, effectively pruning examples where preference is driven by idiosyncratic model noise or ambiguous image quality. The resulting high-agreement subset provides a robust, conservative proxy for human preference. The exact prompt used to enforce this SOP in our pipeline is reproduced in Appendix~\ref{sec:app_SOP}. It explicitly separates independent candidate scoring from the final pairwise decision, defines strict edge cases, and mandates a JSON schema that forces the LLM to articulate flaws before concluding.
+
+
+\paragraph{Testing Label: Gold Dataset Label Generation with Human Double-Blind Annotation}
+To construct a high-quality gold test set, all labels are collected exclusively from human annotators following a double-blind protocol: each image pair is independently reviewed by two annotators without knowledge of each other's judgments.
+
+The gold set covers \textbf{1{,}260 prompts} evaluated across \textbf{4 generative models}, yielding 2 pairwise comparisons per prompt and resulting in 2{,}520 unique image pairs. Under the double-blind protocol, each pair is annotated independently by two human judges, bringing the total annotation workload to \textbf{5{,}040 individual annotation tasks}.
+
+For the global ranking signal, we require strict consensus: if the two annotators disagree on the pairwise winner, the sample is considered ambiguous and discarded from the gold set. For the three diagnostic dimensions, disagreements are resolved by averaging the two scores, naturally encoding annotator uncertainty as a soft supervision signal.
+
+
+\subsection{Evaluator Modeling}
+Binary diagnosis alone cannot distinguish all severity levels. In particular, an image missing one subject and an image missing several subjects may both receive Existence$=0$. We address this by treating pairwise preference as the channel through which severity becomes learnable. The diagnostic head provides categorical structure, while the ranking head learns a continuous latent score that places more severe failures lower whenever annotators systematically prefer the less damaged image. This combination preserves annotation simplicity without discarding score granularity.
+
+
+
+
+
+
+
+
+\section{Results}
+\subsection{SOP-guided LLM-Generated Silver Training set Label Results}
+\label{sec:results_sop_alignment}
+
+Applying the SOP proposed in Section~\ref{sec:method_sop_alignment} to a large-scale corpus of $\sim$60K candidate pairs yields compelling insights into LLM evaluation behavior. The two models achieve a robust \emph{Preference Agreement} of $95.1\%$ ($56,909 / 59,852$ valid overlapping tasks). Looking at the fundamental sub-scores (Figure~\ref{fig:agreement_analysis}a), the models exhibit high consensus on \emph{Existence} ($89.1\%$) and substantial agreement on \emph{Interaction} ($71.9\%$) and \emph{Appearance} ($69.0\%$). This overwhelmingly high preference consensus demonstrates that the SOP effectively anchors the models' global decision-making, confirming that the intersection-filtered labels are highly reliable and well-suited for training our lightweight evaluator. 
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/overall_agreement.pdf}
+        \caption{By Evaluation Dimension}
+        \label{fig:agree_dim}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/agreement_by_subject.pdf}
+        \caption{By Subject Count}
+        \label{fig:agree_subj}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{figures/agreement_by_tag.pdf}
+        \caption{By Spatial Relationship}
+        \label{fig:agree_tag}
+    \end{subfigure}
+    \caption{Cross-model agreement analysis on 60K tasks between \texttt{gemini-2.5-flash} and \texttt{gemini-3.1-flash-lite-preview}. (a) Models reliably converge on global preference but exhibit higher variance on fine-grained appearance. (b) Counter-intuitively, preference agreement increases with the number of subjects, as catastrophic compositional failures in dense scenes make the ``less collapsed'' image trivially obvious. (c) Explicitly prompted interactions provide stronger contextual grounding, yielding the highest agreement.}
+    \label{fig:agreement_analysis}
+\end{figure}
+
+Furthermore, analyzing the preference agreement by scene complexity reveals a counter-intuitive trend: agreement \emph{increases} with the number of subjects (Figure~\ref{fig:agreement_analysis}b). The preference consensus is $91.1\%$ for 2-subject prompts, but rises steadily to $93.4\%$ (4 subjects), $97.7\%$ (6 subjects), and $98.1\%$ (8 subjects). We hypothesize this is because dense multi-subject generation remains exceedingly difficult for current diffusion models; in 8-subject scenarios, candidate images often suffer from catastrophic compositional failures, making the choice between a partially successful image and a completely collapsed image trivially obvious to both judges. Finally, analyzing by spatial relationship (Figure~\ref{fig:agreement_analysis}c) shows that scenes requiring \emph{occlusion with interaction} yield the highest agreement ($97.2\%$), whereas \emph{occlusion without interaction} yields the lowest ($92.8\%$), suggesting that explicitly prompted interactions provide stronger contextual grounding for the LLMs to anchor their judgments.
+
+\paragraph{Qualitative Analysis of SOP Effectiveness.}
+To further validate the robustness of our SOP, we qualitatively examine cases where both \texttt{gemini-2.5-flash} and \texttt{gemini-3.1-flash-lite-preview} reach a strict consensus on all sub-scores and the final preference (Figure~\ref{fig:sop_demos}). The externalized \emph{flaw logs} reveal that the LLMs successfully internalize the multi-dimensional constraints defined in the SOP. This is initially evident in the models' ability to enforce precise semantic adherence for action and target grounding. For instance, in Figure~\ref{fig:sop_demos}(a), the LLMs correctly penalize Candidate B for hallucinating an interaction target (using a stick instead of a hand) and missing a secondary interaction entirely. Beyond semantic accuracy, the SOP effectively drives strict geometric and physical verification. As highlighted in Figure~\ref{fig:sop_demos}(b) and (d), the models identify violations of realistic physics, such as a floating mug embedded in a strange artifact, and catch severe scale distortions like an abnormally giant fried chicken. Furthermore, the evaluators demonstrate a keen sensitivity to fine-grained attribute fidelity. As seen in Figure~\ref{fig:sop_demos}(c) and (d), they effectively scrutinize wardrobe and identity details, successfully catching subtle errors like an incorrect donut color (pink instead of chocolate) or a wrong suitcase color (black instead of white). Importantly, this diagnostic rigor remains robust even in highly complex scenes. Figure~\ref{fig:sop_demos}(e) demonstrates a dense 6-subject composition where Candidate B suffers from severe collapse; despite the visual clutter, both models accurately and consistently isolate multiple concurrent failures across appearance (wrong clothing) and interactions (missing petting, closing, and carrying actions).
+
+Overall, these qualitative results confirm that the ``errors-first'' scaffolding successfully prevents the LLMs from falling back on holistic aesthetic biases, forcing them to conduct rigorous, localized compositional verification.
+
+\subsection{Baseline Evaluator Results on Human Labeled Golden Evaluation Set}
+
+To establish a comprehensive performance ceiling and evaluate the limitations of existing metrics in multi-subject scenarios, we select a representative suite of baselines spanning four distinct paradigms: 
+
+(1) \textbf{Low-level Reconstruction Metrics}: PSNR, SSIM, and MS-SSIM are included to measure pixel-level fidelity; 
+
+(2) \textbf{Semantic Alignment Metrics}: DINO, CLIP, and SigLIP (both Text-based and Image-based) are used to evaluate high-level semantic consistency and identity similarity; 
+
+(3) \textbf{General Human Preference Models}: PickScore, ImageReward, and HPS v2.1, which are specifically trained on human feedback for text-to-image alignment and aesthetics; 
+
+(4) \textbf{Identity-Specific Metrics}: ArcFace Distance and SCR (Subject Consistency Rate), which focus on facial and identity-preserving features critical for personalization.
+
+By evaluating this broad spectrum, we aim to test whether current automated metrics, often designed for single-subject or generic scenes, can effectively handle the ``binding" challenges, such as identity swapping and complex interactions, present in our benchmark.
+
+Table~\ref{tab:overall_metrics} summarizes the mean score of each model on the benchmark. For similarity-style metrics such as PSNR, SSIM, MS-SSIM, DINO, CLIP-T, CLIP-I, SigLIP-T, SigLIP-I, ImageReward, PickScore, and HPS v2.1, larger values indicate better performance. For SCR and ArcFace Distance, smaller values are preferable.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\caption{Overall mean score of each model.}
+\label{tab:overall_metrics}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Metric} & \textbf{GLM} & \textbf{FLUX-2} & \textbf{GPT-image-1.5-high} & \textbf{Seedream-4.5} \\
+\hline
+PSNR & 9.2313 & \textbf{11.0662} & 10.4655 & 9.3190 \\
+SSIM & 0.6308 & 0.7195 & 0.7159 & \textbf{0.7354} \\
+MS-SSIM & 0.5412 & 0.6215 & 0.5983 & \textbf{0.6358} \\
+DINO & 0.5410 & 0.6300 & 0.6627 & \textbf{0.6384} \\
+CLIP-T & 0.3430 & 0.3569 & 0.3564 & \textbf{0.3599} \\
+CLIP-I & 0.7144 & 0.7388 & \textbf{0.7488 }& 0.7356 \\
+SigLIP-T & 0.1809 & \textbf{0.2084} & 0.2050 & 0.2036 \\
+SigLIP-I & 0.7235 & 0.7379 & \textbf{0.7526} & 0.7453 \\
+PickScore & 20.7658 &\textbf{ 21.2998 }& 20.8713 & 21.1139 \\
+ImageReward & 0.7122 & 1.1499 & 1.0351 & \textbf{1.1638} \\
+HPS v2.1 & 0.2827 & 0.2970 & 0.2826 & \textbf{0.2979} \\
+\hline 
+SCR & 0.2006 & 0.2003 & \textbf{0.1245} & 0.1436 \\
+ArcFace Distance & 0.8777 & 0.7984 & 0.6453 & \textbf{0.4547} \\
+\hline
+\end{tabular}
+\end{table}
+
+ We compare automatic metrics against human pairwise preference annotations. After excluding 49 samples marked as prompt-ilogical, the analysis uses 4,991 valid pairwise comparisons. For each comparison, we determine which model is preferred by the annotator and then check whether each automatic metric would rank the same model higher on the corresponding sample. In Figure~\ref{fig:human_metric_pairwise_accuracy}, we report pairwise agreement with human preference, where 0.5 corresponds to random guessing in a balanced binary comparison.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/human_vs_metric_pairwise_accuracy.png}
+\caption{Pairwise agreement between automatic metrics and human preference. The dashed line indicates random-choice accuracy (0.5).}
+\label{fig:human_metric_pairwise_accuracy}
+\end{figure}
+
+
+The comparison shows that the automatic baselines are far from uniformly reliable as proxies for human preference. Several metrics remain only slightly above random choice, including HPS v2.1 (0.5201), while PickScore (0.4857) falls slightly below the random baseline and PSNR (0.3987) is substantially misaligned with human judgments in this setting. Therefore, these metrics should not be treated as dependable replacements for direct human evaluation on this benchmark.
+
+At the same time, the results are not uniformly negative across all baselines. Though ArcFace Distance achieves relative high agreement (0.8729), and semantic-based metrics like DINO and SigLIP-I also show non-trivial alignment, these successes are largely confined to single-dimensional facets such as identity preservation or global semantic consistency. The failure of general-purpose preference scorers (e.g., PickScore, HPS v2.1) to significantly outperform random choice, coupled with the high variance across different metric categories, reveals a fundamental gap in current evaluation paradigms. These fragmented baselines lack a unified reasoning framework to handle the complex ``binding" problem (existence, identity, and interaction) inherent in human judgment. This misalignment underscores the critical need for a more structured, multi-dimensional evaluator that can faithfully replicate the human decision-making process.
+
+\section{Limitations and Future Work}
+
+\section{Conclusion}
+In this paper, we introduced MIBE, a unified benchmark-and-metric framework designed to address the evaluation gap in reference-conditioned multi-subject personalized image generation. We identified binding, the correct assignment of visual identities, appearances, and interactions to their respective subjects, as the central bottleneck for both generation and evaluation in high-subject-count scenarios.
+
+To address this, we constructed MIB, a large-scale benchmark with hierarchical prompt construction and factorized scene buckets, comprising a 60K silver training set with LLM-based annotation and a 4K gold evaluation set with double-blind human annotation across six state-of-the-art generators. Building on this data, we proposed MIE, a reference-conditioned evaluator that jointly predicts pairwise preference and three interpretable diagnostic dimensions: Existence, Appearance, and Interaction. Experiments on the gold set demonstrate that MIE achieves strong cross-generator generalization without any target-generator fine-tuning, outperforming standard metrics on unseen generators and maintaining ranking separability even as subject count increases.
+
+We believe MIBE addresses a critical infrastructure gap in the field. The silver set provides a scalable training resource that can be used not only for metric learning but also for model alignment via DPO or RLHF, and the gold set provides a rigorous, human-grounded testbed for future benchmark comparisons. We hope that MIBE will serve as a standard evaluation protocol for the multi-subject personalization community and stimulate further progress on the binding problem.
+
+\bibliographystyle{plain}  
+\bibliography{main.bib}
+
+
+\newpage
+\appendix
+\section{Appendix: SOP Prompt}
+\label{sec:app_SOP}
+\begin{verbatim}
+You are an expert judge for multi-subject personalized image generation.
+
+You will receive:
+1. The original generation prompt.
+2. Reference images for each subject mentioned in the prompt.
+3. Candidate image A.
+4. Candidate image B.
+
+Your job consists of two parts:
+Part 1: Independent Evaluation
+Evaluate candidate A and candidate B independently. For each image, strictly evaluate:
+- Existence: Are ALL the required subjects in the references physically present?
+  (Generic versions count as 1; completely missing counts as 0).
+- Appearance: Are the subjects rendered WITHOUT structural deformations? Do the
+  generated subjects strictly match the references across ALL features:
+  Face/Skin tone, Hair style, Top clothing, AND Bottoms (pants)?
+- Interaction: Does the generated image reflect the described actions, maintain
+  correct proportions, and follow realistic spatial/physical laws?
+
+Part 2: Overall Comparison
+Compare Candidate A and B and decide the overall winner.
+
+OUTPUT RULES:
+- Use ONLY the provided prompt and images.
+- All dimensional scores (`*_existence', `*_appearance', `*_interaction') must be
+  strictly binary: 1 (fully correct) or 0 (any issue exists).
+- `winner' must be either "A" or "B" (Never "Tie").
+- Return valid JSON ONLY. Absolutely NO markdown formatting.
+- CRITICAL: To focus on errors, the JSON MUST begin with `a_flaw_log` and
+  `b_flaw_log`. DO NOT list perfect subjects. ONLY list subjects with errors and
+  explicitly state what is wrong (Missing, Wrong Face/Hair/Skin, Wrong Top,
+  Wrong Pants, Action/Spatial/Physics Error). If an image is 100% perfect,
+  write "None".
+
+SCORING NOTES & SPECIFIC EDGE CASES:
+- Appearance (Strict Identity & Wardrobe): You MUST check the whole person. If a
+  subject has the correct top but wrong pants, wrong hair, or mismatched skin
+  tone/face compared to the reference, score Appearance as 0 and log the
+  specific flaw (e.g., "Woman red hoodie: Wrong face/skin color",
+  "Man flannel shirt: Wrong pants color").
+- Appearance (Mangled/Melted): Any structural artifacts (extra limbs, mangled
+  faces) = Appearance 0.
+- Existence vs Appearance: If requested "man denim jacket" is drawn as a generic
+  man in a grey sweater, Existence is 1, Appearance is 0.
+- Interaction (Partial): Evaluate interactions based ONLY on rendered subjects.
+  If an interaction requires a missing subject, Interaction is 0.
+- Interaction (Physics, Environment & Scale): Obvious physical violations
+  (e.g., objects floating in mid-air without support) OR severe scale distortions
+  between objects (e.g., abnormally giant bread, miniature people) = Interaction 0.
+  HOWEVER, the presence of unprompted but logical supporting structures
+  (e.g., tables, pedestals) used to hold objects is PERMITTED and should NOT be
+  penalized.
+
+EXPECTED JSON SCHEMA:
+{
+  "a_flaw_log": "Middle eastern man: Appearance (wears green sweater instead of
+  beige shirt). Man flannel shirt: Appearance (wrong pants color). Woman red
+  hoodie: Appearance (mismatched face/skin/hair). Interaction: Man is not
+  occluded by the woman; The burger is floating in mid-air.",
+  "b_flaw_log": "Middle eastern man: Missing. Man bomber jacket: Missing. DSLR
+  camera: Missing. Interaction: Man is not walking towards/staring at the woman;
+  Fails due to missing interaction targets.",
+  "a_existence": 1,
+  "a_appearance": 0,
+  "a_interaction": 0,
+  "b_existence": 0,
+  "b_appearance": 0,
+  "b_interaction": 0,
+  "winner": "A"
+}
+\end{verbatim}
+
+\newpage
+\section{Appendix: Demos of Generated Training Labels}
+\label{sec:app_SOP_demo}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_1.png}
+        \caption{Action and Target Errors}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_2.png}
+        \caption{Physics and Spatial Violations}
+    \end{subfigure}
+    \vspace{1em}
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_3.png}
+        \caption{Appearance and Occlusion Errors}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_4.png}
+        \caption{Scale Distortion and Color Mismatch}
+    \end{subfigure}
+    \vspace{1em}
+    \begin{subfigure}[b]{0.8\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_5.png}
+        \caption{Robust Diagnostics in Highly Complex (6-Subject) Scenes}
+    \end{subfigure}
+    \caption{Qualitative examples of strict cross-model consensus. The externalized flaw logs demonstrate that both LLMs effectively utilize the SOP to catch fine-grained errors in appearance, physical realism, interaction semantics, and complex multi-subject scaling.}
+    \label{fig:sop_demos}
+\end{figure}
+
+\section{Appendix: Human Annotation Observations and Failure Mode Analysis}
+
+During the human annotation process for the gold test set, annotators systematically recorded recurring failure patterns across evaluated image pairs. These observations surfaced three consistent and practically significant findings, which we document here to inform future dataset construction and model development efforts.
+
+\paragraph{Failure Rates Increase with Subject Count.}
+Annotators consistently found that images depicting a larger number of subjects were significantly harder to evaluate correctly, and that generative models performed more poorly on such cases. The most common failure modes in high-subject-count scenes were subject omission, where one or more individuals were missing from the generated output, and appearance drift, where the physical attributes of individual subjects degraded as the total number of subjects increased. This trend was particularly pronounced for visually similar subjects (e.g., individuals wearing comparable outfits or sharing similar physical features), where models frequently confused or merged identities. Facial attributes and clothing details were identified as the two most error-prone visual channels under these conditions.
+
+% A representative 6-subject, 2-object prompt (ID: 6905) evaluated across four generative models. All models exhibit Existence failures, with subject omission ranging from 1 missing subject (FLUX2, ARK, GPT) to 3 missing subjects (GLM). Appearance drift co-occurs in proportion to the severity of omission, as models compensate for missing identities by blending residual subject features into the remaining figures. This example illustrates a consistent empirical trend: as the number of requested subjects increases, both the frequency and severity of compositional failures escalate across all evaluated models.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{figures/Appendix-Failure Rates Increase with Subject Count.png}
+  \caption{\textbf{Failure Rates Increase with Subject Count.} }
+  \label{fig:appendix-failure-rates-subject-count}
+\end{figure}
+
+\paragraph{Existence Failures Frequently Co-occur with Appearance Failures.}
+A substantial proportion of annotated samples exhibited a systematic co-occurrence between Existence and Appearance failures. When a model fails to render all requested subjects as distinct entities, it often compensates by blending the features of missing subjects into the remaining ones, for instance, combining the facial identity of subject $A$ with the wardrobe of subject $B$ into a single generated figure. This entanglement means that Existence failures are rarely isolated: they tend to cascade into cross-subject feature bleeding, inflating Appearance failure rates in a correlated rather than independent manner. This observation motivates treating the three diagnostic dimensions as structured but not fully orthogonal signals in practice, despite their conceptual independence.
+
+% A representative 4-subject prompt (ID: 32062) generated by Seedream, the best-performing model on this sample. The missing subject (Man in Black Suit) is not simply absent: its visual attributes --- the black tie and formal shirt --- are redistributed onto the surviving Bomber Jacket figure, producing a hybrid identity. This demonstrates that Existence and Appearance failures are structurally coupled: when a subject is omitted, the model tends to absorb its features into remaining figures, making Appearance degradation a systematic downstream consequence of Existence failure rather than an independent error.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{figures/Appendix-Existence Failures Frequently Co-occur with Appearance Failures.png}
+  \caption{\textbf{Existence Failures Frequently Co-occur with Appearance Failures} }
+  \label{fig:appendix-existence-appearance-cooccurrence}
+\end{figure}
+
+\paragraph{Naturalness-Accuracy Trade-off in Lower-Performing Models.}
+Annotators observed that images produced by lower-performing models frequently exhibited a characteristic failure pattern distinct from simple omission or distortion. Rather than producing obviously malformed outputs, these models tended to generate visually plausible and perceptually coherent scenes that nonetheless deviated from the reference specifications, favoring naturalistic human poses, socially expected spatial arrangements, or aesthetically balanced compositions at the expense of identity fidelity and attribute accuracy. This suggests that such models implicitly optimize for perceptual realism over reference adherence, trading prompt faithfulness for surface-level believability. This naturalness-accuracy trade-off highlights the importance of reference-conditioned evaluation metrics that explicitly penalize identity drift, rather than metrics that conflate visual quality with task compliance.
+
+
+\newpage
+\input{checklist}
+\end{document}
