@@ -41,17 +41,25 @@ bootstrap_eval_venv() {
   local base_python="$2"
   local pyvenv_cfg="$venv_dir/pyvenv.cfg"
 
-  echo "[run_export_lens_scores] Bootstrapping local eval venv: $venv_dir"
+  echo "[run_export_lens_scores] Bootstrapping local eval venv: $venv_dir" >&2
   if [ -f "$pyvenv_cfg" ] && grep -q "include-system-site-packages = true" "$pyvenv_cfg"; then
-    echo "[run_export_lens_scores] Removing contaminated eval venv (system-site-packages enabled)"
+    echo "[run_export_lens_scores] Removing contaminated eval venv (system-site-packages enabled)" >&2
     rm -rf "$venv_dir"
   fi
   if [ ! -d "$venv_dir" ]; then
-    "$base_python" -m venv "$venv_dir"
+    if ! "$base_python" -m venv "$venv_dir"; then
+      echo "[run_export_lens_scores] Failed to create local eval venv. Please set PYTHON_BIN to an existing environment with unsloth installed, or install python3-venv/ensurepip on the server." >&2
+      return 1
+    fi
   fi
 
   local venv_python="$venv_dir/bin/python"
   local constraints_file="$venv_dir/constraints-export-lens.txt"
+
+  if [ ! -x "$venv_python" ]; then
+    echo "[run_export_lens_scores] Eval venv python not found: $venv_python" >&2
+    return 1
+  fi
 
   cat > "$constraints_file" <<'EOF'
 fsspec<=2025.9.0
@@ -59,12 +67,17 @@ trl>=0.18.2,<=0.24.0,!=0.19.0
 torchao>=0.13.0
 EOF
 
-  "$venv_python" -m pip install --upgrade pip setuptools wheel
+  if ! "$venv_python" -m pip --version >/dev/null 2>&1; then
+    echo "[run_export_lens_scores] pip is unavailable inside $venv_python. Please install python3-venv/ensurepip on the server or provide PYTHON_BIN manually." >&2
+    return 1
+  fi
+
+  "$venv_python" -m pip install --upgrade pip setuptools wheel >&2
   "$venv_python" -m pip install --upgrade --force-reinstall --no-cache-dir \
     -c "$constraints_file" \
-    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao"
+    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao" >&2
 
-  echo "[run_export_lens_scores] Eval venv ready: $venv_python"
+  echo "[run_export_lens_scores] Eval venv ready: $venv_python" >&2
   printf '%s\n' "$venv_python"
 }
 
