@@ -1,0 +1,23 @@
+{
+  "source_files": [
+    "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/Model_Training/data_v2/60k_LLM_Result/2_5_merged_sorted.jsonl",
+    "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/Model_Training/data_v2/60k_LLM_Result/3_1_merged_sorted.jsonl"
+  ],
+  "record_counts": {
+    "gemini_2_5": 59978,
+    "gemini_3_1": 59872,
+    "matched_tasks": 59852,
+    "only_in_2_5": 126,
+    "only_in_3_1": 20
+  },
+  "overall_agreement": {
+    "preference_agreement_rate": 0.9508287108200227,
+    "all_diagnostic_agreement_rate": 0.4620062821626679,
+    "a_existence_agreement_rate": 0.9387489139878367,
+    "a_appearance_agreement_rate": 0.7985530976408475,
+    "a_interaction_agreement_rate": 0.7694312637840005,
+    "b_existence_agreement_rate": 0.9480886185925282,
+    "b_appearance_agreement_rate": 0.8693777985698056,
+    "b_interaction_agreement_rate": 0.934037291986901
+  }
+}

@@ -1,0 +1,2 @@
+{"mode": "layer_only", "from_size": "08b", "to_size": "2b", "pairwise_accuracy_delta": -0.01788617886178856, "pairwise_accuracy_v10_delta": -0.005669737774627981, "pairwise_accuracy_v13_delta": -0.025449758666081568, "macro_f1_delta": 0.060990337535024586}
+{"mode": "lora_layer", "from_size": "08b", "to_size": "2b", "pairwise_accuracy_delta": 0.044173441734417285, "pairwise_accuracy_v10_delta": -0.003543586109142405, "pairwise_accuracy_v13_delta": 0.07371654234313296, "macro_f1_delta": 0.04879468212457705}
