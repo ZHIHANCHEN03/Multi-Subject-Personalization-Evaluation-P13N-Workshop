@@ -54,20 +54,20 @@ for name in modules:
 PY
 }
 
-bootstrap_project_a100_venv() {
+bootstrap_eval_venv() {
   local venv_dir="$1"
   local py_bin="$venv_dir/bin/python"
   local marker="$venv_dir/.deps_ready_export"
-  local constraints_file="$venv_dir/constraints-a100-export.txt"
+  local constraints_file="$venv_dir/constraints-export.txt"
 
-  echo "[run_export_lens_scores] Bootstrapping project A100 runtime at: $venv_dir" >&2
+  echo "[run_export_lens_scores] Bootstrapping INDEPENDENT local eval venv at: $venv_dir" >&2
   mkdir -p "$venv_dir"
   if [ ! -x "$py_bin" ]; then
     python3 -m venv "$venv_dir"
   fi
 
   if [ -f "$marker" ] && python_can_import_runtime_stack "$py_bin"; then
-    echo "[run_export_lens_scores] Reusing ready A100 runtime: $py_bin" >&2
+    echo "[run_export_lens_scores] Reusing ready eval venv: $py_bin" >&2
     printf '%s\n' "$py_bin"
     return 0
   fi
@@ -80,138 +80,47 @@ transformers==5.5.0
 fsspec<=2025.9.0
 EOF
 
+  echo "[run_export_lens_scores] Upgrading pip, setuptools, wheel..." >&2
   "$py_bin" -m pip install --upgrade pip setuptools wheel >&2
+  echo "[run_export_lens_scores] Installing packaging, ninja..." >&2
   "$py_bin" -m pip install --upgrade --no-cache-dir packaging ninja >&2
-  "$py_bin" -m pip install --upgrade --force-reinstall --no-cache-dir \
+  
+  echo "[run_export_lens_scores] Installing PyTorch stack (with progress bar)..." >&2
+  "$py_bin" -m pip install --upgrade --force-reinstall --progress-bar raw \
     torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 \
     --index-url https://download.pytorch.org/whl/cu128 >&2
-  "$py_bin" -m pip install --upgrade --force-reinstall --no-cache-dir \
+    
+  echo "[run_export_lens_scores] Installing Transformers, Peft, Pillow..." >&2
+  "$py_bin" -m pip install --upgrade --force-reinstall --progress-bar raw \
     -c "$constraints_file" transformers==5.5.0 peft pillow 'fsspec<=2025.9.0' >&2
-  "$py_bin" -m pip install --upgrade --force-reinstall --no-cache-dir \
+    
+  echo "[run_export_lens_scores] Installing Unsloth..." >&2
+  "$py_bin" -m pip install --upgrade --force-reinstall --progress-bar raw \
     -c "$constraints_file" unsloth unsloth_zoo >&2
 
   if ! python_can_import_runtime_stack "$py_bin"; then
-    echo "[run_export_lens_scores] Project A100 runtime install finished, but required imports still fail." >&2
+    echo "[run_export_lens_scores] Eval runtime install finished, but required imports still fail." >&2
     return 1
   fi
 
   touch "$marker"
-  echo "[run_export_lens_scores] Project A100 runtime ready: $py_bin" >&2
+  echo "[run_export_lens_scores] Eval runtime ready: $py_bin" >&2
   printf '%s\n' "$py_bin"
 }
 
-bootstrap_eval_venv() {
-  local venv_dir="$1"
-  local base_python="$2"
-  local pyvenv_cfg="$venv_dir/pyvenv.cfg"
-  local fallback_site="$SCRIPT_DIR/.site-packages-export-lens"
-  local fallback_python="$venv_dir/bin/python"
-  local constraints_file="$SCRIPT_DIR/constraints-export-lens.txt"
-  local use_fallback=0
-
-  echo "[run_export_lens_scores] Bootstrapping local eval venv: $venv_dir" >&2
-  if [ -f "$pyvenv_cfg" ] && grep -q "include-system-site-packages = true" "$pyvenv_cfg"; then
-    echo "[run_export_lens_scores] Removing contaminated eval venv (system-site-packages enabled)" >&2
-    rm -rf "$venv_dir"
-  fi
-  if [ ! -d "$venv_dir" ]; then
-    if ! "$base_python" -m venv "$venv_dir"; then
-      echo "[run_export_lens_scores] venv creation failed; falling back to local site-packages install via $base_python" >&2
-      use_fallback=1
-    fi
-  fi
-
-  local venv_python="$venv_dir/bin/python"
-
-  if [ "$use_fallback" -eq 0 ] && [ ! -x "$venv_python" ]; then
-    echo "[run_export_lens_scores] Eval venv python not found: $venv_python; falling back to local site-packages install." >&2
-    use_fallback=1
-  fi
-
-  cat > "$constraints_file" <<'EOF'
-fsspec<=2025.9.0
-trl>=0.18.2,<=0.24.0,!=0.19.0
-torchao>=0.13.0
-EOF
-
-  if [ "$use_fallback" -eq 0 ] && ! "$venv_python" -m pip --version >/dev/null 2>&1; then
-    echo "[run_export_lens_scores] pip is unavailable inside $venv_python; falling back to local site-packages install." >&2
-    use_fallback=1
-  fi
-
-  if [ "$use_fallback" -eq 1 ]; then
-    if ! "$base_python" -m pip --version >/dev/null 2>&1; then
-      echo "[run_export_lens_scores] System python lacks pip as well. Please install pip/venv on the server or provide PYTHON_BIN manually." >&2
-      return 1
-    fi
-    mkdir -p "$fallback_site" "$venv_dir/bin"
-    cat > "$fallback_python" <<EOF
-#!/bin/bash
-export PYTHONPATH="$fallback_site\${PYTHONPATH:+:\$PYTHONPATH}"
-exec "$base_python" "\$@"
-EOF
-    chmod +x "$fallback_python"
-    if python_can_import_runtime_stack "$base_python" "$fallback_site"; then
-      echo "[run_export_lens_scores] Reusing existing fallback runtime: $fallback_python" >&2
-      printf '%s\n' "$fallback_python"
-      return 0
-    fi
-    echo "[run_export_lens_scores] Installing minimal inference runtime into $fallback_site" >&2
-    "$base_python" -m pip install --upgrade --target "$fallback_site" --no-cache-dir --progress-bar raw \
-      -c "$constraints_file" \
-      "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "pillow" "tqdm" >&2
-    if ! python_can_import_runtime_stack "$base_python" "$fallback_site"; then
-      echo "[run_export_lens_scores] Fallback runtime install finished, but required inference imports still fail." >&2
-      return 1
-    fi
-    echo "[run_export_lens_scores] Fallback python ready: $fallback_python" >&2
-    printf '%s\n' "$fallback_python"
-    return 0
-  fi
-
-  "$venv_python" -m pip install --upgrade pip setuptools wheel --progress-bar raw >&2
-  "$venv_python" -m pip install --upgrade --no-cache-dir --progress-bar raw \
-    -c "$constraints_file" \
-    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "pillow" "tqdm" >&2
-
-  echo "[run_export_lens_scores] Eval venv ready: $venv_python" >&2
-  printf '%s\n' "$venv_python"
-}
-
 discover_python_bin() {
-  local candidates=()
-  local project_a100_venv="$PROJECT_ROOT/Model_Training/.venv-a100-unsloth"
   local local_eval_venv="$SCRIPT_DIR/.venv-export-lens"
   local local_eval_python="$local_eval_venv/bin/python"
 
   if [ -n "${PYTHON_BIN:-}" ] && [ "$PYTHON_BIN" != "python3" ]; then
-    candidates+=("$PYTHON_BIN")
-  fi
-  candidates+=(
-    "$PROJECT_ROOT/Model_Training/.venv-a100-unsloth/bin/python"
-    "$PROJECT_ROOT/.venv-a100-unsloth/bin/python"
-    "$PIPELINE_ROOT/.venv-a100-unsloth/bin/python"
-    "$local_eval_python"
-  )
-
-  for candidate in "${candidates[@]}"; do
-    if python_can_import_runtime_stack "$candidate"; then
-      printf '%s\n' "$candidate"
+    if python_can_import_runtime_stack "$PYTHON_BIN"; then
+      printf '%s\n' "$PYTHON_BIN"
       return 0
     fi
-  done
-
-  if python_can_import_runtime_stack "python3"; then
-    printf '%s\n' "python3"
-    return 0
   fi
 
-  if [ -d "$PROJECT_ROOT/Model_Training" ]; then
-    bootstrap_project_a100_venv "$project_a100_venv"
-    return 0
-  fi
-
-  bootstrap_eval_venv "$local_eval_venv" "python3"
+  # Always use the strictly independent local eval venv
+  bootstrap_eval_venv "$local_eval_venv"
 }
 
 MANIFEST_PATH="${MANIFEST_PATH:-}"
