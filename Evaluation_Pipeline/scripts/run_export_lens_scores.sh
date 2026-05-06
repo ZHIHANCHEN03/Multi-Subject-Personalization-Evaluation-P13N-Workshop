@@ -36,6 +36,20 @@ print(getattr(unsloth, "__version__", "unknown"))
 PY
 }
 
+python_can_import_runtime_stack() {
+  local py_bin="$1"
+  local extra_path="${2:-}"
+  if [ ! -x "$py_bin" ]; then
+    return 1
+  fi
+  PYTHONNOUSERSITE=1 PYTHONPATH="$extra_path${PYTHONPATH:+:$PYTHONPATH}" "$py_bin" - <<'PY' >/dev/null 2>&1
+import importlib
+modules = ["unsloth", "torch", "transformers", "peft", "PIL", "tqdm"]
+for name in modules:
+    importlib.import_module(name)
+PY
+}
+
 bootstrap_eval_venv() {
   local venv_dir="$1"
   local base_python="$2"
@@ -81,15 +95,25 @@ EOF
       return 1
     fi
     mkdir -p "$fallback_site" "$venv_dir/bin"
-    "$base_python" -m pip install --upgrade --target "$fallback_site" --no-cache-dir --progress-bar raw \
-      -c "$constraints_file" \
-      "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao" >&2
     cat > "$fallback_python" <<EOF
 #!/bin/bash
 export PYTHONPATH="$fallback_site\${PYTHONPATH:+:\$PYTHONPATH}"
 exec "$base_python" "\$@"
 EOF
     chmod +x "$fallback_python"
+    if python_can_import_runtime_stack "$base_python" "$fallback_site"; then
+      echo "[run_export_lens_scores] Reusing existing fallback runtime: $fallback_python" >&2
+      printf '%s\n' "$fallback_python"
+      return 0
+    fi
+    echo "[run_export_lens_scores] Installing minimal inference runtime into $fallback_site" >&2
+    "$base_python" -m pip install --upgrade --target "$fallback_site" --no-cache-dir --progress-bar raw \
+      -c "$constraints_file" \
+      "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "pillow" "tqdm" >&2
+    if ! python_can_import_runtime_stack "$base_python" "$fallback_site"; then
+      echo "[run_export_lens_scores] Fallback runtime install finished, but required inference imports still fail." >&2
+      return 1
+    fi
     echo "[run_export_lens_scores] Fallback python ready: $fallback_python" >&2
     printf '%s\n' "$fallback_python"
     return 0
