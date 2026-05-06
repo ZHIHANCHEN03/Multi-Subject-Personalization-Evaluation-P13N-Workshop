@@ -54,6 +54,52 @@ for name in modules:
 PY
 }
 
+bootstrap_project_a100_venv() {
+  local venv_dir="$1"
+  local py_bin="$venv_dir/bin/python"
+  local marker="$venv_dir/.deps_ready_export"
+  local constraints_file="$venv_dir/constraints-a100-export.txt"
+
+  echo "[run_export_lens_scores] Bootstrapping project A100 runtime at: $venv_dir" >&2
+  mkdir -p "$venv_dir"
+  if [ ! -x "$py_bin" ]; then
+    python3 -m venv "$venv_dir"
+  fi
+
+  if [ -f "$marker" ] && python_can_import_runtime_stack "$py_bin"; then
+    echo "[run_export_lens_scores] Reusing ready A100 runtime: $py_bin" >&2
+    printf '%s\n' "$py_bin"
+    return 0
+  fi
+
+  cat > "$constraints_file" <<'EOF'
+torch==2.10.0
+torchvision==0.25.0
+torchaudio==2.10.0
+transformers==5.5.0
+fsspec<=2025.9.0
+EOF
+
+  "$py_bin" -m pip install --upgrade pip setuptools wheel >&2
+  "$py_bin" -m pip install --upgrade --no-cache-dir packaging ninja >&2
+  "$py_bin" -m pip install --upgrade --force-reinstall --no-cache-dir \
+    torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 \
+    --index-url https://download.pytorch.org/whl/cu128 >&2
+  "$py_bin" -m pip install --upgrade --force-reinstall --no-cache-dir \
+    -c "$constraints_file" transformers==5.5.0 peft pillow 'fsspec<=2025.9.0' >&2
+  "$py_bin" -m pip install --upgrade --force-reinstall --no-cache-dir \
+    -c "$constraints_file" unsloth unsloth_zoo >&2
+
+  if ! python_can_import_runtime_stack "$py_bin"; then
+    echo "[run_export_lens_scores] Project A100 runtime install finished, but required imports still fail." >&2
+    return 1
+  fi
+
+  touch "$marker"
+  echo "[run_export_lens_scores] Project A100 runtime ready: $py_bin" >&2
+  printf '%s\n' "$py_bin"
+}
+
 bootstrap_eval_venv() {
   local venv_dir="$1"
   local base_python="$2"
@@ -134,6 +180,7 @@ EOF
 
 discover_python_bin() {
   local candidates=()
+  local project_a100_venv="$PROJECT_ROOT/Model_Training/.venv-a100-unsloth"
   local local_eval_venv="$SCRIPT_DIR/.venv-export-lens"
   local local_eval_python="$local_eval_venv/bin/python"
 
@@ -156,6 +203,11 @@ discover_python_bin() {
 
   if python_can_import_runtime_stack "python3"; then
     printf '%s\n' "python3"
+    return 0
+  fi
+
+  if [ -d "$PROJECT_ROOT/Model_Training" ]; then
+    bootstrap_project_a100_venv "$project_a100_venv"
     return 0
   fi
 
