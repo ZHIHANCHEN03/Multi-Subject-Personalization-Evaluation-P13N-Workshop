@@ -81,7 +81,7 @@ EOF
       return 1
     fi
     mkdir -p "$fallback_site" "$venv_dir/bin"
-    "$base_python" -m pip install --upgrade --target "$fallback_site" --no-cache-dir \
+    "$base_python" -m pip install --upgrade --target "$fallback_site" --no-cache-dir --progress-bar raw \
       -c "$constraints_file" \
       "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao" >&2
     cat > "$fallback_python" <<EOF
@@ -95,8 +95,8 @@ EOF
     return 0
   fi
 
-  "$venv_python" -m pip install --upgrade pip setuptools wheel >&2
-  "$venv_python" -m pip install --upgrade --force-reinstall --no-cache-dir \
+  "$venv_python" -m pip install --upgrade pip setuptools wheel --progress-bar raw >&2
+  "$venv_python" -m pip install --upgrade --force-reinstall --no-cache-dir --progress-bar raw \
     -c "$constraints_file" \
     "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao" >&2
 
