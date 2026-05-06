@@ -2,11 +2,15 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PIPELINE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$PIPELINE_ROOT/.." && pwd)"
 
 discover_manifest() {
   shopt -s nullglob
-  local candidates=("$SCRIPT_DIR"/*_manifest.jsonl)
+  local candidates=(
+    "$PIPELINE_ROOT/data/manifests"/*_manifest.jsonl
+    "$SCRIPT_DIR"/*_manifest.jsonl
+  )
   shopt -u nullglob
 
   if [ "${#candidates[@]}" -eq 1 ]; then
@@ -120,9 +124,9 @@ EOF
   fi
 
   "$venv_python" -m pip install --upgrade pip setuptools wheel --progress-bar raw >&2
-  "$venv_python" -m pip install --upgrade --force-reinstall --no-cache-dir --progress-bar raw \
+  "$venv_python" -m pip install --upgrade --no-cache-dir --progress-bar raw \
     -c "$constraints_file" \
-    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao" >&2
+    "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "pillow" "tqdm" >&2
 
   echo "[run_export_lens_scores] Eval venv ready: $venv_python" >&2
   printf '%s\n' "$venv_python"
@@ -137,19 +141,20 @@ discover_python_bin() {
     candidates+=("$PYTHON_BIN")
   fi
   candidates+=(
-    "$REPO_ROOT/Model_Training/.venv-a100-unsloth/bin/python"
-    "$REPO_ROOT/.venv-a100-unsloth/bin/python"
+    "$PROJECT_ROOT/Model_Training/.venv-a100-unsloth/bin/python"
+    "$PROJECT_ROOT/.venv-a100-unsloth/bin/python"
+    "$PIPELINE_ROOT/.venv-a100-unsloth/bin/python"
     "$local_eval_python"
   )
 
   for candidate in "${candidates[@]}"; do
-    if python_can_import_unsloth "$candidate"; then
+    if python_can_import_runtime_stack "$candidate"; then
       printf '%s\n' "$candidate"
       return 0
     fi
   done
 
-  if python_can_import_unsloth "python3"; then
+  if python_can_import_runtime_stack "python3"; then
     printf '%s\n' "python3"
     return 0
   fi
@@ -160,7 +165,7 @@ discover_python_bin() {
 MANIFEST_PATH="${MANIFEST_PATH:-}"
 OUTPUT_PATH="${OUTPUT_PATH:-}"
 DATASET_ROOT="${DATASET_ROOT:-}"
-AUTO_MANIFEST_OUTPUT="${AUTO_MANIFEST_OUTPUT:-$SCRIPT_DIR/auto_manifest.jsonl}"
+AUTO_MANIFEST_OUTPUT="${AUTO_MANIFEST_OUTPUT:-$PIPELINE_ROOT/data/manifests/auto_manifest.jsonl}"
 
 if [ "$#" -ge 1 ]; then
   MANIFEST_PATH="$1"
@@ -180,13 +185,14 @@ if [ -n "$MANIFEST_PATH" ] && [ ! -f "$MANIFEST_PATH" ]; then
 fi
 
 if [ -z "$OUTPUT_PATH" ]; then
+  mkdir -p "$PIPELINE_ROOT/outputs/jsonl"
   if [ -n "$MANIFEST_PATH" ]; then
     MANIFEST_BASENAME="$(basename "$MANIFEST_PATH")"
     MANIFEST_STEM="${MANIFEST_BASENAME%.jsonl}"
   else
     MANIFEST_STEM="auto_manifest"
   fi
-  OUTPUT_PATH="$SCRIPT_DIR/${MANIFEST_STEM}_lens_scores_all6.jsonl"
+  OUTPUT_PATH="$PIPELINE_ROOT/outputs/jsonl/${MANIFEST_STEM}_lens_scores_all6.jsonl"
 fi
 
 if [ -n "$MANIFEST_PATH" ]; then
@@ -196,16 +202,31 @@ else
   MANIFEST_STEM="auto_manifest"
 fi
 TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
-LOG_PATH="${LOG_PATH:-$SCRIPT_DIR/${MANIFEST_STEM}_lens_scores_all6_${TIMESTAMP}.log}"
+mkdir -p "$PIPELINE_ROOT/outputs/logs"
+LOG_PATH="${LOG_PATH:-$PIPELINE_ROOT/outputs/logs/${MANIFEST_STEM}_lens_scores_all6_${TIMESTAMP}.log}"
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 RUNS_ROOT="${RUNS_ROOT:-}"
-DATASET_BASE_DIR="${DATASET_BASE_DIR:-$REPO_ROOT}"
+DATASET_BASE_DIR="${DATASET_BASE_DIR:-$PROJECT_ROOT}"
 LOG_EVERY="${LOG_EVERY:-20}"
-PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-5}"
-PAIR_BATCH_SIZE_4B="${PAIR_BATCH_SIZE_4B:-2}"
+BATCH_SIZE="${BATCH_SIZE:-}"
+if [ -n "$BATCH_SIZE" ]; then
+  PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-$BATCH_SIZE}"
+  PAIR_BATCH_SIZE_4B="${PAIR_BATCH_SIZE_4B:-$BATCH_SIZE}"
+else
+  PAIR_BATCH_SIZE="${PAIR_BATCH_SIZE:-5}"
+  PAIR_BATCH_SIZE_4B="${PAIR_BATCH_SIZE_4B:-2}"
+fi
 MODEL_GROUP="${MODEL_GROUP:-all}"
 PYTHON_BIN="$(discover_python_bin)"
+
+case "$MODEL_GROUP" in
+  all) METRIC_MODEL_LABEL="all 6 ready models" ;;
+  08b) METRIC_MODEL_LABEL="0.8B group (2 models)" ;;
+  2b) METRIC_MODEL_LABEL="2B group (2 models)" ;;
+  4b) METRIC_MODEL_LABEL="4B group (2 models)" ;;
+  *) METRIC_MODEL_LABEL="$MODEL_GROUP" ;;
+esac
 
 echo "============================================================"
 echo "[run_export_lens_scores] Starting LENS score export"
@@ -221,7 +242,7 @@ echo "[run_export_lens_scores] Log file       : $LOG_PATH"
 echo "[run_export_lens_scores] Runs root      : ${RUNS_ROOT:-<auto-discover>}"
 echo "[run_export_lens_scores] Dataset base   : $DATASET_BASE_DIR"
 echo "[run_export_lens_scores] Python         : $PYTHON_BIN"
-echo "[run_export_lens_scores] Metric models  : all 6 ready models"
+echo "[run_export_lens_scores] Metric models  : $METRIC_MODEL_LABEL"
 echo "[run_export_lens_scores] Per-model out  : ${OUTPUT_PATH%.jsonl}__<metrics_alias>.jsonl"
 echo "[run_export_lens_scores] Log every      : $LOG_EVERY pairs"
 echo "[run_export_lens_scores] Pair batch     : $PAIR_BATCH_SIZE"

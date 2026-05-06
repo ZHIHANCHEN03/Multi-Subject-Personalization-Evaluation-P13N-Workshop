@@ -15,8 +15,9 @@ from transformers import AutoProcessor
 from tqdm.auto import tqdm
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-MODEL_TRAINING_ROOT = REPO_ROOT / "Model_Training"
+PIPELINE_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = PIPELINE_ROOT.parent
+MODEL_TRAINING_ROOT = PROJECT_ROOT / "Model_Training"
 if str(MODEL_TRAINING_ROOT) not in sys.path:
     sys.path.append(str(MODEL_TRAINING_ROOT))
 
@@ -847,7 +848,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dataset_base_dir",
         type=str,
-        default=str(REPO_ROOT),
+        default=str(PROJECT_ROOT),
         help="Base directory used to resolve relative image paths from the manifest",
     )
     parser.add_argument(
@@ -905,7 +906,7 @@ def main() -> None:
     if args.manifest:
         manifest_path = Path(args.manifest).resolve()
     else:
-        dataset_root = Path(args.dataset_root).resolve() if args.dataset_root else discover_dataset_root(REPO_ROOT)
+        dataset_root = Path(args.dataset_root).resolve() if args.dataset_root else discover_dataset_root(PROJECT_ROOT)
         auto_manifest_output = (
             Path(args.auto_manifest_output).resolve()
             if args.auto_manifest_output
@@ -913,7 +914,7 @@ def main() -> None:
         )
         manifest_path = build_auto_manifest(dataset_root, auto_manifest_output)
 
-    runs_root = Path(args.runs_root).resolve() if args.runs_root else discover_runs_root(REPO_ROOT)
+    runs_root = Path(args.runs_root).resolve() if args.runs_root else discover_runs_root(PROJECT_ROOT)
     log(f"Using runs root: {runs_root}")
 
     manifest_items = load_manifest(manifest_path)
