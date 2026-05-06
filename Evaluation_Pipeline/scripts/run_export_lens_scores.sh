@@ -40,6 +40,10 @@ bootstrap_eval_venv() {
   local venv_dir="$1"
   local base_python="$2"
   local pyvenv_cfg="$venv_dir/pyvenv.cfg"
+  local fallback_site="$SCRIPT_DIR/.site-packages-export-lens"
+  local fallback_python="$venv_dir/bin/python"
+  local constraints_file="$SCRIPT_DIR/constraints-export-lens.txt"
+  local use_fallback=0
 
   echo "[run_export_lens_scores] Bootstrapping local eval venv: $venv_dir" >&2
   if [ -f "$pyvenv_cfg" ] && grep -q "include-system-site-packages = true" "$pyvenv_cfg"; then
@@ -48,17 +52,16 @@ bootstrap_eval_venv() {
   fi
   if [ ! -d "$venv_dir" ]; then
     if ! "$base_python" -m venv "$venv_dir"; then
-      echo "[run_export_lens_scores] Failed to create local eval venv. Please set PYTHON_BIN to an existing environment with unsloth installed, or install python3-venv/ensurepip on the server." >&2
-      return 1
+      echo "[run_export_lens_scores] venv creation failed; falling back to local site-packages install via $base_python" >&2
+      use_fallback=1
     fi
   fi
 
   local venv_python="$venv_dir/bin/python"
-  local constraints_file="$venv_dir/constraints-export-lens.txt"
 
-  if [ ! -x "$venv_python" ]; then
-    echo "[run_export_lens_scores] Eval venv python not found: $venv_python" >&2
-    return 1
+  if [ "$use_fallback" -eq 0 ] && [ ! -x "$venv_python" ]; then
+    echo "[run_export_lens_scores] Eval venv python not found: $venv_python; falling back to local site-packages install." >&2
+    use_fallback=1
   fi
 
   cat > "$constraints_file" <<'EOF'
@@ -67,9 +70,29 @@ trl>=0.18.2,<=0.24.0,!=0.19.0
 torchao>=0.13.0
 EOF
 
-  if ! "$venv_python" -m pip --version >/dev/null 2>&1; then
-    echo "[run_export_lens_scores] pip is unavailable inside $venv_python. Please install python3-venv/ensurepip on the server or provide PYTHON_BIN manually." >&2
-    return 1
+  if [ "$use_fallback" -eq 0 ] && ! "$venv_python" -m pip --version >/dev/null 2>&1; then
+    echo "[run_export_lens_scores] pip is unavailable inside $venv_python; falling back to local site-packages install." >&2
+    use_fallback=1
+  fi
+
+  if [ "$use_fallback" -eq 1 ]; then
+    if ! "$base_python" -m pip --version >/dev/null 2>&1; then
+      echo "[run_export_lens_scores] System python lacks pip as well. Please install pip/venv on the server or provide PYTHON_BIN manually." >&2
+      return 1
+    fi
+    mkdir -p "$fallback_site" "$venv_dir/bin"
+    "$base_python" -m pip install --upgrade --target "$fallback_site" --no-cache-dir \
+      -c "$constraints_file" \
+      "unsloth" "unsloth_zoo" "transformers==5.5.0" "peft" "accelerate" "pillow" "tqdm" "trl" "torchao" >&2
+    cat > "$fallback_python" <<EOF
+#!/bin/bash
+export PYTHONPATH="$fallback_site\${PYTHONPATH:+:\$PYTHONPATH}"
+exec "$base_python" "\$@"
+EOF
+    chmod +x "$fallback_python"
+    echo "[run_export_lens_scores] Fallback python ready: $fallback_python" >&2
+    printf '%s\n' "$fallback_python"
+    return 0
   fi
 
   "$venv_python" -m pip install --upgrade pip setuptools wheel >&2
