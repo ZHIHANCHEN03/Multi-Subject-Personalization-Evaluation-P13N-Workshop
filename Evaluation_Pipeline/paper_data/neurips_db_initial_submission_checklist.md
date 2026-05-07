@@ -201,11 +201,11 @@ NeurIPS D&B reviewers do not need every raw intermediate score inside the PDF, b
 
 ### The safest project-specific package is
 
-- `paper_data/section_4_1_mib_silver/*`
-- `paper_data/section_4_2_mib_gold/*`
-- `paper_data/section_5_1_existing_metrics/*`
-- `paper_data/section_5_2_mie_alignment/*`
-- `paper_data/section_5_3_breakdown/*`
+- `paper_data/section_4_1_1_mib_silver/*`
+- `paper_data/section_4_1_2_mib_gold/*`
+- `paper_data/section_4_2_1_existing_metrics/*`
+- `paper_data/section_4_2_2_mie_alignment/*`
+- `paper_data/section_4_2_3_breakdown/*`
 - `paper_data/paper_section4&5_analysis.md`
 
 These are especially useful because they are already paper-facing and reviewer-readable.
@@ -280,11 +280,11 @@ If you want a very concrete answer, this is the recommended first upload bundle 
 
 ### C. Paper companion artifacts
 
-- `paper_data/section_4_1_mib_silver`
-- `paper_data/section_4_2_mib_gold`
-- `paper_data/section_5_1_existing_metrics`
-- `paper_data/section_5_2_mie_alignment`
-- `paper_data/section_5_3_breakdown`
+- `paper_data/section_4_1_1_mib_silver`
+- `paper_data/section_4_1_2_mib_gold`
+- `paper_data/section_4_2_1_existing_metrics`
+- `paper_data/section_4_2_2_mie_alignment`
+- `paper_data/section_4_2_3_breakdown`
 - `paper_data/paper_section4&5_analysis.md`
 - `paper_data/images`
 

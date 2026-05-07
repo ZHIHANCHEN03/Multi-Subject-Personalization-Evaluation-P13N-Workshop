@@ -360,7 +360,8 @@ def summarize_results(results: List[Dict], human_stats: Dict) -> str:
     for result in results:
         best_by_mode[result["mode"]].append(result)
     for mode, entries in sorted(best_by_mode.items()):
-        entries = sorted(entries, key=lambda x: x["size"])
+        size_order = {"08b": 0, "2b": 1, "4b": 2}
+        entries = sorted(entries, key=lambda x: size_order.get(x["size"], 999))
         if len(entries) >= 2:
             for earlier, later in zip(entries, entries[1:]):
                 lines.append(

@@ -4,11 +4,11 @@ This folder contains section-oriented data exports for the paper results section
 
 Generated sections:
 
-- `section_4_1_mib_silver`
-- `section_4_2_mib_gold`
-- `section_5_1_existing_metrics`
-- `section_5_2_mie_alignment`
-- `section_5_3_breakdown`
+- `section_4_1_1_mib_silver`
+- `section_4_1_2_mib_gold`
+- `section_4_2_1_existing_metrics`
+- `section_4_2_2_mie_alignment`
+- `section_4_2_3_breakdown`
 
 Regenerate everything with:
 

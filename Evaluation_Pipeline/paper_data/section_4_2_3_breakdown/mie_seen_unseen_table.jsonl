@@ -1,0 +1,6 @@
+{"metrics_model_name": "qwen35_08b_layer_only", "size": "08b", "mode": "layer_only", "seen_pairwise_accuracy_v10": 0.9844082211197732, "unseen_pairwise_accuracy_v13": 0.7836770513383062, "unseen_minus_seen": -0.200731169781467}
+{"metrics_model_name": "qwen35_08b_lora_layer", "size": "08b", "mode": "lora_layer", "seen_pairwise_accuracy_v10": 0.9865343727852587, "unseen_pairwise_accuracy_v13": 0.7801667397981571, "unseen_minus_seen": -0.2063676329871016}
+{"metrics_model_name": "qwen35_2b_layer_only", "size": "2b", "mode": "layer_only", "seen_pairwise_accuracy_v10": 0.9787384833451452, "unseen_pairwise_accuracy_v13": 0.7582272926722247, "unseen_minus_seen": -0.22051119067292058}
+{"metrics_model_name": "qwen35_2b_lora_layer", "size": "2b", "mode": "lora_layer", "seen_pairwise_accuracy_v10": 0.9829907866761163, "unseen_pairwise_accuracy_v13": 0.8538832821412901, "unseen_minus_seen": -0.12910750453482622}
+{"metrics_model_name": "qwen35_4b_layer_only", "size": "4b", "mode": "layer_only", "seen_pairwise_accuracy_v10": 0.9829907866761163, "unseen_pairwise_accuracy_v13": 0.8086880210618692, "unseen_minus_seen": -0.17430276561424707}
+{"metrics_model_name": "qwen35_4b_lora_layer", "size": "4b", "mode": "lora_layer", "seen_pairwise_accuracy_v10": 0.9822820694542878, "unseen_pairwise_accuracy_v13": 0.8841597191750767, "unseen_minus_seen": -0.09812235027921101}

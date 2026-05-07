@@ -41,7 +41,7 @@ What this means for writing:
 - do **not** claim a complete 6-model evaluator sweep in the paper unless the 4B jsonl files are also available
 - it is safer to explicitly frame the evaluator ablation as the currently available `0.8B/2B` family
 
-## Section 4.1
+## Section 4.1.1
 
 ### 4.1 MIB-Silver: Label Reliability and Scalability
 
@@ -97,7 +97,7 @@ They are sufficient for:
 If you want to report the exact size of the final consensus-filtered silver subset used for training, you may also want the post-intersection training split statistics.
 But for the core two-LLM agreement analysis, these two files are enough.
 
-## Section 4.2
+## Section 4.1.2
 
 ### 4.2 MIB-Gold: Human Annotation Findings and Benchmark Difficulty
 
@@ -143,14 +143,14 @@ They contain the exact fields needed for:
 - human preference aggregation
 - disagreement filtering
 - category aggregation
-- prompt-ilogical filtering
+- preference-consistency filtering
 - descriptive analysis of benchmark difficulty
 
 ### What this section can already support
 
 - human annotation protocol summary
 - valid-vs-dropped sample counts
-- category disagreement behavior
+- level-wise and dataset-wise benchmark difficulty behavior
 - qualitative and quantitative benchmark findings
 - a clean `4.2` subsection
 
@@ -159,7 +159,7 @@ They contain the exact fields needed for:
 This section should be written as `human annotation findings`, not just `annotation statistics`.
 The strongest use of these files is to explain what the benchmark reveals about multi-subject failure.
 
-## Section 5.1
+## Section 4.2.1
 
 ### 5.1 Existing Metrics Fail on MIB-Gold
 
@@ -220,7 +220,7 @@ This is enough to write a strong `5.1` subsection without needing any new evalua
 - by-subject-count failure trend
 - optional by-scenario breakdown
 
-## Section 5.2
+## Section 4.2.2
 
 ### 5.2 MIE Aligns Better with Human Preference
 
@@ -290,7 +290,7 @@ For now, write this section as:
 
 This is already enough to support a credible section.
 
-## Section 5.3
+## Section 4.2.3
 
 ### 5.3 Breakdown Analysis
 

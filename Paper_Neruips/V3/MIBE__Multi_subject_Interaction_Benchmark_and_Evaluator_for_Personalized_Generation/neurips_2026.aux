@@ -1,0 +1,192 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{chen2026identities}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\citation{kirstain2023pick}
+\citation{xu2023imagereward}
+\citation{wu2023human}
+\citation{ruiz2023dreambooth,peng2024dreambench}
+\citation{huang2023t2i}
+\citation{chen2025xverse,wang2025psr}
+\citation{chen2026identities}
+\citation{chen2026identities}
+\def\@LN@column{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces  \textbf  {Existing metrics approach random agreement as subject count grows; MIE retains higher human alignment.} Pairwise agreement with double-blind human preference on MIB-Gold by subject count ($N \in \{2,4,6,8\}$). Standard metrics, including SCR~\cite  {chen2026identities}, approach random agreement (dashed line) in high-subject-count settings; MIE, trained exclusively on MIB-Silver, retains higher agreement, with the gap widening as scenes grow more crowded. }}{2}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:metric_agreement_subject_count}{{1}{2}{\textbf {Existing metrics approach random agreement as subject count grows; MIE retains higher human alignment.} Pairwise agreement with double-blind human preference on MIB-Gold by subject count ($N \in \{2,4,6,8\}$). Standard metrics, including SCR~\cite {chen2026identities}, approach random agreement (dashed line) in high-subject-count settings; MIE, trained exclusively on MIB-Silver, retains higher agreement, with the gap widening as scenes grow more crowded}{figure.caption.2}{}}
+\citation{ruiz2023dreambooth}
+\citation{gal2022image}
+\citation{ye2023ip}
+\citation{li2024photomaker}
+\citation{xiao2023fastcomposer}
+\citation{wang2024ms}
+\citation{xu2025interactcustom}
+\citation{huang2023t2i}
+\citation{chen2025xverse}
+\citation{wang2025psr}
+\citation{borse2025multihuman}
+\citation{tian2026multibind}
+\citation{xu2023imagereward}
+\citation{kumar2026vlmjudge}
+\citation{huang2023t2i}
+\citation{ruiz2023dreambooth}
+\citation{peng2024dreambench}
+\citation{kumari2023multi}
+\citation{chen2025xverse}
+\citation{wang2025psr}
+\citation{wu2025omnigen2}
+\citation{oshima2025multibanana}
+\citation{borse2025multihuman}
+\citation{tian2026multibind}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{3}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Personalized and Multi-Subject Generation}{3}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Evolution of Benchmark}{3}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Metrics and Scalable Evaluators}{3}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methods}{3}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}MIB Construction}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Prompt Construction}{3}{subsubsection.3.1.1}\protected@file@percent }
+\def\@LN@column{1}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison with existing compositional and personalized generation benchmarks. DreamBench refers to the evaluation set introduced with DreamBooth, and CustomConcept101 refers to the concept set released with Custom Diffusion. Prior benchmarks mainly focus on text-only composition, single-subject personalization, broad multi-subject capability evaluation, multi-reference consistency, multi-human generation, or attribute-level misbinding. MIB targets reference-conditioned multi-subject personalization under factorized non-contact, occlusion, and physical-interaction stress, and provides both scalable preference/diagnostic supervision and human gold evaluation.}}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:benchmark_comparison}{{1}{4}{Comparison with existing compositional and personalized generation benchmarks. DreamBench refers to the evaluation set introduced with DreamBooth, and CustomConcept101 refers to the concept set released with Custom Diffusion. Prior benchmarks mainly focus on text-only composition, single-subject personalization, broad multi-subject capability evaluation, multi-reference consistency, multi-human generation, or attribute-level misbinding. MIB targets reference-conditioned multi-subject personalization under factorized non-contact, occlusion, and physical-interaction stress, and provides both scalable preference/diagnostic supervision and human gold evaluation}{table.caption.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Human/non-human composition for each ratio type and scene complexity level. H denotes human entities, and N denotes non-human entities.}}{4}{table.caption.9}\protected@file@percent }
+\newlabel{tab:entity_ratio_levels}{{2}{4}{Human/non-human composition for each ratio type and scene complexity level. H denotes human entities, and N denotes non-human entities}{table.caption.9}{}}
+\def\@LN@column{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Overview of MIBE. The framework decouples reference construction, hierarchical prompt construction, candidate generation, and label acquisition. The Silver Set provides scalable SOP-guided VLM supervision for training MIE, while the Gold Set is double-blind human-labeled and reserved for benchmark evaluation.}}{5}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:mibe_construction}{{2}{5}{Overview of MIBE. The framework decouples reference construction, hierarchical prompt construction, candidate generation, and label acquisition. The Silver Set provides scalable SOP-guided VLM supervision for training MIE, while the Gold Set is double-blind human-labeled and reserved for benchmark evaluation}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Hierarchical prompt construction. Each Level-8 seed is reduced into strict Level-6, Level-4, and Level-2 subsets by removing entities and their associated relations.}}{5}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:hierarchical_prompt_construction}{{3}{5}{Hierarchical prompt construction. Each Level-8 seed is reduced into strict Level-6, Level-4, and Level-2 subsets by removing entities and their associated relations}{figure.caption.8}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Reference Image Generation}{6}{subsubsection.3.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.3}Multi-subject Personalized Image Generation}{6}{subsubsection.3.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.4}Label Construction}{6}{subsubsection.3.1.4}\protected@file@percent }
+\newlabel{sec:method_label}{{3.1.4}{6}{Label Construction}{subsubsection.3.1.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Pairwise preference.}{6}{section*.11}\protected@file@percent }
+\def\@LN@column{1}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Dataset statistics for MIB. The Silver Set provides scalable SOP-guided VLM supervision for training MIE, while the Gold Set is fully human-labeled under a double-blind protocol.}}{7}{table.caption.10}\protected@file@percent }
+\newlabel{tab:dataset_statistics}{{3}{7}{Dataset statistics for MIB. The Silver Set provides scalable SOP-guided VLM supervision for training MIE, while the Gold Set is fully human-labeled under a double-blind protocol}{table.caption.10}{}}
+\@writefile{toc}{\contentsline {paragraph}{Diagnostic labels.}{7}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{MIB-Silver annotation with SOP-guided VLM judges.}{7}{section*.13}\protected@file@percent }
+\def\@LN@column{1}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Annotation agreement by evaluation dimension. Preference labels exhibit high agreement for both Silver VLM annotation and Gold human annotation, while fine-grained diagnostic dimensions show lower agreement, motivating strict consensus for preference labels and soft aggregation for diagnostic labels.}}{8}{table.caption.16}\protected@file@percent }
+\newlabel{tab:annotation_agreement}{{4}{8}{Annotation agreement by evaluation dimension. Preference labels exhibit high agreement for both Silver VLM annotation and Gold human annotation, while fine-grained diagnostic dimensions show lower agreement, motivating strict consensus for preference labels and soft aggregation for diagnostic labels}{table.caption.16}{}}
+\@writefile{toc}{\contentsline {paragraph}{MIB-Gold annotation with double-blind human evaluation.}{8}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Annotation agreement.}{8}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Evaluator Modeling}{8}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Motivation.}{8}{section*.17}\protected@file@percent }
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {paragraph}{Input-Output Formulation.}{9}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Pairwise Comparison Setup.}{9}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Architecture.}{9}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why Joint Learning?}{9}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Training Objective.}{9}{section*.22}\protected@file@percent }
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {paragraph}{Training Regime.}{10}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Role Within MIBE.}{10}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{10}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}MIB Label Alignment Results}{10}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}MIB-Silver Results}{10}{subsubsection.4.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Qualitative Analysis of SOP Effectiveness.}{10}{section*.26}\protected@file@percent }
+\citation{hore2010image}
+\citation{wang2004image}
+\citation{wang2003multiscale}
+\def\@LN@column{1}
+\newlabel{fig:agree_dim}{{4a}{11}{By Evaluation Dimension}{figure.caption.25}{}}
+\newlabel{sub@fig:agree_dim}{{a}{11}{By Evaluation Dimension}{figure.caption.25}{}}
+\newlabel{fig:agree_subj}{{4b}{11}{By Subject Count}{figure.caption.25}{}}
+\newlabel{sub@fig:agree_subj}{{b}{11}{By Subject Count}{figure.caption.25}{}}
+\newlabel{fig:agree_tag}{{4c}{11}{By Spatial Relationship}{figure.caption.25}{}}
+\newlabel{sub@fig:agree_tag}{{c}{11}{By Spatial Relationship}{figure.caption.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Cross-model agreement analysis on 60K tasks between \texttt  {gemini-2.5-flash} and \texttt  {gemini-3.1-flash-lite-preview}. (a) Models reliably converge on global preference but exhibit higher variance on fine-grained appearance. (b) Counter-intuitively, preference agreement increases with the number of subjects, as catastrophic compositional failures in dense scenes make the ``less collapsed'' image trivially obvious. (c) Explicitly prompted interactions provide stronger contextual grounding, yielding the highest agreement.}}{11}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:agreement_analysis}{{4}{11}{Cross-model agreement analysis on 60K tasks between \texttt {gemini-2.5-flash} and \texttt {gemini-3.1-flash-lite-preview}. (a) Models reliably converge on global preference but exhibit higher variance on fine-grained appearance. (b) Counter-intuitively, preference agreement increases with the number of subjects, as catastrophic compositional failures in dense scenes make the ``less collapsed'' image trivially obvious. (c) Explicitly prompted interactions provide stronger contextual grounding, yielding the highest agreement}{figure.caption.25}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}MIB-Gold Results}{11}{subsubsection.4.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Evaluator Results on MIB-Gold}{11}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Existing Metrics Fail on MIB-Gold}{11}{subsubsection.4.2.1}\protected@file@percent }
+\citation{oquab2023dinov2}
+\citation{radford2021learning}
+\citation{zhai2023sigmoid}
+\citation{kirstain2023pick}
+\citation{xu2023imagereward}
+\citation{wu2023human}
+\citation{chen2026identities}
+\def\@LN@column{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Human annotation findings on `MIB-Gold`. Left: preference consistency by benchmark level. Right: preference consistency by spatial relationship. The lower retention in the broader cross-platform subset indicates that `MIB-Gold` captures a meaningful benchmark difficulty gap rather than annotation noise.}}{12}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:mib_gold_benchmark}{{5}{12}{Human annotation findings on `MIB-Gold`. Left: preference consistency by benchmark level. Right: preference consistency by spatial relationship. The lower retention in the broader cross-platform subset indicates that `MIB-Gold` captures a meaningful benchmark difficulty gap rather than annotation noise}{figure.caption.27}{}}
+\def\@LN@column{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Human alignment of MIE variants on \texttt  {MIB-Gold}. Left: overall, seen-generator, and unseen-generator pairwise accuracy. Right: category-level F1 across existence, appearance, and interaction. The 4B LoRA-layer evaluator is the strongest overall model and remains clearly above third-party baselines even on the unseen-generator subset.}}{13}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:mie_alignment}{{6}{13}{Human alignment of MIE variants on \texttt {MIB-Gold}. Left: overall, seen-generator, and unseen-generator pairwise accuracy. Right: category-level F1 across existence, appearance, and interaction. The 4B LoRA-layer evaluator is the strongest overall model and remains clearly above third-party baselines even on the unseen-generator subset}{figure.caption.28}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}MIE Aligns Better with Human Preference}{13}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{MIE Breakdown Analysis}{13}{section*.29}\protected@file@percent }
+\def\@LN@column{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Breakdown analysis of MIE variants. Left: seen-to-unseen generalization gap. Middle: LoRA-layer gains over layer-only tuning at different model scales. Right: category-level F1 for the strongest checkpoint. The results show that LoRA-layer tuning improves diagnostic quality across scales and that interaction remains the hardest binding dimension, especially under generator shift.}}{14}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:mie_breakdown}{{7}{14}{Breakdown analysis of MIE variants. Left: seen-to-unseen generalization gap. Middle: LoRA-layer gains over layer-only tuning at different model scales. Right: category-level F1 for the strongest checkpoint. The results show that LoRA-layer tuning improves diagnostic quality across scales and that interaction remains the hardest binding dimension, especially under generator shift}{figure.caption.30}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Limitations}{14}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scale and Diversity of the Gold Set}{14}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Temporal Snapshot of Baseline Generators}{14}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{VLM-Induced Noise in the Silver Set}{14}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{14}{section.6}\protected@file@percent }
+\bibstyle{plain}
+\bibdata{main.bib}
+\bibcite{borse2025multihuman}{{1}{}{{}}{{}}}
+\bibcite{chen2025xverse}{{2}{}{{}}{{}}}
+\bibcite{chen2026identities}{{3}{}{{}}{{}}}
+\bibcite{gal2022image}{{4}{}{{}}{{}}}
+\bibcite{hore2010image}{{5}{}{{}}{{}}}
+\bibcite{huang2023t2i}{{6}{}{{}}{{}}}
+\bibcite{kirstain2023pick}{{7}{}{{}}{{}}}
+\bibcite{kumar2026vlmjudge}{{8}{}{{}}{{}}}
+\bibcite{kumari2023multi}{{9}{}{{}}{{}}}
+\bibcite{li2024photomaker}{{10}{}{{}}{{}}}
+\bibcite{oquab2023dinov2}{{11}{}{{}}{{}}}
+\bibcite{oshima2025multibanana}{{12}{}{{}}{{}}}
+\def\@LN@column{1}
+\bibcite{peng2024dreambench}{{13}{}{{}}{{}}}
+\bibcite{radford2021learning}{{14}{}{{}}{{}}}
+\bibcite{ruiz2023dreambooth}{{15}{}{{}}{{}}}
+\bibcite{tian2026multibind}{{16}{}{{}}{{}}}
+\bibcite{wang2025psr}{{17}{}{{}}{{}}}
+\bibcite{wang2024ms}{{18}{}{{}}{{}}}
+\bibcite{wang2004image}{{19}{}{{}}{{}}}
+\bibcite{wang2003multiscale}{{20}{}{{}}{{}}}
+\bibcite{wu2025omnigen2}{{21}{}{{}}{{}}}
+\bibcite{wu2023human}{{22}{}{{}}{{}}}
+\bibcite{xiao2023fastcomposer}{{23}{}{{}}{{}}}
+\bibcite{xu2023imagereward}{{24}{}{{}}{{}}}
+\bibcite{xu2025interactcustom}{{25}{}{{}}{{}}}
+\bibcite{ye2023ip}{{26}{}{{}}{{}}}
+\bibcite{zhai2023sigmoid}{{27}{}{{}}{{}}}
+\def\@LN@column{1}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Appendix: Human Annotation Observations and Failure Mode Analysis}{17}{section.A}\protected@file@percent }
+\newlabel{sec:appendix_failure_modes}{{A}{17}{Appendix: Human Annotation Observations and Failure Mode Analysis}{section.A}{}}
+\@writefile{toc}{\contentsline {paragraph}{Failure Rates Increase with Subject Count.}{17}{section*.35}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces \textbf  {Failure Rates Increase with Subject Count} A representative 6-subject, 2-object prompt (ID: 6905) evaluated across four generative models. All models exhibit Existence failures, with subject omission ranging from 1 missing subject (FLUX2, Seedrems-4.5, GPT) to 3 missing subjects (GLM).}}{17}{figure.caption.36}\protected@file@percent }
+\newlabel{fig:appendix-failure-rates-subject-count}{{8}{17}{\textbf {Failure Rates Increase with Subject Count} A representative 6-subject, 2-object prompt (ID: 6905) evaluated across four generative models. All models exhibit Existence failures, with subject omission ranging from 1 missing subject (FLUX2, Seedrems-4.5, GPT) to 3 missing subjects (GLM)}{figure.caption.36}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {paragraph}{Existence Failures Frequently Co-occur with Appearance Failures.}{18}{section*.37}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces \textbf  {Existence Failures Frequently Co-occur with Appearance Failures} A representative 4-subject prompt (ID: 32062) generated by Seedream, the best-performing model on this sample. The missing subject (Man in Black Suit) is not simply absent: its visual attributes --- the black tie and formal shirt --- are redistributed onto the surviving Bomber Jacket figure, producing a hybrid identity.}}{18}{figure.caption.38}\protected@file@percent }
+\newlabel{fig:appendix-existence-appearance-cooccurrence}{{9}{18}{\textbf {Existence Failures Frequently Co-occur with Appearance Failures} A representative 4-subject prompt (ID: 32062) generated by Seedream, the best-performing model on this sample. The missing subject (Man in Black Suit) is not simply absent: its visual attributes --- the black tie and formal shirt --- are redistributed onto the surviving Bomber Jacket figure, producing a hybrid identity}{figure.caption.38}{}}
+\@writefile{toc}{\contentsline {paragraph}{Multi-Action Overload Leads to Subject Deformation}{18}{section*.39}\protected@file@percent }
+\def\@LN@column{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces \textbf  {Multi-Action Overload Leads to Subject Deformation.} When a subject is assigned more than one concurrent action, models either clone the subject to satisfy each action independently (Figure Splitting, ID: 61186) or silently discard one of the assigned actions (Action Dropout, ID: 60869). Both failure modes are observed in Nano Banana, a better performing model in these cases.}}{19}{figure.caption.40}\protected@file@percent }
+\newlabel{fig:appendix-multi-action-overload}{{10}{19}{\textbf {Multi-Action Overload Leads to Subject Deformation.} When a subject is assigned more than one concurrent action, models either clone the subject to satisfy each action independently (Figure Splitting, ID: 61186) or silently discard one of the assigned actions (Action Dropout, ID: 60869). Both failure modes are observed in Nano Banana, a better performing model in these cases}{figure.caption.40}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Appendix: SOP Prompt}{19}{section.B}\protected@file@percent }
+\newlabel{sec:app_SOP}{{B}{19}{Appendix: SOP Prompt}{section.B}{}}
+\def\@LN@column{1}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Appendix: Demos of Generated Training Labels}{21}{section.C}\protected@file@percent }
+\newlabel{sec:app_SOP_demo}{{C}{21}{Appendix: Demos of Generated Training Labels}{section.C}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Qualitative examples of strict cross-model consensus. The externalized flaw logs demonstrate that both VLMs effectively utilize the SOP to catch fine-grained errors in appearance, physical realism, interaction semantics, and complex multi-subject scaling.}}{21}{figure.caption.41}\protected@file@percent }
+\newlabel{fig:sop_demos}{{11}{21}{Qualitative examples of strict cross-model consensus. The externalized flaw logs demonstrate that both VLMs effectively utilize the SOP to catch fine-grained errors in appearance, physical realism, interaction semantics, and complex multi-subject scaling}{figure.caption.41}{}}
+\def\@LN@column{1}
+\def\@LN@column{1}
+\def\@LN@column{1}
+\def\@LN@column{1}
+\def\@LN@column{1}
+\def\@LN@column{1}
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\def\@LN@column{1}
+\gdef \@abspage@last{28}

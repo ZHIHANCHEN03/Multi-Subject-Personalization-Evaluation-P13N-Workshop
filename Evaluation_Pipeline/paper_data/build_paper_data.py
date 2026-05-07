@@ -119,6 +119,9 @@ def summarize_group_agreement(rows: List[Dict], group_key: str) -> List[Dict]:
             "matched_tasks": len(items),
             "preference_agreement_rate": safe_ratio(pref_agree, len(items)),
             "all_diagnostic_agreement_rate": safe_ratio(diag_all_agree, len(items)),
+            "existence_both_agreement_rate": safe_ratio(sum(1 for item in items if item.get("existence_both_agree")), len(items)),
+            "appearance_both_agreement_rate": safe_ratio(sum(1 for item in items if item.get("appearance_both_agree")), len(items)),
+            "interaction_both_agreement_rate": safe_ratio(sum(1 for item in items if item.get("interaction_both_agree")), len(items)),
         }
         for label_key in LABEL_KEYS:
             out[f"{label_key}_agreement_rate"] = safe_ratio(
@@ -130,7 +133,7 @@ def summarize_group_agreement(rows: List[Dict], group_key: str) -> List[Dict]:
 
 
 def build_section_4_1() -> None:
-    out_dir = PAPER_DATA_ROOT / "section_4_1_mib_silver"
+    out_dir = PAPER_DATA_ROOT / "section_4_1_1_mib_silver"
     records_25 = {record["task_id"]: record for record in read_jsonl(SILVER_25_PATH)}
     records_31 = {record["task_id"]: record for record in read_jsonl(SILVER_31_PATH)}
 
@@ -156,6 +159,9 @@ def build_section_4_1() -> None:
                 "preference_agree": rec_25.get("winner") == rec_31.get("winner"),
                 "label_agreement": label_agreement,
                 "all_diag_agree": all(label_agreement.values()),
+                "existence_both_agree": label_agreement.get("a_existence", False) and label_agreement.get("b_existence", False),
+                "appearance_both_agree": label_agreement.get("a_appearance", False) and label_agreement.get("b_appearance", False),
+                "interaction_both_agree": label_agreement.get("a_interaction", False) and label_agreement.get("b_interaction", False),
             }
         )
 
@@ -173,6 +179,9 @@ def build_section_4_1() -> None:
         "overall_agreement": {
             "preference_agreement_rate": safe_ratio(pref_agree, len(common_ids)),
             "all_diagnostic_agreement_rate": safe_ratio(diag_all_agree, len(common_ids)),
+            "existence_both_agreement_rate": safe_ratio(sum(1 for row in joined_rows if row["existence_both_agree"]), len(common_ids)),
+            "appearance_both_agreement_rate": safe_ratio(sum(1 for row in joined_rows if row["appearance_both_agree"]), len(common_ids)),
+            "interaction_both_agreement_rate": safe_ratio(sum(1 for row in joined_rows if row["interaction_both_agree"]), len(common_ids)),
             **{
                 f"{label_key}_agreement_rate": safe_ratio(
                     sum(1 for row in joined_rows if row["label_agreement"][label_key]),
@@ -187,7 +196,7 @@ def build_section_4_1() -> None:
     write_json(out_dir / "silver_agreement_summary.json", summary)
     for group_key in ("subject_count", "level", "class_tag", "ratio_type"):
         rows = summarize_group_agreement(joined_rows, group_key)
-        fieldnames = [group_key, "matched_tasks", "preference_agreement_rate", "all_diagnostic_agreement_rate"] + [
+        fieldnames = [group_key, "matched_tasks", "preference_agreement_rate", "all_diagnostic_agreement_rate", "existence_both_agreement_rate", "appearance_both_agreement_rate", "interaction_both_agreement_rate"] + [
             f"{label_key}_agreement_rate" for label_key in LABEL_KEYS
         ]
         write_csv(out_dir / f"silver_agreement_by_{group_key}.csv", rows, fieldnames)
@@ -199,7 +208,7 @@ def parse_bool(value: str) -> bool:
 
 
 def build_section_4_2() -> None:
-    out_dir = PAPER_DATA_ROOT / "section_4_2_mib_gold"
+    out_dir = PAPER_DATA_ROOT / "section_4_1_2_mib_gold"
     human_rows = []
     for row in read_csv_rows(V10_HUMAN_PATH):
         row["_dataset"] = "v10"
@@ -330,7 +339,7 @@ def copy_and_convert_csv(src: Path, dst_dir: Path, stem: str) -> None:
 
 
 def build_section_5_1() -> None:
-    out_dir = PAPER_DATA_ROOT / "section_5_1_existing_metrics"
+    out_dir = PAPER_DATA_ROOT / "section_4_2_1_existing_metrics"
     out_dir.mkdir(parents=True, exist_ok=True)
     file_map = {
         "baseline_human_alignment_v10_v13": BASELINE_ANALYSIS_DIR / "human_vs_metric_pairwise_accuracy_v10_v13.csv",
@@ -403,8 +412,8 @@ def build_section_5_2_and_5_3() -> None:
     results = summary["results"]
     overall_rows, category_rows, category_dataset_rows = flatten_metrics_summary(results)
 
-    out_52 = PAPER_DATA_ROOT / "section_5_2_mie_alignment"
-    out_53 = PAPER_DATA_ROOT / "section_5_3_breakdown"
+    out_52 = PAPER_DATA_ROOT / "section_4_2_2_mie_alignment"
+    out_53 = PAPER_DATA_ROOT / "section_4_2_3_breakdown"
     source_jsonl_dir = out_52 / "source_jsonl"
     source_jsonl_dir.mkdir(parents=True, exist_ok=True)
 
@@ -448,7 +457,7 @@ def build_section_5_2_and_5_3() -> None:
         {
             "summary_json": str(METRICS_SUMMARY_PATH),
             "source_jsonl_files": [str(path) for path in sorted(METRICS_JSONL_DIR.glob("*.jsonl"))],
-            "note": "Current export contains the 0.8B and 2B evaluator variants only.",
+            "note": "Current export contains the 0.8B, 2B, and 4B evaluator variants.",
         },
     )
 
@@ -487,7 +496,7 @@ def build_section_5_2_and_5_3() -> None:
     for row in overall_rows:
         by_mode[row["mode"]].append(row)
     scaling_rows = []
-    size_order = {"08b": 0, "2b": 1, "4b": 2}
+    size_order = {"08b": 0, "2b": 1, "4b": 2}  # Order for scaling rows
     for mode, rows in sorted(by_mode.items()):
         rows = sorted(rows, key=lambda item: size_order.get(item["size"], 999))
         for earlier, later in zip(rows, rows[1:]):
@@ -537,7 +546,7 @@ def build_section_5_2_and_5_3() -> None:
         out_53 / "mie_breakdown_manifest.json",
         {
             "summary_json": str(out_52 / "mie_vs_human_summary.json"),
-            "note": "Breakdown tables are derived from the current 0.8B and 2B evaluator summary.",
+            "note": "Breakdown tables are derived from the current 0.8B, 2B, and 4B evaluator summary.",
         },
     )
 
@@ -553,11 +562,11 @@ def write_readme() -> None:
                 "",
                 "Generated sections:",
                 "",
-                "- `section_4_1_mib_silver`",
-                "- `section_4_2_mib_gold`",
-                "- `section_5_1_existing_metrics`",
-                "- `section_5_2_mie_alignment`",
-                "- `section_5_3_breakdown`",
+                "- `section_4_1_1_mib_silver`",
+                "- `section_4_1_2_mib_gold`",
+                "- `section_4_2_1_existing_metrics`",
+                "- `section_4_2_2_mie_alignment`",
+                "- `section_4_2_3_breakdown`",
                 "",
                 "Regenerate everything with:",
                 "",

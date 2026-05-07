@@ -1,4 +1,0 @@
-{"level": "2", "groups": 1005, "preference_consistent_groups": 874, "preference_consistency_rate": 0.8696517412935323, "prompt_ilogical_any_rate": 0.006965174129353234}
-{"level": "4", "groups": 1005, "preference_consistent_groups": 920, "preference_consistency_rate": 0.9154228855721394, "prompt_ilogical_any_rate": 0.023880597014925373}
-{"level": "6", "groups": 1005, "preference_consistent_groups": 954, "preference_consistency_rate": 0.9492537313432836, "prompt_ilogical_any_rate": 0.026865671641791045}
-{"level": "8", "groups": 1005, "preference_consistent_groups": 942, "preference_consistency_rate": 0.9373134328358209, "prompt_ilogical_any_rate": 0.03980099502487562}
