@@ -169,10 +169,20 @@ Existing automatic metrics are fragmented. CLIP- and DINO-based reference simila
   \label{fig:metric_agreement_subject_count}
 \end{figure}
 
-We address this gap with \textbf{MIBE}, a unified framework that couples a \textbf{Multi-subject Interaction Benchmark (MIB)} with a learned \textbf{Multi-subject Interaction Evaluator (MIE)}. MIB adopts a silver--gold design: MIB-Silver provides 60K Nano Banana/MOSAIC candidate pairs labeled by SOP-guided dual-VLM consensus for scalable supervision, reaching 95.1\% cross-VLM preference agreement, while MIB-Gold provides 4,020 double-blind human-labeled pairs across six generators for human-grounded evaluation. The benchmark uses hierarchical prompts over $N \in \{2,4,6,8\}$ subjects and factorizes binding stress by subject count, human/object composition, and relation type. This design supports both seen-generator validation on Nano Banana/MOSAIC and unseen-generator transfer to GPT-Image-1.5, Flux2, Seedream~4.5, and GLM.
+We address this gap with \textbf{MIBE}, a unified framework that couples a \textbf{Multi-subject Interaction Benchmark (MIB)} with a learned \textbf{Multi-subject Interaction Evaluator (MIE)}. As summarized in Figure~\ref{fig:mibe_overview}, MIBE decouples benchmark construction from evaluator learning: MIB first builds controlled prompt-reference tasks and silver/gold supervision, and MIE then uses these annotations for scalable training and human-grounded evaluation. MIB adopts a silver--gold design: MIB-Silver provides 60K Nano Banana/MOSAIC candidate pairs labeled by SOP-guided dual-VLM consensus for scalable supervision, reaching 95.1\% cross-VLM preference agreement, while MIB-Gold provides 4,020 double-blind human-labeled pairs across six generators for human-grounded evaluation. The benchmark uses hierarchical prompts over $N \in \{2,4,6,8\}$ subjects and factorizes binding stress by subject count, human/object composition, and relation type. This design supports both seen-generator validation on Nano Banana/MOSAIC and unseen-generator transfer to GPT-Image-1.5, Flux2, Seedream~4.5, and GLM.
 \textbf{MIE} is trained exclusively on MIB-Silver and evaluated on MIB-Gold. 
 Given the reference set, prompt, and candidate image, it jointly predicts a pairwise ranking score and Existence/Appearance/Interaction diagnostics. 
 MIE consistently outperforms baseline metrics in agreement with double-blind human judgment, achieving 0.922 overall pairwise accuracy on MIB-Gold, including 0.982 on seen generators and 0.884 on unseen generators, with the gap widening as subject count scales from 2 to 8.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[
+        width=0.98\textwidth,
+        keepaspectratio
+    ]{mibe_overview_v3.png}
+    \caption{Overview of MIBE. MIB constructs a controlled benchmark through reference pooling, hierarchical prompt construction, Silver Set supervision, and Gold Set human evaluation. MIE is trained on Silver labels and evaluated against double-blind human Gold labels for cross-generator, human-aligned assessment.}
+    \label{fig:mibe_overview}
+\end{figure*}
 
 In summary, this paper makes three contributions:
 \begin{itemize}
@@ -355,16 +365,6 @@ Standard metrics often provide incomplete assessments of multi-subject quality: 
 \section{Methods}
 \subsection{MIB Construction}
 
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[
-        width=0.98\textwidth,
-        keepaspectratio
-    ]{mibe_overview_v3.png}
-    \caption{Overview of MIBE. MIB constructs a controlled benchmark through reference pooling, hierarchical prompt construction, Silver Set supervision, and Gold Set human evaluation. MIE is trained on Silver labels and evaluated against double-blind human Gold labels for cross-generator, human-aligned assessment.}
-    \label{fig:mibe_overview}
-\end{figure*}
 
 MIB is the data substrate of MIBE, consisting of controlled prompt-reference tasks, paired generated candidates, and preference/diagnostic labels. Each task specifies a guiding prompt, a set of reference subjects, and two candidate generations produced under the same prompt-reference condition. This decoupled design separates reference construction, prompt-task design, candidate generation, and label acquisition, allowing subject identity, scene complexity, relation type, generator source, and annotation source to be controlled independently.
 
