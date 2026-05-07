@@ -74,7 +74,7 @@ IMPORTANT, please:
     \item {\bf Experimental result reproducibility}
     \item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results of the paper to the extent that it affects the main claims and/or conclusions of the paper (regardless of whether the code and data are provided or not)?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Justification: The code and data are provided in the supplementary file, thus, the results are reproducible. %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -111,7 +111,7 @@ IMPORTANT, please:
 \item {\bf Experimental setting/details}
     \item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer) necessary to understand the results?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: In Section 3 we discuss the construction of training and testing sets. Section 4 and Appendix shows the details of evaluator model architecture and hyperparameters.  %\justificationTODO{}
+    \item[] Justification: In Section 3, we discuss the construction of training and testing sets. Section 4 and Appendix shows the details of evaluator model architecture and hyperparameters.  %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -139,7 +139,7 @@ IMPORTANT, please:
 \item {\bf Experiments compute resources}
     \item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: In Result section we show the configuration of the computation resources. %\justificationTODO{}
+    \item[] Justification: In Section 4 and appendix, we show the configuration of the computation resources. %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -151,7 +151,7 @@ IMPORTANT, please:
 \item {\bf Code of ethics}
     \item[] Question: Does the research conducted in the paper conform, in every respect, with the NeurIPS Code of Ethics \url{https://neurips.cc/public/EthicsGuidelines}?
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Justification: The research conforms with the NeurIPS Code of Ethics. No personally identifiable information was collected, and all human annotation was conducted under an anonymous pairwise protocol. %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the authors have not reviewed the NeurIPS Code of Ethics.
@@ -162,8 +162,9 @@ IMPORTANT, please:
 
 \item {\bf Broader impacts}
     \item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts of the work performed?
-    \item[] Answer: \answerNA{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
+    \item[] Justification: Shown in Section 1 and 6, MIBE provides the community with a 60K silver training corpus and a 4K human-labeled gold benchmark, enabling more rigorous evaluation of multi-subject personalized image generation. MIE offers a significantly more reliable metric for complex multi-reference scenarios where existing evaluators collapse, supporting more accurate model comparison and alignment research.
+    %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that there is no societal impact of the work performed.
@@ -176,8 +177,8 @@ IMPORTANT, please:
     
 \item {\bf Safeguards}
     \item[] Question: Does the paper describe safeguards that have been put in place for responsible release of data or models that have a high risk for misuse (e.g., pre-trained language models, image generators, or scraped datasets)?
-    \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Answer: \answerNA{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
+    \item[] Justification: MIB and MIE are evaluation resources rather than generative models, and do not directly enable the creation of harmful content. No additional safeguards beyond standard CC BY 4.0 licensing terms are deemed necessary.%\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper poses no such risks.
@@ -188,8 +189,8 @@ IMPORTANT, please:
 
 \item {\bf Licenses for existing assets}
     \item[] Question: Are the creators or original owners of assets (e.g., code, data, models), used in the paper, properly credited and are the license and terms of use explicitly mentioned and properly respected?
-    \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
+    \item[] Justification: In Section 3 and 4, we cited and disclosed that we used LLMs to generate prompts, used VLMs to generate the MIB-silver set labels, and we leveraged backbone VLMs to fine tune a multi-subject image evaluator. %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not use existing assets.
@@ -204,8 +205,8 @@ IMPORTANT, please:
 
 \item {\bf New assets}
     \item[] Question: Are new assets introduced in the paper well documented and is the documentation provided alongside the assets?
-    \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
+    \item[] Justification: In the Supplementary materials, we show that the benchmark dataset and code are available in the provided \href{https://zenodo.org/records/20057714?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6ImEwODQ3ODk2LTExZmQtNDc1Ni1hNmU2LTkyMzBlZDM5YzhkZCIsImRhdGEiOnt9LCJyYW5kb20iOiJlZmYzNzA2NTJkNmJlYWE5NmU3NGI2ZGI0MGFkM2Y2MiJ9.2pqs5d2K96NLeHs73pVt1zXJ2duMm16H9-thFfrYdNus1aBFX71tAQI6vOX8EXZRo6HG91e3FKVzoE3z9zM_Yw}{Zenodo private dataset}.  %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not release new assets.
@@ -216,8 +217,8 @@ IMPORTANT, please:
 
 \item {\bf Crowdsourcing and research with human subjects}
     \item[] Question: For crowdsourcing experiments and research with human subjects, does the paper include the full text of instructions given to participants and screenshots, if applicable, as well as details about compensation (if any)? 
-    \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
+    \item[] Justification: The human evaluation was conducted by independent trained annotators who were blind to the candidate models and specific project hypotheses. They were compensated at an hourly rate exceeding the local minimum wage. The evaluation criteria used are detailed in the SOP provided in the Appendix.  %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not involve crowdsourcing nor research with human subjects.
@@ -228,7 +229,7 @@ IMPORTANT, please:
 \item {\bf Institutional review board (IRB) approvals or equivalent for research with human subjects}
     \item[] Question: Does the paper describe potential risks incurred by study participants, whether such risks were disclosed to the subjects, and whether Institutional Review Board (IRB) approvals (or an equivalent approval/review based on the requirements of your country or institution) were obtained?
     \item[] Answer: \answerNA{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Justification: The annotation task involved only routine visual preference judgments on generated images without collecting any personally identifiable information, and thus is exempt from full IRB review according to institutional guidelines. %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not involve crowdsourcing nor research with human subjects.
@@ -241,7 +242,7 @@ IMPORTANT, please:
     \item[] Question: Does the paper describe the usage of LLMs if it is an important, original, or non-standard component of the core methods in this research? Note that if the LLM is used only for writing, editing, or formatting purposes and does \emph{not} impact the core methodology, scientific rigor, or originality of the research, declaration is not required.
     %this research? 
     \item[] Answer: \answerYes{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: \justificationTODO{}
+    \item[] Justification: In Section 3 and 4, we disclose that we used LLMs to generate prompts, used VLMs to generate the MIB-silver set labels, and we leveraged backbone VLMs to fine tune a multi-subject image evaluator. %\justificationTODO{}
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the core method development in this research does not involve LLMs as any important, original, or non-standard components.
