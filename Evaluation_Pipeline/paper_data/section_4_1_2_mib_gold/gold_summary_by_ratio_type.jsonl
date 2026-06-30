@@ -1,3 +1,0 @@
-{"ratio_type": "balanced", "groups": 1340, "preference_consistent_groups": 1205, "preference_consistency_rate": 0.8992537313432836, "prompt_ilogical_any_rate": 0.0007462686567164179}
-{"ratio_type": "human_heavy", "groups": 1340, "preference_consistent_groups": 1283, "preference_consistency_rate": 0.9574626865671642, "prompt_ilogical_any_rate": 0.020149253731343283}
-{"ratio_type": "object_heavy", "groups": 1340, "preference_consistent_groups": 1202, "preference_consistency_rate": 0.8970149253731343, "prompt_ilogical_any_rate": 0.05223880597014925}

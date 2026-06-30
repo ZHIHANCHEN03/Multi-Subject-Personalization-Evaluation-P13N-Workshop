@@ -1,3 +1,0 @@
-{"class_tag": "no_interaction_no_occlusion", "groups": 1340, "preference_consistent_groups": 1236, "preference_consistency_rate": 0.9223880597014925, "prompt_ilogical_any_rate": 0.0052238805970149255}
-{"class_tag": "occlusion_interaction", "groups": 1340, "preference_consistent_groups": 1240, "preference_consistency_rate": 0.9253731343283582, "prompt_ilogical_any_rate": 0.04701492537313433}
-{"class_tag": "occlusion_no_interaction", "groups": 1340, "preference_consistent_groups": 1214, "preference_consistency_rate": 0.9059701492537313, "prompt_ilogical_any_rate": 0.020895522388059702}

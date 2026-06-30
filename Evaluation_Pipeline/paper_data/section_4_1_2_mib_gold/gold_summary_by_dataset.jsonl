@@ -1,2 +1,0 @@
-{"dataset": "v10", "groups": 1500, "preference_consistent_groups": 1411, "preference_consistency_rate": 0.9406666666666667, "prompt_ilogical_any_rate": 0.03266666666666666}
-{"dataset": "v13", "groups": 2520, "preference_consistent_groups": 2279, "preference_consistency_rate": 0.9043650793650794, "prompt_ilogical_any_rate": 0.019444444444444445}
