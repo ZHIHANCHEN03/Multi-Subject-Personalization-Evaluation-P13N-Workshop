@@ -9,7 +9,7 @@ self-correction loop. Nothing is trained.
 | Asset | How to wire it | If missing |
 |---|---|---|
 | **FLUX.2** | `FLUX2_MODEL_ID=black-forest-labs/FLUX.2-klein-4B` (or `FLUX.2-dev`) | use `--generator mock` |
-| **MIE (Paper 1)** | write a module `score(image, prompt, subject_refs, subject_names)->{existence,appearance,interaction[,total,weak_subject]}`, set `MIE_ADAPTER=your.module`, `MISC_CRITIC=mie_checkpoint` | use `--critic mock` (or `vlm_judge` with an API) |
+| **MIE** | ready-made adapter `mie_adapter.py`: set `MISC_CRITIC=mie_checkpoint MIE_ADAPTER=mie_adapter MIE_REPO=.../Model_Training MIE_CKPT=.../-best`. Returns `total`=MIE preference score (unbounded, comparison-only, higher=better) + `existence/appearance/interaction`=sigmoid logits ∈[0,1] (higher=better) | use `--critic mock` (or `vlm_judge` with an API) |
 | **Data (MIB-Gold)** | JSONL, `MISC_DATA=/path/mib_gold.jsonl` (schema in `data.py`) | built-in mock tasks |
 | **LLM API** | `LLM_API_BASE`, `LLM_API_KEY` (OpenAI-compatible) | `prompt_llm` action & `vlm_judge` disabled; rule/mock used |
 

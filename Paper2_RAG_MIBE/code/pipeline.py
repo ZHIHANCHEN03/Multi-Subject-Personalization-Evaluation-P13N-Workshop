@@ -60,6 +60,8 @@ class MISCPipeline:
         self.k_steps = k_steps
         # Aligned compute budget (generator calls). Default: N + K.
         self.budget = budget if budget is not None else (n_init + k_steps)
+        # Fixability estimate (prior; optionally updated online across tasks).
+        self.fixability = dict(config.FIXABILITY)
 
     # ------------------------------------------------------------------
     def _score(self, image, prompt, refs, names):
@@ -70,14 +72,44 @@ class MISCPipeline:
             return rng.choice(config.DIMS)
         if self.routing == "static":
             return config.PRIORITY[0]
-        # diagnostic: weakest typed dim, static prior breaks ties
-        weakest = min(config.DIMS, key=lambda k: (diag[k], config.PRIORITY.index(k)))
-        return weakest
+        if self.routing == "diagnostic":
+            # raw argmin over absolute scores. Because E>A>I in practice, this
+            # degenerates to almost-always Interaction (the hardest dim). Kept as
+            # the negative ablation that motivates calibrated routing.
+            return min(config.DIMS, key=lambda k: (diag[k], config.PRIORITY.index(k)))
+        # calibrated (default): shortfall vs each dim's OWN baseline x fixability.
+        priority = {
+            k: max(0.0, config.MIE_REF[k] - diag[k]) * self.fixability[k]
+            for k in config.DIMS
+        }
+        if max(priority.values()) <= 0.0:
+            # nothing is anomalously low -> fall back to weakest-by-shortfall
+            return max(config.DIMS, key=lambda k: (config.MIE_REF[k] - diag[k],
+                                                    -config.PRIORITY.index(k)))
+        return max(config.DIMS, key=lambda k: (priority[k], -config.PRIORITY.index(k)))
 
-    def _seed_for(self, base, t):
+    def _update_fixability(self, dim, gain):
+        if not config.ONLINE_GAIN:
+            return
+        lr = config.ONLINE_GAIN_LR
+        # normalize gain into ~[0,1] range (gains are small score deltas)
+        g = max(0.0, min(1.0, gain * 5.0))
+        self.fixability[dim] = (1 - lr) * self.fixability[dim] + lr * g
+
+    def _seed_for(self, base, t, stuck=0):
+        # resampled mode always jitters; otherwise jitter only once knobs kick in
         if self.seed_mode == "resampled":
             return base + 1000 * (t + 1)
+        if config.KNOB_ESCALATION and stuck >= config.STUCK_TO_KNOB:
+            return base + 777 * stuck
         return base
+
+    def _guidance_for(self, stuck=0):
+        """Escalate FLUX.2 guidance when prompt edits on a dim keep stalling."""
+        if not config.KNOB_ESCALATION or stuck < config.STUCK_TO_KNOB:
+            return None  # use generator default
+        bump = config.GUIDANCE_STEP * (stuck - config.STUCK_TO_KNOB + 1)
+        return min(config.GUIDANCE_MAX, config.GUIDANCE_SCALE + bump)
 
     # ------------------------------------------------------------------
     def run(self, task) -> tuple:
@@ -139,26 +171,38 @@ class MISCPipeline:
 
         cur_img, cur_diag = best_img, best_diag
         traj_best = (cur_img, cur_diag, dict(state))  # global-best over trajectory
+        escalation = {k: 0 for k in config.DIMS}      # per-dim unaccepted streak
 
         # --- correction loop ---
         remaining = self.budget - self.n_init
         for t in range(min(self.k_steps, max(0, remaining))):
-            if cur_diag["total"] >= config.TAU_STOP:
+            # Stop when all E/A/I quality scores clear the gate. NOTE: we do NOT
+            # threshold `total` -- the MIE preference score is unbounded and only
+            # meaningful for comparison, so an absolute stop must use the [0,1]
+            # category scores.
+            if min(cur_diag[k] for k in config.DIMS) >= config.THETA_GATE:
                 break
             weak = self._route(cur_diag, rng)
-            subject = cur_diag.get("weak_subject")
+            stuck = escalation[weak]
+            # graded intensity from the score DEFICIT (+escalation) -- uses the
+            # magnitude of the weakness, not just which dim is weakest.
+            level = actions.level_from_score(cur_diag[weak], stuck)
             cand_state = actions.apply_action(
-                state, weak, subject, self.action_mode, rng,
+                state, weak, level, self.action_mode, rng,
                 original_prompt=p0, refs_by_subject=refs_by_subject,
+                subject_names=names, step=t, diag=cur_diag,
             )
+            # when a dim keeps stalling, escalate FLUX.2-native knobs (guidance + seed)
             cand_img = self.gen.generate(
                 cand_state["prompt"], cand_state.get("ref_images", refs),
-                seed=self._seed_for(config.BASE_SEED, t),
+                seed=self._seed_for(config.BASE_SEED, t, stuck),
+                guidance=self._guidance_for(stuck),
             )
             tr.gen_calls += 1
             cand_diag = self._score(cand_img, cand_state["prompt"],
                                     cand_state.get("ref_images", refs), names)
 
+            self._update_fixability(weak, cand_diag["total"] - cur_diag["total"])
             improved = cand_diag["total"] > cur_diag["total"] + config.EPS_ACCEPT
             no_regress = all(
                 cand_diag[k] >= cur_diag[k] - config.DELTA_FLOOR
@@ -169,7 +213,7 @@ class MISCPipeline:
                 tr.collateral_events += 1
 
             tr.step_log.append({
-                "t": t, "weak": weak, "subject": subject,
+                "t": t, "weak": weak, "level": level,
                 "prompt": cand_state["prompt"],
                 "before": cur_diag["total"], "after": cand_diag["total"],
                 "accepted": bool(improved and no_regress),
@@ -178,10 +222,12 @@ class MISCPipeline:
             if improved and no_regress:
                 cur_img, cur_diag, state = cand_img, cand_diag, cand_state
                 tr.accepted_steps += 1
+                escalation[weak] = 0  # progress -> reset intensity escalation
                 if cur_diag["total"] > traj_best[1]["total"]:
                     traj_best = (cur_img, cur_diag, dict(state))
             else:
-                tr.rejected_steps += 1  # rollback: keep cur state
+                tr.rejected_steps += 1               # rollback: keep cur state
+                escalation[weak] += 1                # no progress -> escalate next time
 
         # --- constrained-optimal output over the whole trajectory ---
         img, diag, st = traj_best

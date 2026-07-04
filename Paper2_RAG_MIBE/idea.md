@@ -50,7 +50,10 @@
 
 ## 2. 最终范式：MISC（MIE-guided Inference-time Self-Correction）
 
-> 结构化验证器 MIE 作为冻结 FLUX.2 的**控制器**，在推理期决定 ①何时停 ②修哪个维度 ③用哪个动作，迭代修正，单调不退。
+> **定位（关键）**：MIE（Qwen3.5-0.8B 双头评估器）只给分，**不诊断病因、不定位主体、不告诉你怎么改**。所以本范式是 **propose–verify**（提案—验证），不是 diagnose–fix：
+> - **preference 分**（score head，MarginRanking 训练 ⇒ **无界、只有比较意义、越高越好**）= **验证器**：决定接受/拒绝、Best-of-N 选优。**这恰好是它 pairwise 训练的用途**，用它比较两个候选=正中靶心。**不能设绝对阈值**。
+> - **E/A/I 三分**（classification head，sigmoid ∈ **[0,1]、越高越好**）= **路由 + 力度 + 停止**：校准路由选维、缺口定改写力度、三维都过门槛 θ 才停（停止只能用这三个有界分，不能用 preference）。
+> - **主体级定位靠 search**：动作在各步轮换要强化的主体，让验证器留下有用的。
 
 ```
 输入: 参考集 R = {r_1..r_N}, prompt p0
@@ -58,13 +61,12 @@
 【初始化】Best-of-N：p0 配不同 seed 生成 N 张 → MIE 打分 → 选总分最高 (y0, state0)
       │
 ┌── 循环 t = 1..K ────────────────────────────────────────────────┐
-│ 1. 诊断:  MIE(R, p_t, y_t) → 总分 s_t + typed 三维 (d_E,d_A,d_I) │
-│           + weak_subject（哪个主体最可能是问题所在）             │
+│ 1. 打分:  MIE(R, p_t, y_t) → 总分 s_t + 三子分 (d_E, d_A, d_I)   │
 │ 2. 停止:  s_t ≥ τ  或  t = K  → 退出                             │
-│ 3. 路由:  k* = argmin_d d_k  （typed 控制信号；静态先验只做 tie-break）│
-│ 4. 动作:  a_t = ACTION[k*](state_t, weak_subject)  （见下方动作表）│
+│ 3. 路由:  k* = argmax_d [(ref_k − d_k)_+ × fixability_k]  （校准，见下）│
+│ 4. 提案:  a_t = ACTION[k*](state_t, subject=轮换(t))            │
 │ 5. 重生成: y_{t+1} = FLUX2.generate(p', R')                      │
-│ 6. 复评:  MIE(y_{t+1}) → s_{t+1}                                  │
+│ 6. 验证:  MIE(y_{t+1}) → s_{t+1}                                 │
 │ 7. 接受:  s_{t+1} > s_t + ε  且  无任一维度跌破 δ  → 采用；        │
 │           否则回滚（保留 state_t），本步仍计入预算                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -72,26 +74,57 @@
 输出: 约束最优 —— 三维都过门槛 θ_k 的步里取总分最高；否则退化取总分最高
 ```
 
-### Typed 动作表（E/A/I → 动作，这就是"图像版 reflection token"）
+### 动作表（维度 → 提案的"种类"；主体级由 search 轮换决定）
 
-| 弱维度 k* | 默认动作（prompt，P1） | FLUX.2-native 变体（参考集，P2） |
+| 弱维度 k* | 默认动作（prompt，P1，维度级） | FLUX.2-native 变体（参考集，P2） |
 |---|---|---|
-| **existence**（主体缺失） | 把该主体分句挪到最前 + 加 "clearly include {S}" | 把 {S} 的参考图提到参考序列最前 |
-| **appearance**（不像） | 分句末尾加身份强调 "(matching reference identity)" | 复制/前移 {S} 的参考图，强化其条件权重 |
-| **interaction**（交互错） | 末尾追加显式空间描述（"facing each other"…） | —（交互是关系，参考集层面无直接动作，回落 prompt） |
+| **existence**（存在分低） | 句首加 "Clearly include {轮换主体/每个主体}" | 把 {轮换主体} 的参考图提前+复制 |
+| **appearance**（外观分低） | 句尾加 "matches its reference identity" | 复制/前移 {轮换主体} 的参考图 |
+| **interaction**（交互分低） | 末尾追加显式空间描述（"facing each other"…） | —（关系无对应主体，回落 prompt） |
 
-- **动作是确定性的**（默认零额外模型调用，可复现、可解释）；
-- **通用性实验**：另跑一版用小 LLM 做改写，证明范式不绑定手写规则（回答"只对模板 prompt 有效"）。
+- **提案是启发式的**（不保证单步一定变好），靠**验证器 + 接受/回滚**兜底；
+- **{轮换主体}**：因为 MIE 不告诉你哪个主体错，我们按步 round-robin 换主体来提案，让验证器筛——这是 search，不是 MIE 诊断；
+- **动作可替换**：`prompt_rule`（确定性）/ `prompt_llm`（LLM 改写，证明不绑手写规则）/ `reference`（改参考集，FLUX.2 独有）。
+
+### 关键设计：为什么不能用 raw argmin 路由（一个可写进论文的发现）
+
+**观察**：实践中 MIE 分数系统性地 **E > A > I**（存在最好、交互最差）。于是 `argmin(绝对分)` **几乎每步都选 Interaction**——而 I 恰恰最难修 ⇒ 预算全砸在最啃不动的维度上，退化成"瞎修 I"。（mock 复现：diagnostic 路由 I 占比 75%。）
+
+**根因**：三维**基线不同、可修性不同**，绝对高低不可比。真正该问的是"往哪维使劲对 preference 总分的**期望增益**最大"。
+
+**解法：gain-calibrated 路由**（本文默认）：
+`priority_k = (ref_k − score_k)_+ × fixability_k`，取 argmax。
+- `ref_k` = 该维**自己的**典型水平（dev 集校准；先验编码 E>A>I）→ 只挑"异常低于自己常态"的维，I 常态低就不再霸占路由；
+- `fixability_k` = 可修性（先验 E>A>I 递减；可选**在线**用观测增益更新，训练-免费的 bandit）。
+- 效果（mock 复现）：calibrated 路由分布 E=50% / A=25% / I=25%，钱花在期望回报高处。
+
+**这本身是论文的一个卖点**：*naive 结构化路由会退化，校准才是让"结构化 > 标量"成立的关键*——顺带给出强消融（raw-argmin vs calibrated vs random vs scalar：预期 raw-argmin ≈ 甚至 < scalar，calibrated > scalar）。
+
+### 如何把 MIE 的 4 个数全部用起来（preference + E/A/I），并接到 FLUX.2 的杠杆
+
+MIE 每步只吐 4 个数，我们让每个数都承载一个控制职能，再对应到 FLUX.2 的原生能力：
+
+| MIE 信号 | 控制职能 | 落到 FLUX.2 的哪个杠杆 |
+|---|---|---|
+| **preference 标量**（无界，比较用） | **验证器**：`s_{t+1}>s_t+ε` 才接受、Best-of-N 选最高——**不设绝对阈值**（无界只有比较意义） | 决定是否保留这次 `generate` 的结果 |
+| **E/A/I 三维**（[0,1]，亏空+可修性） | **校准路由**（`(ref−score)_+ × fixability`，非 raw argmin）+ **停止**（三维都 ≥ θ 才停） | 决定往 prompt 里加哪类描述（存在/外观/交互） |
+| **缺口 θ−score 的大小** | **力度**：缺口越大，改写越激进（level 1/2/3） | prompt 用词强度；P2 里参考图复制份数随 level 增加 |
+| **前后 delta（是否卡住）** | **升级阶梯**：某维改了几步分数不动 → 换杠杆 | **抬 `guidance_scale`（+抖 seed）**——FLUX.2 guidance-distilled，让模型更死守 prompt |
+
+要点：
+- **不只用排序，还用数值大小**——existence=0.2 和 0.65 触发不同力度，这正是"结构化(graded) > 标量"的额外弹药（消融 `MISC_GRADED=0` 可验证）。
+- **升级阶梯的终点是 FLUX.2 原生旋钮**：光改词没用时（分数停滞），自动抬 guidance + 换 seed，而不是无脑继续加词（消融 `MISC_KNOB_ESCALATION=0` 可验证）。
+- **最推荐的 prompt 引擎是 steered upsampler**：把 4 个分数连同"当前最弱维"一起喂给 FLUX.2 自带的 Mistral upsampler（或等价 LLM），让它按 FLUX.2 偏好的 dense/structured caption 风格定向扩写——比手写模板更强、也答"手写规则脆弱"的质疑。
 
 ### 端到端落地映射（证明"整个流程能跑起来"，全程免训练）
 
 | 步骤 | 具体调用 | 是否训练 |
 |---|---|---|
 | 生成器 G | FLUX.2 [klein] 4B/9B（主力，亚秒级）或 [dev] 32B（上限），`Flux2Pipeline(image=R, prompt=p, guidance_scale, generator=seed)` | 冻结 |
-| 验证器 C | MIE `mie_checkpoint`：`MIE(refs=R, prompt=p, image=y) → {s, d_E, d_A, d_I, weak_subject}` | 冻结 |
+| 验证器 C | MIE `mie_checkpoint`（`mie_adapter.py`）：`MIE(refs, prompt, image) → {preference 标量, d_E, d_A, d_I∈[0,1]}`（只给分，不定位主体） | 冻结 |
 | 初始化 | 同 prompt × N 个 seed 调 G，逐张过 MIE，取总分最高 | — |
 | 动作·prompt(P1) | 确定性字符串重写；或调用 FLUX.2 官方 upsampler（Mistral-Small-3.2-24B / OpenRouter）做**受控**改写 | 免训练 |
-| 动作·参考集(P2) | 重排/复制 `R` 里对应 `weak_subject` 的参考图，再喂回 G 的 `image=` | 免训练 |
+| 动作·参考集(P2) | 按步轮换某主体，重排/复制其参考图再喂回 G 的 `image=`（主体级靠 search） | 免训练 |
 | 接受/回滚 | 纯逻辑：比较相邻 MIE 分数，维护"全程最优状态" | — |
 
 > 整条链路只有两个模型（FLUX.2、MIE）且**都不更新权重**；新增部分全是无参数的控制逻辑 + 官方已提供的 upsampler。这就是"train-free 范式"的字面含义：**贡献在协议，不在权重**。
@@ -100,13 +133,14 @@
 
 ## 3. 为什么是"范式"（对标 Self-RAG）
 
-Self-RAG 的范式内核 = **把自我批判变成 typed 离散控制信号（reflection tokens），控制生成轨迹**。MISC 是它的**免训练、外部验证器版本**：
+Self-RAG 的范式内核 = **用 typed 反馈信号控制生成轨迹**。注意：Self-RAG 的 reflection token 也主要是"判好坏/要不要检索"的**验证/门控信号**，并不精确告诉模型"怎么改"——真正的改进来自"重新生成候选 + 用信号筛"。MISC 是它的**免训练、外部验证器版本**，且诚实地把 MIE 当**验证器**而非诊断器：
 
 | | Self-RAG | MISC（本文） |
 |---|---|---|
-| 控制信号 | reflection tokens（typed） | MIE 的 E/A/I 三维（typed） |
+| 控制信号 | reflection tokens（typed，判好坏/门控） | MIE 总分(验证) + E/A/I 三分(维度路由) |
 | 信号来源 | **训练进模型** | **冻结的外部验证器 MIE（免训练）** |
-| 控制什么 | 检索 + 生成 | 停止 / 路由 / 动作 |
+| 信号作用 | 检索/接受/停止 | 接受-回滚 / 停止 / 维度路由 |
+| 怎么"改" | 重新生成候选，用信号筛（propose–verify） | 同左：提案动作 + 验证器筛，非诊断照方抓药 |
 | 灾难性遗忘 | 有（改了模型） | 无（不动 FLUX.2/MIE） |
 
 **诚实定位**（防审稿人攻击）：不说"图像版 Self-RAG"。说——
@@ -136,10 +170,11 @@ Self-RAG 的范式内核 = **把自我批判变成 typed 离散控制信号（re
 2. **缓解注意力稀释/属性泄漏**（多主体核心病）：把弱主体分句提前/加强调、加显式空间描述，会改变 cross-attention 权重分配，把被忽略的 token 的注意力拿回来。所以"哪维弱改哪维"有机理，不是随机扰动。
 3. **有偏采样**：换条件+换 seed 本就是再抽一次；结构化改写让这次抽样**偏向修复目标维度**，提高期望；回滚保证下界。二者合起来才成立。
 
-### 5.2 创新边界（答辩时的收口，防"就是 self-refine / prompt engineering"）
-- **不声称**："改 prompt 能提质"是已知的（官方都在用）。
-- **声称的 novelty**：用**结构化(typed) 验证器信号**在推理期决定 *改什么 / 何时停 / 如何保证不退化* 的这套**免训练控制协议**；改 prompt 只是该协议下可替换的一个动作实例。
-- 一句话：**"我们不声称改 prompt 新；我们声称——用结构化验证器做 typed 推理期控制、且带不退化保证的这套范式新，并用算力对齐实验证明它优于标量控制。"**
+### 5.2 创新边界（答辩收口，防三种攻击）
+- **防"改 prompt 不新"**：不声称改 prompt 新（官方 upsampler 就在用）。声称新的是**用结构化验证器做 propose–verify 的推理期控制协议**；改 prompt 只是可替换的动作实例。
+- **防"MIE 只给分、又没告诉你怎么改"**（本条最关键）：正因为 MIE 只给分，我们才**只把它当验证器 + 维度路由**——这正是 test-time scaling 里 reward model 的标准用法（reward 也只给分，best-of-N/beam search 照样有效）。"怎么改"由**提案动作 + 验证器筛**解决，不依赖 MIE 诊断。
+- **防"就是 Best-of-N 换壳"**：靠承重实验——三分的**维度路由**必须让提案比盲目重抽更命中（见 §8.1）。这是全篇的赌注。
+- 一句话：**"我们不声称改 prompt 新、也不声称 MIE 能诊断；我们声称——把结构化验证器接进推理期 propose–verify 循环、用维度路由做定向提案、并带不退化保证的这套范式新，且用算力对齐实验证明它优于标量 Best-of-N。"**
 
 ---
 
@@ -202,8 +237,10 @@ klein 4B ≈ 1s/次 ⇒ 主体 ~11 GPU-小时；dev 32B 子集 ~30s/次 × 3.2k 
 
 ### 8.2 完整对比/消融矩阵
 - **主对比**：one-shot / best-of-N(标量) / caption_upsample(官方改写) / **MISC(ours)**
-- **routing**：diagnostic / random / static（因果：诊断路由是否真有用）
+- **routing**：**calibrated**（本文）/ diagnostic=raw-argmin(退化成always-I) / random / static——核心因果：证明校准路由是"结构化 > 标量"的关键，而非任意 typed 信号都行
 - **action**：prompt-only / +参考集重配(P2) / LLM-改写（证明不绑手写规则）
+- **graded intensity**：graded（用分数大小定力度）vs fixed（只用排序）——证明"用数值 > 只用排序"
+- **knob escalation**：on（卡住时抬 guidance+抖 seed）vs off（只改 prompt）——证明升级到 FLUX.2 旋钮有用
 - **seed_mode**：fixed / resampled
 - **换验证器**：`vlm_judge` 替 MIE（范式不依赖具体 C）
 - **换生成器**：klein 4B ↔ dev 32B（结论跨模型成立）

@@ -86,6 +86,7 @@ def main():
                 "final_dims": tr.final_dims,
                 "collateral_damage_rate": tr.collateral_damage_rate,
                 "final_prompt": tr.final_prompt,
+                "step_log": tr.step_log,
             }
             if not args.no_metrics:
                 rec["independent"] = metrics.independent_metrics(

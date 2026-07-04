@@ -1,0 +1,4 @@
+class_tag,groups,preference_consistent_groups,preference_consistency_rate,prompt_ilogical_any_rate
+no_interaction_no_occlusion,1340,1236,0.9223880597014925,0.0052238805970149255
+occlusion_interaction,1340,1240,0.9253731343283582,0.04701492537313433
+occlusion_no_interaction,1340,1214,0.9059701492537313,0.020895522388059702

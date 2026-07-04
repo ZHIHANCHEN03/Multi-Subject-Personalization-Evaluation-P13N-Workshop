@@ -29,7 +29,8 @@ run --name bon_scalar      --method best_of_n       --generator "$GEN" --critic 
 run --name caption_upsample --method caption_upsample --generator "$GEN" --critic "$CRITIC" --budget "$B"
 run --name misc            --method misc            --generator "$GEN" --critic "$CRITIC" --budget "$B"
 
-# ---- 2. routing ablation ----
+# ---- 2. routing ablation (calibrated is default in `misc`; show it beats the rest) ----
+run --name misc_route_diagnostic --method misc --routing diagnostic --generator "$GEN" --critic "$CRITIC" --budget "$B"  # raw argmin -> degenerates to always-Interaction
 run --name misc_route_random --method misc --routing random --generator "$GEN" --critic "$CRITIC" --budget "$B"
 run --name misc_route_static --method misc --routing static --generator "$GEN" --critic "$CRITIC" --budget "$B"
 
@@ -39,6 +40,10 @@ run --name misc_act_llm  --method misc --action prompt_llm --generator "$GEN" --
 
 # ---- 4. seed mode ----
 run --name misc_resampled --method misc --seed_mode resampled --generator "$GEN" --critic "$CRITIC" --budget "$B"
+
+# ---- 4b. signal-usage ablations: how much of MIE's 4 numbers we actually use ----
+MISC_GRADED=0 run --name misc_fixed_intensity --method misc --generator "$GEN" --critic "$CRITIC" --budget "$B"
+MISC_KNOB_ESCALATION=0 run --name misc_no_knob --method misc --generator "$GEN" --critic "$CRITIC" --budget "$B"
 
 # ---- 5. scaling curve: structured (misc) vs scalar (bon) across budgets ----
 for b in 2 4 6 8; do

@@ -27,7 +27,7 @@ echo "==> installing python deps"
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
-: "${FLUX2_MODEL_ID:=black-forest-labs/FLUX.2-dev}"
+: "${FLUX2_MODEL_ID:=black-forest-labs/FLUX.2-klein-4B}"
 echo "==> FLUX2_MODEL_ID = ${FLUX2_MODEL_ID}"
 
 if [[ "$SKIP_GPU" -eq 1 ]]; then

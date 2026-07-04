@@ -1,0 +1,103 @@
+\section{BindBench}
+
+\subsection{Dataset Overview}
+BindBench is designed as a stress-test benchmark for multi-subject personalized generation. The benchmark spans subject counts $N \in \{2,4,6,8\}$ and is built around controlled pairwise comparison: for each task, the same prompt and the same reference subjects are paired with two generated candidates, denoted Image A and Image B. This setup suppresses nuisance variance from unrelated scene changes and turns the evaluation target into a clean ranking question under fixed task conditions.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=8mm and 7mm,
+  box/.style={draw, rounded corners, align=center, minimum width=3.1cm, minimum height=1.05cm, fill=blue!5},
+  smallbox/.style={draw, rounded corners, align=center, minimum width=2.2cm, minimum height=0.95cm, fill=green!6},
+  arrow/.style={-{Latex[length=2.5mm]}, thick}
+]
+\node[box] (prompts) {15K prompt seeds\\$\rightarrow$ 60K hierarchical prompts};
+\node[box, right=of prompts] (control) {36 controlled buckets\\relation $\times$ ratio $\times$ complexity};
+\node[box, right=of control] (paired) {paired generations\\same prompt + same references};
+
+\node[smallbox, below=of prompts] (silver) {60K silver resource\\Nano/Mosaic + dual teachers};
+\node[smallbox, below=of paired] (gold) {4K human set\\6 generators + double blind};
+\node[box, below=of control, yshift=-8mm] (uses) {community uses:\\metric training, generator benchmarking, RLHF/DPO data};
+
+\draw[arrow] (prompts) -- (control);
+\draw[arrow] (control) -- (paired);
+\draw[arrow] (prompts) -- (silver);
+\draw[arrow] (paired) -- (gold);
+\draw[arrow] (silver) -- (uses);
+\draw[arrow] (gold) -- (uses);
+\end{tikzpicture}
+\caption{BindBench overview: hierarchical prompts, controlled pairs, a silver training resource, and a broader human evaluation layer.}
+\label{fig:bindbench_overview}
+\end{figure}
+
+\subsection{Hierarchical Prompt Construction}
+To ensure rigorous control over scene complexity and interaction types, we construct a 60K prompt set for multi-entity image generation. The construction process is strictly hierarchical. We generate 60K prompts from 15K distinct seeds. Each seed produces four related prompts at complexity levels $N \in \{8, 6, 4, 2\}$. We first construct the most complex prompt ($N=8$) and then obtain lower-complexity versions by systematically removing entities and their corresponding relations. This ensures that prompt complexity decreases in a controlled and consistent way across levels, allowing us to isolate the exact point at which a generator or metric fails.
+
+All prompts describe a scene in a white studio to minimize background distractors. To reduce unrealistic size relationships during generation, we prepend a global constraint to every prompt: \textit{``White studio. Keep all entities at realistic scale.''}
+
+\subsection{Reference Pool and Factorized Control}
+The prompts are grounded in a fixed pool of 80 reference images (resized to $512 \times 512$), consisting of 30 human references and 50 non-human references (animals and objects). The prompt space is factorized across two key axes:
+\begin{itemize}
+    \item \textbf{Relation Category}: Prompts are assigned to one of three structural types: \texttt{no\_interaction\_\allowbreak no\_occlusion} (strictly non-contact), \texttt{occlusion\_\allowbreak no\_interaction} (spatial overlap without active engagement), and \texttt{occlusion\_\allowbreak interaction} (explicit physical verbs, excluding weak descriptions like gaze).
+    \item \textbf{Human/Object Ratio}: Each prompt follows a strict composition ratio:
+    \texttt{balanced}, \texttt{human\_heavy}, or \texttt{object\_heavy}. Table~\ref{tab:entity_ratio_levels} gives the exact human/non-human counts at each complexity level.
+\end{itemize}
+
+This creates $3 \times 3 \times 4 = 36$ distinct buckets, across which the 60,000 prompts are distributed approximately uniformly.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Number of human (H) and non-human (N) entities at each complexity level for the three ratio types.}
+\label{tab:entity_ratio_levels}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Ratio Type} & \textbf{Level 8} & \textbf{Level 6} & \textbf{Level 4} & \textbf{Level 2} \\
+\midrule
+balanced & 4H, 4N & 3H, 3N & 2H, 2N & 1H, 1N \\
+human\_heavy & 6H, 2N & 4H, 2N & 3H, 1N & 2H, 0N \\
+object\_heavy & 2H, 6N & 2H, 4N & 1H, 3N & 0H, 2N \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Quality Control for Prompt Generation}
+To guarantee that the text prompt accurately reflects the intended combinatorial structure, we enforce strict automatic quality checks during construction: (1) every assigned entity must be explicitly mentioned; (2) no unassigned entities may appear; (3) the sum of humans and non-humans must match the target level; (4) lower-level prompts must remain strict subsets of higher-level prompts from the same seed; (5) exact duplicate prompts are removed; (6) a single subject is not reused as the active subject of multiple independent sentences. The final finalized prompt set guarantees 100\% entity coverage and strict $8 \rightarrow 6 \rightarrow 4 \rightarrow 2$ hierarchical consistency. The broader goal is to build an evaluation stack that supports both large-scale metric training and generator-agnostic meta-evaluation.
+
+\subsection{Controlled Paired Generation}
+The benchmark uses two generated images under identical task conditions. Because both images share the same prompt and subject references, differences in the final labels are more likely to reflect subject-level alignment quality rather than unrelated background content. This paired design also makes the ranking supervision natural: annotators are asked which image is better for the same task, not which image is absolutely good in isolation.
+
+\subsection{Scale}
+The current benchmark construction has two layers:
+\begin{itemize}
+    \item \textbf{Silver training set}: roughly 60k candidate pairs generated by Nano and Mosaic and labeled by two teacher VLMs, Gemini 2.5 Flash and Gemini 3.1 Flash Lite.
+    \item \textbf{Human evaluation set}: roughly 4k pairs curated for paper-facing evaluation. Among them, 1.5k pairs come from Nano and Mosaic, while the remaining 2.5k pairs come from \texttt{flux2\_klein\_9b\_kv}, Seedream 4.5, GPT-Image-1.5, and GLM.
+\end{itemize}
+
+After filtering, the current silver manifest contains 57,055 usable pairs, split into 51,328 training pairs, 2,847 validation pairs, and 2,880 test pairs. These splits are performed by grouped \texttt{seed\_id} rather than individual samples so that closely related prompt families do not leak across train, validation, and test. The human evaluation set is intentionally broader in generator coverage than the silver training set, allowing the final meta-evaluation to test whether a metric trained on Nano and Mosaic transfers beyond those two generators.
+
+\subsection{Label Schema}
+Each stored sample contains the prompt, the reference subject list, the path to Image A and Image B, and diagnostic labels derived from two teacher sources. The stored target consists of:
+\begin{itemize}
+    \item a binary preference decision between Image A and Image B,
+    \item a three-dimensional binary diagnostic vector for Image A,
+    \item a three-dimensional binary diagnostic vector for Image B.
+\end{itemize}
+
+The schema intentionally remains image-level. We do not require the labeling pipeline to count the exact number of missing subjects or assign per-subject severity levels. This choice improves label stability and allows the model to learn severity through pairwise ranking instead of relying on brittle fine-grained scalar annotations.
+
+\subsection{Silver Filtering Rules}
+The current \texttt{v2} build process applies conservative filtering before a pair is admitted to the final manifests:
+\begin{itemize}
+    \item if the two teacher label sources disagree on the pairwise preference, the sample is dropped;
+    \item if the diagnostic labels differ, the three category scores are averaged across the two sources;
+    \item if any required reference image is missing, the sample is dropped;
+    \item if either generated image is missing, the sample is dropped.
+\end{itemize}
+This policy is intentionally asymmetric. Preference disagreement destroys the ranking target and is therefore treated as fatal noise, whereas diagnostic disagreement is treated as soft uncertainty that can still provide useful supervision after averaging. In other words, the build process prefers a smaller but cleaner ranking set over a larger set with unstable ordering signal.
+
+\subsection{Annotation Protocol}
+The current training pipeline uses dual-teacher silver labels under a shared schema. Two teacher VLM outputs are collected for each task, then merged only if the ranking decision is consistent. The human evaluation layer is separated from this training pipeline and is designed for paper-facing metric comparison across a wider set of generators. This distinction matters: the silver set provides scale, while the human set provides stronger evidence of alignment and transfer.
+
+\subsection{Why BindBench Matters}
+BindBench is not simply another paired preference set. Its core purpose is to isolate the exact evaluation regime where existing metrics fail: shared prompt, shared references, multiple requested subjects, and controlled comparison between two generated images. This is the setting required to measure whether a metric still has discriminative power after identity complexity grows.

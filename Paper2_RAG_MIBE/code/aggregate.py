@@ -70,6 +70,7 @@ def cmd_summary(args):
     agg = {k: 0.0 for k in keys}
     dims = {"existence": 0.0, "appearance": 0.0, "interaction": 0.0}
     ind = {"clip_i": [], "dino": [], "clip_t": []}
+    route_hist = {}
     for r in recs.values():
         for k in keys:
             agg[k] += r.get(k, 0) or 0
@@ -79,6 +80,8 @@ def cmd_summary(args):
             v = (r.get("independent") or {}).get(m)
             if v is not None:
                 ind[m].append(v)
+        for s in (r.get("step_log") or []):
+            route_hist[s.get("weak")] = route_hist.get(s.get("weak"), 0) + 1
     print(f"run: {args.run}  (n={n})")
     for k in keys:
         print(f"  mean {k:24s}: {agg[k]/max(n,1):.4f}")
@@ -87,6 +90,11 @@ def cmd_summary(args):
     for m, vals in ind.items():
         if vals:
             print(f"  mean {m:24s}: {sum(vals)/len(vals):.4f}  (n={len(vals)})")
+    if route_hist:
+        tot = sum(route_hist.values())
+        dist = "  ".join(f"{k}={route_hist.get(k,0)/tot:.0%}" for k in
+                         ["existence", "appearance", "interaction"])
+        print(f"  routing distribution        : {dist}  (steps={tot})")
 
 
 def cmd_winrate(args):

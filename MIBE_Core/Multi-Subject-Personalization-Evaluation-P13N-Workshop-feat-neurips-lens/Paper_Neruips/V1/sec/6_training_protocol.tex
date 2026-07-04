@@ -1,0 +1,37 @@
+\section{Training Protocol}
+
+\subsection{Ranking Objective}
+For each task, the model receives Image A and Image B generated under the same prompt and the same reference subjects. The scalar outputs of the score head are optimized with a pairwise ranking loss so that the preferred image receives a higher score than the rejected image. This setup directly matches the final use case of the metric: relative comparison under fixed task conditions.
+
+\subsection{Diagnostic Objective}
+In parallel, the classification head is trained with binary cross-entropy over the three diagnostic dimensions for both images. This auxiliary supervision is critical because it prevents the shared representation from collapsing into a purely aesthetic ranking signal. Instead, the model is pushed to attend to concrete image-level failure modes that are meaningful to users and reviewers.
+
+\subsection{Multi-Task Loss}
+The overall training loss is
+\[
+\mathcal{L}_{\text{total}} = \lambda_{\text{rank}}\mathcal{L}_{\text{rank}} + \lambda_{\text{cls}}\mathcal{L}_{\text{cls}}.
+\]
+The ranking term teaches global ordering, while the classification term supplies interpretable structure. In the current implementation, the default weights are $\lambda_{\text{rank}} = 1.0$ and $\lambda_{\text{cls}} = 0.5$, which biases optimization toward preserving ranking quality while still forcing the shared representation to encode diagnostic cues.
+
+\subsection{Backbone Family and Training Modes}
+The current paper-facing training pipeline instantiates AnchorScore on top of Qwen3.5-VL backbones using Unsloth acceleration. We run three backbone scales, \texttt{0.8B}, \texttt{2B}, and \texttt{4B}, and two parameter-update modes:
+\begin{itemize}
+    \item \textbf{layer\_only}: unfreeze the last transformer layers and train the diagnostic heads;
+    \item \textbf{lora\_layer}: attach LoRA adapters while also unfreezing the last transformer layers.
+\end{itemize}
+This produces six paper-facing training configurations in total. The design goal is not to search for a separate hyperparameter optimum for every backbone, but to keep the comparison protocol reviewer-friendly and compute-balanced across scales and modes.
+
+\subsection{Why This Should Recover Score Separability}
+The training design is explicitly targeted at the failure mode of existing metrics. Global similarity methods lose separability because localized identity errors are averaged into a coarse representation. AnchorScore instead receives repeated supervision that says: under identical prompts and references, one image is better, and the reason is linked to Existence, Appearance, or Interaction. Over many pairs, this teaches the model to build a score surface aligned with human preference in the high-subject regime.
+
+\subsection{Data Filtering}
+The silver pipeline applies several quality filters before training. Preference conflicts across the two teacher sources are removed entirely, because they destroy the ordering target required by the margin-ranking objective. For the three diagnostic dimensions, the two teacher outputs are averaged rather than thresholded away, which converts mild disagreement into soft supervision. Samples are also removed if any required reference image or either generated candidate image is missing. This filtering stage is necessary because pairwise ranking models are especially sensitive to noisy preference labels. A slightly smaller but cleaner silver set is preferable to a larger set with ambiguous ordering signal.
+
+\subsection{Implementation-Level Training Budget}
+The current training protocol is intentionally compute-controlled. All six main model configurations are trained with a shared fixed optimizer-step budget of 600 updates. The physical batch size is 1 due to multimodal memory constraints, while gradient accumulation is auto-scaled to reach an effective batch size of 16. Additional default settings are shared across runs: learning rate $2\times 10^{-5}$, weight decay $0.01$, warmup ratio $0.03$, seed $3407$, gradient clipping $1.0$, and early stopping patience 1. This protocol is designed to support fair ablation under limited wall-clock budget, not to claim that 600 steps fully saturate every backbone.
+
+\subsection{Current Data Split Used For Training}
+The present `v2` manifests contain 57,055 usable pairs after filtering, split into 51,328 train, 2,847 validation, and 2,880 test examples. Training uses the train split, checkpoint selection uses the validation split, and the test split is reserved for final reporting. In the current large-scale run plan, the main six backbone-mode combinations are first trained under a shared budget with validation monitoring; full test-table reporting is completed afterward once all runs finish successfully.
+
+\subsection{Validation Strategy}
+The current codebase performs model selection on the validation manifest and saves both epoch checkpoints and the best checkpoint under the monitored validation loss. For the full paper, we keep two evaluation levels conceptually separate: validation on the current `v2` split for training-time model selection, and final human-facing meta-evaluation on a golden test set once that set is finalized. This preserves the distinction between teacher-derived supervision used for optimization and stronger human-grounded evidence used for the final claim.

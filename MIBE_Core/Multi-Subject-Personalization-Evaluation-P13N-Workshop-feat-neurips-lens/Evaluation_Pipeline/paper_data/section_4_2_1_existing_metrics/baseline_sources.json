@@ -1,0 +1,31 @@
+{
+  "analysis_files": {
+    "baseline_human_alignment_v10_v13": "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/multisubject_generation_eval/data/v13_2_1.26k_evl/eval_results/analysis/human_vs_metric_pairwise_accuracy_v10_v13.csv",
+    "baseline_human_alignment_overall": "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/multisubject_generation_eval/data/v13_2_1.26k_evl/eval_results/analysis/human_vs_metric_pairwise_accuracy.csv",
+    "baseline_metric_means_overall": "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/multisubject_generation_eval/data/v13_2_1.26k_evl/eval_results/analysis/metric_means_overall.csv",
+    "baseline_metric_means_by_subject_count": "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/multisubject_generation_eval/data/v13_2_1.26k_evl/eval_results/analysis/metric_means_by_subject_count.csv",
+    "baseline_metric_means_by_occlusion_interaction": "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/multisubject_generation_eval/data/v13_2_1.26k_evl/eval_results/analysis/metric_means_by_occlusion_interaction.csv"
+  },
+  "raw_metric_result_files": [
+    "FLUX_arcface_humans.json",
+    "FLUX_dino_clip_metrics.json",
+    "FLUX_fast_metrics.json",
+    "FLUX_lpips_metrics.json",
+    "FLUX_pref_metrics.json",
+    "GLM_arcface_humans.json",
+    "GLM_dino_clip_metrics.json",
+    "GLM_fast_metrics.json",
+    "GLM_lpips_metrics.json",
+    "GLM_pref_metrics.json",
+    "gpt-image-1.5_high_arcface_humans.json",
+    "gpt-image-1.5_high_dino_clip_metrics.json",
+    "gpt-image-1.5_high_fast_metrics.json",
+    "gpt-image-1.5_high_lpips_metrics.json",
+    "gpt-image-1.5_high_pref_metrics.json",
+    "seedream4.5_arcface_humans.json",
+    "seedream4.5_dino_clip_metrics.json",
+    "seedream4.5_fast_metrics.json",
+    "seedream4.5_lpips_metrics.json",
+    "seedream4.5_pref_metrics.json"
+  ]
+}

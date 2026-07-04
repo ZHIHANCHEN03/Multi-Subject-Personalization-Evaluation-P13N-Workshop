@@ -1,10 +1,15 @@
 """MIE critic: the structured (typed) verifier that drives the controller.
 
+IMPORTANT: MIE is a *scorer*, not a diagnostician. It returns only scores --
+one aggregate + three sub-dimensions. It does NOT say which subject is wrong or
+how to fix it. The controller uses these scores as (a) a VERIFIER (accept /
+reject / stop) and (b) a dimension-level ROUTING signal (which of E/A/I to act
+on). Subject-level targeting is handled by SEARCH in actions.py, not by MIE.
+
 Returns, for a generated image:
     {
       "total": float in [0,1],
       "existence": float, "appearance": float, "interaction": float,
-      "weak_subject": Optional[str],
     }
 
 Three backends (config.CRITIC_BACKEND):
@@ -53,18 +58,19 @@ class MIECritic:
             d = self._diagnose_vlm(image, prompt, subject_names)
         else:
             d = self._diagnose_mock(image, prompt, subject_names)
-        return self._finalize(d, subject_names)
+        return self._finalize(d)
 
-    def _finalize(self, d: dict, subject_names) -> dict:
+    def _finalize(self, d: dict) -> dict:
+        out = {}
+        # E/A/I are quality scores in [0,1] (sigmoid of the MIE classification head),
+        # higher = better. Clipping is safe here.
         for k in DIMS:
-            d[k] = _clip01(d.get(k, 0.0))
-        # total = mean of typed dims unless the backend supplied its own.
-        if "total" not in d:
-            d["total"] = sum(d[k] for k in DIMS) / len(DIMS)
-        d["total"] = _clip01(d["total"])
-        ws = d.get("weak_subject")
-        d["weak_subject"] = ws if (subject_names and ws in subject_names) else None
-        return d
+            out[k] = _clip01(d.get(k, 0.0))
+        # total = MIE preference score (score head). It is an UNBOUNDED margin-
+        # ranking scalar meaningful only for COMPARISON (higher = better). Do NOT
+        # clip it. Only fall back to the dim mean if the backend omits it.
+        out["total"] = float(d["total"]) if "total" in d else sum(out[k] for k in DIMS) / len(DIMS)
+        return out
 
     # ------------------------------------------------------------------
     def _diagnose_checkpoint(self, image, prompt, subject_refs, subject_names) -> dict:
@@ -83,8 +89,7 @@ class MIECritic:
             "- appearance: does each subject look correct/consistent?\n"
             "- interaction: is the described spatial/relational interaction correct?\n"
             f"Subjects: {names}\nPrompt: {prompt}\n"
-            'Reply ONLY JSON: {"existence":x,"appearance":x,"interaction":x,'
-            '"weak_subject":"<name or null>"}'
+            'Reply ONLY JSON: {"existence":x,"appearance":x,"interaction":x}'
         )
         raw = llm.chat_with_images(text, [image], model=config.LLM_MODEL, temperature=0.0)
         d = llm.parse_json(raw)
@@ -101,12 +106,16 @@ class MIECritic:
             h.update(str(image.size).encode())
             h.update(bytes(image.resize((8, 8)).convert("L").tobytes()))
         digest = h.digest()
-        scores = {DIMS[i]: (digest[i] / 255.0) for i in range(len(DIMS))}
-        weak_dim = min(DIMS, key=lambda k: scores[k])
-        weak_subject = None
-        if subject_names:
-            idx = digest[8] % len(subject_names)
-            if weak_dim in ("appearance", "existence"):
-                weak_subject = subject_names[idx]
-        scores["weak_subject"] = weak_subject
-        return scores
+        # Bias the mock to the empirical ordering E > A > I so smoke tests
+        # exercise the "raw argmin always picks Interaction" degeneracy and the
+        # calibrated-routing fix. Ranges: E~[0.6,1.0], A~[0.4,0.85], I~[0.1,0.6].
+        bias = {
+            "existence": (0.60, 0.40),
+            "appearance": (0.40, 0.45),
+            "interaction": (0.10, 0.50),
+        }
+        out = {}
+        for i, k in enumerate(DIMS):
+            lo, span = bias[k]
+            out[k] = lo + (digest[i] / 255.0) * span
+        return out
