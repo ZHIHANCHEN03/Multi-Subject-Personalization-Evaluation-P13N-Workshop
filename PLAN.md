@@ -34,15 +34,20 @@
 ### 第一轮：证"有没有戏"（便宜、快、零人工）
 
 **怎么跑**
-- 挑 **~60 个最难的强交互任务**（claim 就活在这里），**一个底座**：OmniGen2（因为 UMO 是这底座，trained baseline 现成）
+- 预注册 **60 个强交互+遮挡任务**：30 个 4 实体主比较 + 30 个 6 实体(n>4)压力测试
+- 另取完全不重合的 30+30 校准任务，用 Qwen-based MIE 计算各实体数下 E/A/I 的 median/MAD；按标准化异常路由，避免天然最低的 Interaction 被固定选择
 - 跑 **5 个方法**：你的闭环 / one-shot / best-of-N / UMO / FreeGraftor
+- 前四个方法在 OmniGen2 上形成受控比较；FreeGraftor 原生使用 FLUX.1-dev，只作为跨系统开环 SOTA 参考，不能单独用于因果证明“闭环 > 开环”
 - 用 **SCR(DINOv2) 自动打分**，**不用人、不调参**，一天出结果
 
 **能证明什么**
 > 这个 claim 到底有没有信号。看三点：
 > 1. 你的方法 > best-of-N / one-shot？（方法有没有效）
 > 2. 最难子集里 你 ≥ UMO？（免训练追不追得平重训）
-> 3. 你 > FreeGraftor？（闭环打不打得过开环）
+> 3. 你 > FreeGraftor？（是否优于代表性开环系统；注意底座差异）
+
+主 claim 先看 4 实体的较公平切片；6 实体切片显式报告各方法 failure rate，
+作为“n>4 能力边界”证据。只测 n>4 会让 baseline 超出官方验证范围，结论不干净。
 
 **决策门**
 - 三点都正 → 进第二轮
@@ -68,7 +73,7 @@
 | 数据文件 | 第一轮 60 个是 500 的**子集**，task_id 保持一致 |
 | 命令 / 脚本 | 完全一样，只把 `--limit 60` 改 `--limit 500` |
 | 已生成结果 | config/seed 不变时，第一轮 records 直接是第二轮的一部分，不用重跑 |
-| 校准值 ref_E/A/I | 第一轮算出后冻结，第二轮直接用 |
+| 校准值 | 第一轮在独立 calibration split 上算出 E/A/I median/MAD 后冻结，第二轮直接用 |
 | SCR / 人评脚本 | 第一轮搭好，第二轮原样放大 |
 
 ---
@@ -111,7 +116,6 @@
 
 ## 八、下一步（从零重写代码）
 
-1. 搭最小 pipeline：`生成 → MIE 打分 → 选最弱维 → 改 prompt/参考集 → 再生成 → 择优`
-2. 接 MIBE_Core 的 MIE 做 critic；写 SCR(DINOv2) 独立打分
-3. 整理 ~60 个最难任务的 JSONL（task_id / prompt / subjects+ref_images）
-4. 跑第一轮 5 方法 → 看三信号 → 决策
+1. 在 H100 上设置 `HF_TOKEN` 和 `MIE_CKPT`
+2. 运行 `bash round1/run_round1.sh`（自动安装、校准、生成、SCR、决策）
+3. 查看 `round1/results/DECISION.md`

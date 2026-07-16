@@ -1,0 +1,15 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.env
+*.env
+**/.env
+*token*
+*credentials*
+
+# Repository-local environments, model weights, caches, and generated outputs.
+.venvs/
+models/
+external/
+round1/.cache/
+round1/results/

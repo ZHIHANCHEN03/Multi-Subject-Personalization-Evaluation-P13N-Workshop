@@ -1,0 +1,12 @@
+# Round-1 dependencies. Install PyTorch matching your CUDA first, e.g.:
+#   pip install torch==2.6.0 torchvision --extra-index-url https://download.pytorch.org/whl/cu124
+torch>=2.4
+torchvision
+diffusers>=0.32
+transformers>=4.45
+accelerate
+safetensors
+sentencepiece
+pillow
+numpy
+# OmniGen2 recommends (optional, faster): flash-attn==2.7.4.post1
