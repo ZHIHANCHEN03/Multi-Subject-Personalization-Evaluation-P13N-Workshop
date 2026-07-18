@@ -74,8 +74,14 @@ REFS_DIR="${REFS_DIR:-../refs}"
 GEN="${GEN:-omnigen2}"
 B="${B:-8}"                     # aligned budget: best-of-N=8, ours=n_init4+k4
 DATA="${DATA:-$MANIFESTS/hard_cases.jsonl}"
-N_SUPPORTED="${N_SUPPORTED:-30}" # 4 entities: all baselines' supported regime
-N_STRESS="${N_STRESS:-30}"       # 6 entities: requested n>4 stress regime
+# OmniGen2 supports at most 5 reference images (image_index_embedding size=5),
+# so 6/8-entity cases cannot run on OmniGen2-based methods. The hardest tier we
+# can run natively is 4 entities; 2 entities is the easy contrast. 6/8-entity
+# extreme-collapse stress moves to Round 2 on a base that supports more refs.
+HARD_ENTITIES="${HARD_ENTITIES:-4}"
+EASY_ENTITIES="${EASY_ENTITIES:-2}"
+N_SUPPORTED="${N_SUPPORTED:-30}" # hard tier (4 entities)
+N_STRESS="${N_STRESS:-30}"       # easy contrast tier (2 entities)
 N_CAL_SUPPORTED="${N_CAL_SUPPORTED:-30}"
 N_CAL_STRESS="${N_CAL_STRESS:-30}"
 PY_OMNI="${PY_OMNI:-../.venvs/omni/bin/python}"
@@ -121,17 +127,17 @@ fi
 
 # ---- 0. pre-register a mixed hard set: fair 4-entity + n>4 stress ----
 if [[ ! -f "$DATA" ]]; then
-  stage_begin "03/11 Manifest — select 30 supported + 30 stress test cases"
+  stage_begin "03/11 Manifest — select $N_SUPPORTED hard(${HARD_ENTITIES}) + $N_STRESS easy(${EASY_ENTITIES}) cases"
   "$PY_OMNI" select_hard_cases.py \
     --src "$DATA_SRC" --refs "$REFS_DIR" \
-    --exact_entities 4 --n "$N_SUPPORTED" --seed 0 \
+    --exact_entities "$HARD_ENTITIES" --n "$N_SUPPORTED" --seed 0 \
     --out "$MANIFESTS/hard_supported.jsonl"
   "$PY_OMNI" select_hard_cases.py \
     --src "$DATA_SRC" --refs "$REFS_DIR" \
-    --exact_entities 6 --n "$N_STRESS" --seed 1 \
-    --out "$MANIFESTS/stress_6plus.jsonl"
+    --exact_entities "$EASY_ENTITIES" --n "$N_STRESS" --seed 1 \
+    --out "$MANIFESTS/easy_contrast.jsonl"
   "$PY_OMNI" -c 'from pathlib import Path; import sys; Path(sys.argv[1]).write_bytes(Path(sys.argv[2]).read_bytes() + Path(sys.argv[3]).read_bytes())' \
-    "$DATA" "$MANIFESTS/hard_supported.jsonl" "$MANIFESTS/stress_6plus.jsonl"
+    "$DATA" "$MANIFESTS/hard_supported.jsonl" "$MANIFESTS/easy_contrast.jsonl"
   stage_end
 else
   stage_skip "03/11 Manifest" "frozen manifest already exists"
@@ -141,15 +147,15 @@ fi
 if [[ "$GEN" != "mock" && ! -f "$CAL_BASELINE" ]]; then
   stage_begin "04/11 Calibration generation — build held-out split and run OmniGen2 one-shot"
   "$PY_OMNI" select_hard_cases.py \
-    --src "$DATA_SRC" --refs "$REFS_DIR" --exact_entities 4 \
+    --src "$DATA_SRC" --refs "$REFS_DIR" --exact_entities "$HARD_ENTITIES" \
     --n "$N_CAL_SUPPORTED" --seed 100 --exclude "$DATA" \
-    --out "$MANIFESTS/calibration_4.jsonl"
+    --out "$MANIFESTS/calibration_hard.jsonl"
   "$PY_OMNI" select_hard_cases.py \
-    --src "$DATA_SRC" --refs "$REFS_DIR" --exact_entities 6 \
+    --src "$DATA_SRC" --refs "$REFS_DIR" --exact_entities "$EASY_ENTITIES" \
     --n "$N_CAL_STRESS" --seed 101 --exclude "$DATA" \
-    --out "$MANIFESTS/calibration_6.jsonl"
+    --out "$MANIFESTS/calibration_easy.jsonl"
   "$PY_OMNI" -c 'from pathlib import Path; import sys; Path(sys.argv[1]).write_bytes(Path(sys.argv[2]).read_bytes() + Path(sys.argv[3]).read_bytes())' \
-    "$CAL_DATA" "$MANIFESTS/calibration_4.jsonl" "$MANIFESTS/calibration_6.jsonl"
+    "$CAL_DATA" "$MANIFESTS/calibration_hard.jsonl" "$MANIFESTS/calibration_easy.jsonl"
   "$PY_OMNI" p2_oneshot.py \
     --name calibration --data "$CAL_DATA" --generator "$GEN" --no_scr
   stage_end
@@ -172,18 +178,28 @@ stage_begin "07/11 Best-of-N — generate B candidates and select by MIE prefere
 "$PY_OMNI" p3_bestofn.py --data "$DATA" --generator "$GEN" --budget "$B" $SCR_FLAG
 stage_end
 stage_begin "08/11 OURS — calibrated MIE diagnose, semantic correction and verification"
+# Budget matched to best-of-N (B): n_init + k*proposals = 2 + 3*2 = 8.
+OURS_PROPOSALS="${OURS_PROPOSALS:-2}" OURS_DEFICIT_MIN="${OURS_DEFICIT_MIN:-0.75}" \
 "$PY_OMNI" p1_ours.py \
-  --data "$DATA" --generator "$GEN" --n_init 4 --k 4 \
+  --data "$DATA" --generator "$GEN" --n_init "${OURS_N_INIT:-2}" --k "${OURS_K:-3}" \
   --calibration "$CAL_BASELINE" $SCR_FLAG
 stage_end
 
 # ---- 3. released external baselines, direct inference ----
 if [[ "$GEN" != "mock" ]]; then
   stage_begin "09/11 UMO — released retrained OmniGen2 baseline"
-  "$PY_OMNI" p4_umo.py --data "$DATA"
+  "$PY_OMNI" p4_umo.py --data "$DATA" || echo "[warn] UMO stage failed; continuing to evaluation"
   stage_end
-  stage_begin "10/11 FreeGraftor — released training-free open-loop baseline"
-  "$PY_FG" p5_freegraftor.py --data "$DATA"
+  # Interim verdict from the OmniGen2 same-base methods (signals 1&2), so a
+  # GO/STOP is available before the slow optional FreeGraftor stage.
+  echo "[run] interim evaluation (OmniGen2 methods, before FreeGraftor):"
+  "$PY_OMNI" compare_round1.py --runs "$RESULTS" --out_dir "$RESULTS" || true
+  stage_begin "10/11 FreeGraftor — released training-free open-loop baseline (optional)"
+  if [[ -f "../models/sam_vit_h_4b8939.pth" && -d "../models/FLUX.1-dev" ]]; then
+    "$PY_FG" p5_freegraftor.py --data "$DATA" || echo "[warn] FreeGraftor stage failed; continuing to evaluation"
+  else
+    echo "[warn] FreeGraftor prerequisites (SAM/FLUX) missing; skipping optional baseline"
+  fi
   stage_end
 else
   stage_skip "09-10/11 External baselines" "mock mode"

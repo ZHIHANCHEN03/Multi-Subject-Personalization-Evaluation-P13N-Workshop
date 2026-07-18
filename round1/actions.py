@@ -14,6 +14,7 @@ The weakest dimension picks which lever + how to phrase it:
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from PIL import Image
@@ -56,6 +57,17 @@ class RawRouter:
         return max(DIMS, key=lambda dim: deficits[dim]), deficits
 
 
+def _layout_hint(subject_names: list[str]) -> str:
+    """Optional positional hint to reduce identity blending (env OURS_LAYOUT=1)."""
+    if os.environ.get("OURS_LAYOUT", "0") != "1" or not subject_names:
+        return ""
+    slots = ["on the left", "in the center-left", "in the center",
+             "in the center-right", "on the right", "in the back"]
+    parts = [f"{n.replace('_',' ')} {slots[i % len(slots)]}"
+             for i, n in enumerate(subject_names)]
+    return " Arrange the subjects in distinct, non-overlapping regions: " + "; ".join(parts) + "."
+
+
 def rewrite_prompt(prompt: str, dim: str, subject_names: list[str]) -> str:
     subjects = ", ".join(n.replace("_", " ") for n in subject_names)
     if dim == "existence":
@@ -75,19 +87,31 @@ def manipulate_refset(
     subject_names: list[str],
     target_idx: int,
     mode: str = "front_dup",
+    max_refs: int = 5,
 ) -> list[Image.Image]:
     """Reorder/duplicate the reference list to emphasize `target_idx`.
 
-    front_dup: move target's ref to the front AND duplicate it (stronger weight).
-    front:     move target's ref to the front only.
+    front       : move target's ref to the front only.
+    front_dup   : front + one duplicate (stronger weight).
+    front_dup3  : front + two duplicates (even stronger).
+
+    The total is capped at `max_refs` (default 5 = OmniGen2's hard limit) by
+    dropping trailing non-target refs, so dup modes never exceed the base
+    model's reference capacity.
     """
     if not refs or not (0 <= target_idx < len(refs)):
         return refs
     tgt = refs[target_idx]
     rest = [r for i, r in enumerate(refs) if i != target_idx]
     if mode == "front":
-        return [tgt] + rest
-    return [tgt, tgt] + rest  # front_dup
+        out = [tgt] + rest
+    elif mode == "front_dup3":
+        out = [tgt, tgt, tgt] + rest
+    else:  # front_dup
+        out = [tgt, tgt] + rest
+    if len(out) > max_refs:
+        out = out[:max_refs]
+    return out
 
 
 def pick_target_subject(num_subjects: int, step: int) -> int:
@@ -108,15 +132,22 @@ def apply_action(
     refs: list[Image.Image],
     dim: str,
     step: int,
+    action_mode: str = "both",
 ) -> tuple[str, list[Image.Image], dict]:
-    """Return (new_prompt, new_refs, action_info) for the routed dimension."""
-    new_prompt = rewrite_prompt(prompt, dim, task.subject_names)
-    new_refs = refs
+    """Return (new_prompt, new_refs, action_info) for the routed dimension.
 
-    if dim in ("appearance", "existence"):
+    action_mode:
+      both        -> prompt rewrite (+ reference-set manipulation on appearance/existence)
+      prompt_only -> prompt rewrite only (ablation: no reference-set lever)
+    """
+    new_prompt = rewrite_prompt(prompt, dim, task.subject_names) + _layout_hint(task.subject_names)
+    new_refs = refs
+    refset_mode = os.environ.get("OURS_REFSET_MODE", "front_dup")
+
+    if action_mode == "both" and dim in ("appearance", "existence"):
         tgt = pick_target_subject(task.num_subjects, step)
-        new_refs = manipulate_refset(refs, task.subject_names, tgt, mode="front_dup")
-        action = {"dim": dim, "lever": "prompt+refset", "target_subject": tgt}
+        new_refs = manipulate_refset(refs, task.subject_names, tgt, mode=refset_mode)
+        action = {"dim": dim, "lever": f"prompt+refset({refset_mode})", "target_subject": tgt}
     else:
         action = {"dim": dim, "lever": "prompt"}
 

@@ -11,12 +11,13 @@ import common
 from external_generators import UMOGenerator
 
 
-def make_method(generator: UMOGenerator):
+def make_method(generator: UMOGenerator, seed_offset: int = 0):
     def method(task: common.Task):
-        image = generator.generate(task, seed=0)
+        image = generator.generate(task, seed=seed_offset)
         return image, {
             "budget": 1,
             "gen_calls": 1,
+            "seed_offset": seed_offset,
             "source": "official_umo_omnigen2",
         }
 
@@ -29,6 +30,7 @@ def main():
     ap.add_argument("--name", default="umo")
     ap.add_argument("--model_path", default=None)
     ap.add_argument("--lora_path", default=None)
+    ap.add_argument("--seed_offset", type=int, default=0)
     ap.add_argument("--no_offload", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--no_scr", action="store_true")
@@ -43,7 +45,7 @@ def main():
     scorer = None if args.no_scr else common.DinoScorer()
     common.run_over_dataset(
         args.name,
-        make_method(generator),
+        make_method(generator, args.seed_offset),
         tasks,
         scorer,
         save_images=True,

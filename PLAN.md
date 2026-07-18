@@ -13,7 +13,11 @@
 
 ## 二、要证明的 claim（已确认没人做过）
 
-> **多主体身份崩塌无需重训**，靠"外部分维度评测器闭环诊断 + 迭代修复"就能在语义层修好——**尤其在开环免训练法(FreeGraftor)救不了、重训法(UMO)也崩的强交互最难 case 上能救回来**，且训练成本为零。
+> **多主体身份崩塌无需重训**，靠"外部分维度评测器(MIE)闭环诊断 + 迭代修复"就能在语义层修好，在**同底座(OmniGen2)上以零训练成本追平重训 SOTA(UMO)**；并能 scale 到更多主体。
+
+> ⚠️ **底座约束（关键，决定了实验怎么切）**：`ours / one-shot / best-of-N` 需要底座**原生支持多参考图主体条件生成**。**OmniGen2 原生支持但最多 5 张参考图**；纯 FLUX.1 不原生支持（MultiCrafter靠训练、FreeGraftor靠trick才行）。因此：
+> - **2/4 主体 → 在 OmniGen2 上做**（有同底座重训 SOTA=UMO 可比）= **核心 claim 的地基**。
+> - **6/8 主体 → 换 FLUX.2**（需先确认其多参考容量）；那里**没有同底座重训 SOTA**，只做 `ours vs one-shot/best-of-N` 的 **scaling 故事**，是**加分**不是地基。
 
 **为什么干净（逐个切割相邻工作）：**
 
@@ -31,50 +35,41 @@
 
 ## 三、两轮打法
 
-### 第一轮：证"有没有戏"（便宜、快、零人工）
+### 第一轮：证"有没有戏"（OmniGen2 上，2/4 主体，零人工）
 
-**怎么跑**
-- 预注册 **60 个强交互+遮挡任务**：30 个 4 实体主比较 + 30 个 6 实体(n>4)压力测试
-- 另取完全不重合的 30+30 校准任务，用 Qwen-based MIE 计算各实体数下 E/A/I 的 median/MAD；按标准化异常路由，避免天然最低的 Interaction 被固定选择
-- 跑 **5 个方法**：你的闭环 / one-shot / best-of-N / UMO / FreeGraftor
-- 前四个方法在 OmniGen2 上形成受控比较；FreeGraftor 原生使用 FLUX.1-dev，只作为跨系统开环 SOTA 参考，不能单独用于因果证明“闭环 > 开环”
-- 用 **SCR(DINOv2) 自动打分**，**不用人、不调参**，一天出结果
+**跑什么**
+- **底座 OmniGen2**，两档任务：**hard=4 实体**（主比较）+ **easy=2 实体**（对照）。强交互+遮挡(`occlusion_interaction`)。
+  - 为什么不做 6/8：OmniGen2 参考图上限=5，6/8 跑不了 → 留给 Round 2 的 FLUX.2。
+- **5 个方法**：`ours / one-shot / best-of-N / UMO / FreeGraftor`
+  - 前四个在 OmniGen2 上 = **受控对比**；**FreeGraftor 在 FLUX.1 = 跨系统参考**（可选，缺了也能出结论）。
+- 另取**不重合的校准 split**，用 Qwen-based MIE 算各实体数下 E/A/I 的 median/MAD 冻结 → 标准化异常路由（避免永远选 Interaction）。
+- **过程用 MIE，终评用 SCR(DINOv2)**，自动出 `DECISION.md`。
 
-**能证明什么**
-> 这个 claim 到底有没有信号。看三点：
-> 1. 你的方法 > best-of-N / one-shot？（方法有没有效）
-> 2. 最难子集里 你 ≥ UMO？（免训练追不追得平重训）
-> 3. 你 > FreeGraftor？（是否优于代表性开环系统；注意底座差异）
+**看什么信号（主看 4 实体切片）**
+1. `method_works`：ours 的 SCR < one-shot 且 < best-of-N（方法有效）
+2. `noninferior_to_umo`：ours 的 SCR ≤ UMO + 容差（免训练追平重训）← **核心**
+3. `beats_freegraftor`：ours < FreeGraftor（可选，跨系统参考）
 
-主 claim 先看 4 实体的较公平切片；6 实体切片显式报告各方法 failure rate，
-作为“n>4 能力边界”证据。只测 n>4 会让 baseline 超出官方验证范围，结论不干净。
+**决策门（脚本自动判）**
+- 信号1&2 都过 → **GO**（进 Round 2）
+- 只有信号1过 → **CONDITIONAL**（方法有效但没追平UMO，调整/加样本，至少workshop）
+- 信号1不过 → **STOP**（先改方法）
+- FreeGraftor 缺失不致命，用信号1&2 下结论。
 
-**决策门**
-- 三点都正 → 进第二轮
-- 只有 1 正、2/3 不行 → claim 降级（退路阶梯往下挪一格），仍可发
-- 全不行 → 立刻止损，调方法 / 换角度
+### 第二轮：坐实核心 + 补 scaling（冲 AAAI）
 
-### 第二轮：把"有戏"变"铁证"（放大 + 人评 + 严谨）
-
-**怎么跑（在第一轮基础上只做加法）**
-- 数据 60 → **500 + 完整最难子集 ~150**
-- 加 **人评**：抽 100–200 对做 A/B（你 vs UMO、你 vs best-of-N），3 人投票
-- 加 **scaling 曲线**（B=2/4/6/8，横轴算力 / 纵轴 SCR）
-- 加 **第二底座 FLUX.2 展示**（"最新底座即插即用，重训法还得再训一版"）
-- 加**消融**（附录）：分维度路由 vs 总分路由；改参考集 vs 只改 prompt；换 VLM 控制器
-
-**能证明什么**
-> claim 是真的、稳的、人也认——有统计置信度 + 独立指标 + 人评三重背书。
+在 Round1=GO 后做加法：
+- **放大 2/4 核心**：500 任务 + 多 seed + 置信区间/显著性；**加人评**（抽100-200对A/B，你 vs UMO / vs best-of-N，3人投票）。
+- **scaling 曲线**：算力预算 B=2/4/6/8，横轴算力/纵轴 SCR，证 ours 帕累托压 best-of-N。
+- **6/8 主体 on FLUX.2**：换到支持更多参考图的底座，做 `ours vs one-shot/best-of-N` 的"主体越多崩越狠、我增益越大"scaling 故事（该底座无同底座重训SOTA，只证信号1）。
+- **消融**（附录）：校准路由 vs 总分/argmin 路由；改prompt vs +参考集操纵；换 VLM 控制器。
 
 ### 第一轮如何无缝滚进第二轮（零浪费）
-
-| 东西 | 复用方式 |
-|---|---|
-| 数据文件 | 第一轮 60 个是 500 的**子集**，task_id 保持一致 |
-| 命令 / 脚本 | 完全一样，只把 `--limit 60` 改 `--limit 500` |
-| 已生成结果 | config/seed 不变时，第一轮 records 直接是第二轮的一部分，不用重跑 |
-| 校准值 | 第一轮在独立 calibration split 上算出 E/A/I median/MAD 后冻结，第二轮直接用 |
-| SCR / 人评脚本 | 第一轮搭好，第二轮原样放大 |
+- 数据：Round1 的任务是 500 的子集，task_id 稳定不变。
+- 命令/脚本：一样，只把 `N_SUPPORTED/N_STRESS` 从 15-30 调到目标规模。
+- 已生成结果：seed/config 不变时 Round1 的 records 直接并入。
+- 校准值：Round1 冻结的 E/A/I median/MAD 直接复用。
+- 环境/权重：Round1 已装好，Round2 不用重装。
 
 ---
 
@@ -114,8 +109,105 @@
 
 ---
 
-## 八、下一步（从零重写代码）
+## 七bis、当前进度（2026-07-18）— Round 1 GO + Round 1.1 winner 已冻结，Round 2 启动中
 
-1. 在 H100 上设置 `HF_TOKEN` 和 `MIE_CKPT`
-2. 运行 `bash round1/run_round1.sh`（自动安装、校准、生成、SCR、决策）
-3. 查看 `round1/results/DECISION.md`
+- **Round 1 完成（GO）**：4主体(n=30) SCR ours 0.50 / UMO 0.525 / best-of-N 0.55 / one-shot 0.558；2主体 one-shot 0.45 / ours_v2 0.483 / UMO 0.483。详见 `round1/REPORT.md`。
+- **Round 1.1 完成（algorithm tuning，找到 winner）**：详见 `round1_1/REPORT.md`。
+  - 诊断：Round 1 的 correction loop 基本没干活（`accepted_steps=0.2`），赢靠 init+MIE 挑选不是自纠正。根因：MIE 只给全局维度分不知道哪个 subject 塌，SCR per-subject 信号被浪费，接受条件太严。
+  - 结构性改版（`round1/p1_ours_v2.py`）：把 SCR 从"只当裁判"提升进 loop——MIE 定维度 + SCR 定 subject → targeted refset + action portfolio + dual-signal acceptance + **按塌方 subject 的 DINO sim 选候选**（V2_SELECT_MODE=weak_subject）。
+  - 消融定位关键杠杆：weak_subject 选择（matched compute 下 SCR 0.513→0.488，-4.9%）；total_tol 反而有害；strict SCR collateral 卡死 loop。
+  - **winner（冻结进 Round 2）= `v2.3 weaksel`**：`V2_SELECT_MODE=weak_subject` + `V2_ACCEPT_MODE=relaxed` + `V2_TOTAL_TOL=0.0` + front_dup3 + layout，budget 8（matched to best-of-N）。
+  - 20 任务 matched：ours SCR 0.488 / DINO 0.498 vs v1 0.513/0.486 vs UMO 0.563/0.432（**双指标赢 UMO**，head-to-head 8胜4负8平）。
+  - 诚实定位：提升真实且 matched-compute 成立，但幅度中等（~5%）、20 任务小样本、无显著性/人评 → Round 2 要坐实。
+- **Round 2 启动中**：500 任务 manifest 已建（250 hard_4 + 250 easy_2），分 4 片各 125；`round2/run_shard.sh` 已改用 winner pipeline；shard 0 在 GPU0 跑，shard 1-3 待其余 3 台服务器。
+- 环境/模型/结果均在 `/workspace/misc`（持久盘）；MIE 权重只读；服务器可 Stop（勿 Terminate）。
+
+---
+
+## 九、Round 2 可执行清单（把 marginal 变 solid，冲 AAAI）
+
+> 目标：Round 1 证明了方向对；Round 2 要把"免训练追平重训"从 marginal 做成**统计显著 + 人评认可 + 有 scaling 亮点**。按优先级排。
+
+### P0 门槛（不做则只能 workshop）
+1. **规模 + 显著性**
+   - 500 任务（沿用 select 逻辑，task_id 稳定；Round1 的 60 是子集，可复用其 records）。
+   - 每任务 ≥3 seeds；报 **mean ± 95%CI**，ours vs UMO 做**配对 bootstrap / 符号检验**，目标 p<0.05 或 CI 不跨 0。
+   - 交付物：主表（SCR/DINO，含 CI）+ 显著性标注。
+2. **人评（A/B）**
+   - 抽 100–200 对：ours vs UMO、ours vs best-of-N。每对 3 人、强制二选一、随机左右。
+   - 报胜率 + CI 下界；目标 CI 下界 > 50%。
+   - 交付物：`round2/human_eval/` 导出的成对图 + 打分表模板 + 汇总脚本。
+
+### P1 亮点（决定能否上主会）
+3. **6/8 主体 scaling on FLUX.2**
+   - 先确认 FLUX.2 原生多参考容量（能否 ≥6 refs）；能则跑 2/4/6/8 的 ours vs one-shot/best-of-N。
+   - 讲"**主体越多、崩越狠、ours 增益越大**"的曲线（横轴主体数，纵轴 SCR 降幅）。
+   - 该底座无同底座重训 SOTA → 只证信号1（ours>baselines），当 scaling 故事。
+4. **算力 scaling 曲线**：预算 B=2/4/6/8，ours vs best-of-N，横轴算力/纵轴 SCR（口径=零训练成本，不吹省推理算力）。
+
+### P2 可信度（补强，不决定生死）
+5. **消融**（`round1` 已有开关，Round2 系统跑）：
+   - 路由：校准路由 vs 总分/argmin（证明校准必要）
+   - 动作：+参考集操纵 vs 只改 prompt
+   - 控制器：MIE vs 分维度 VLM（证不只对 MIE 有效）
+   - 触发门槛/多提案的消融（OURS_DEFICIT_MIN / OURS_PROPOSALS）
+6. **更全 baseline 套件**：
+   - 同底座因果：**UMO**（唯一能证"追平重训"）
+   - 跨系统参照（下载→按 task_id 出图→用我们 SCR 打分，不训练不改）：**MOSAIC**(FLUX.1，主打4+主体)、**MultiCrafter**(FLUX.1)、**FreeGraftor**(FLUX.1 开环)、有余力加 XVerse/PSR
+   - 均明确标注"跨系统、底座不同、仅参照"。
+
+### 判定
+- P0 全做且显著 + 人评认 + P1 的 FLUX.2 scaling 优势变大 → **AAAI 有力竞争**。
+- 只有 P0 显著、无 scaling 亮点 → borderline。
+- P0 做不出显著/人评 → **workshop(P13N)**。
+
+### 复用 Round 1（零浪费）
+- 数据/校准/records/环境/模型全在 `/workspace/misc`；Round2 = 调 `N_SUPPORTED/N_STRESS`、加 seed、加检验与人评脚本、接 FLUX.2 与跨系统 baseline。
+- 待写脚本（下一步，纯代码不占 GPU）：`round2/` 下 显著性检验、人评导出、scaling 扫描、MOSAIC/MultiCrafter 接入骨架。
+
+> MIE 权重固定在 `/workspace/Model_Training_runs/v2/unsloth_Qwen3.5-4B/20260503_045230/outputs/unsloth_Qwen3.5-4B-lora_layer-best`（只读，绝不删）。
+> 服务器：RunPod pod `pwvgfql1co3zv5`，SSH `ssh root@216.81.151.3 -p 19490 -i ~/.ssh/id_ed25519_2`（直连，任务放 tmux）。
+
+---
+
+## 十、Round 2 服务器需求与分工（2026-07-18）
+
+### 已就绪
+- 500 任务 manifest：`/workspace/misc/round2/results_r2/manifests/round2_full.jsonl`（250 hard_4 + 250 easy_2）。
+- 4 片 × 125 任务：`/workspace/misc/round2/results_r2/shards/shard_{0..3}.jsonl`。
+- winner pipeline 已接入 `round2/run_shard.sh`（用 `p1_ours_v2.py` + v2.3 weaksel env）。
+- 校准复用 Round 1 冻结值；MIE 权重只读。
+
+### 磁盘
+- **不需要更大 disk**。`/workspace` 是 RunPod 网络卷，258T 富余。Round 2 全量结果预估 < 10G。
+- **关键**：新服务器若挂在**同一个网络卷**（同 region 同 volume），则模型（98G：OmniGen2/FLUX.1-dev/SAM/Grounding-DINO/UMO）和 venvs 直接共享，新 pod 无需重下、即开即跑。开新 pod 时务必选同一个 `/workspace` 卷。
+
+### GPU 需求：4 张 A100（已有 1，再要 3）
+每片 125 任务 × 4 方法（ours/one_shot/best_of_n/UMO），单卡 ~4 min/任务 → 每片 ~33h。4 卡并行 ~1.4 天跑完主跑。
+
+| 服务器 | 跑什么 | 预估耗时 |
+|---|---|---|
+| **GPU0（当前 pod，已有）** | shard 0（125 任务 × 4 方法） | ~33h |
+| **GPU1（待开）** | shard 1 | ~33h |
+| **GPU2（待开）** | shard 2 | ~33h |
+| **GPU3（待开）** | shard 3 | ~33h |
+
+主跑完成后，同一批卡接着跑：
+- **P1 scaling**（FLUX.2 6/8 主体）：1 卡 ~12h
+- **P2 跨系 baseline**（MOSAIC/MultiCrafter/FreeGraftor，下载即推理）：1 卡 ~10h
+- **P2 消融**（v2.3 各开关）：1 卡 ~8h
+
+### 给我新服务器的方式
+每台新 pod 起来后，给我 SSH 地址（host + port + key 路径），我远程执行：
+1. 确认挂到同一个 `/workspace`（模型/venv 已在）。
+2. `cd /workspace/misc/round2 && CUDA_VISIBLE_DEVICES=0 SHARD_MANIFEST=results_r2/shards/shard_<N>.jsonl RESULTS_DIR=results_r2/shard_<N> CALIBRATION=... MIE_CKPT=... bash run_shard.sh`（在 tmux 里）。
+3. 4 片全跑完后我 merge + analyze + 出显著性表 + 导人评。
+
+### 时间线（4 卡到位后）
+- Day 1-2：主跑 500 任务（4 卡并行）
+- Day 3：merge + analyze + 显著性 + 人评导出
+- Day 4-5：人评回收 + scaling(FLUX.2) + 跨系 baseline + 消融
+- Day 6-8：写论文
+- Day 9-10：buffer / 补实验
+
+> **现在就缺 3 台 A100 的 SSH 地址**。给我地址我立刻在每台启动一个 shard，~1.4 天后主跑完成。

@@ -418,6 +418,7 @@ def run_over_dataset(
                     "detection_recall": 0.0,
                 }
                 fout.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                fout.flush()
                 print(f"[{name}] FAILED {task.task_id}: {rec['error']}")
                 show_progress(i, task.task_id, "FAILED", rec)
                 continue
@@ -442,6 +443,7 @@ def run_over_dataset(
                 image.save(p)
                 rec["image_path"] = str(p)
             fout.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            fout.flush()  # flush per-record so live monitoring can read partial results
             show_progress(i, task.task_id, "OK", rec)
     print(
         f"[METHOD END] name={name} tasks={len(tasks)} "

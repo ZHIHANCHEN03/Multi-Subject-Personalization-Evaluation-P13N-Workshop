@@ -30,8 +30,10 @@ class UMOGenerator:
         self,
         model_path: str | None = None,
         lora_path: str | None = None,
-        cpu_offload: bool = True,
+        cpu_offload: bool = None,
     ):
+        if cpu_offload is None:
+            cpu_offload = os.environ.get("ROUND1_CPU_OFFLOAD", "0") == "1"
         if not OMNIGEN2_SRC.exists():
             raise FileNotFoundError(
                 f"{OMNIGEN2_SRC} is missing; run round1/setup_round1.sh."
@@ -111,7 +113,7 @@ class UMOGenerator:
             width=1024,
             height=1024,
             align_res=False,
-            num_inference_steps=50,
+            num_inference_steps=int(os.environ.get("OMNIGEN2_STEPS", "28")),
             max_sequence_length=1024,
             text_guidance_scale=5.0,
             image_guidance_scale=2.0,

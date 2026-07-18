@@ -13,7 +13,7 @@ import common
 from generators import build_generator
 
 
-def make_method(critic, generator, budget: int):
+def make_method(critic, generator, budget: int, seed_offset: int = 0):
     def method(task: common.Task):
         refs = task.load_refs()
         prompt = common.omnigen_prompt(task)
@@ -24,7 +24,7 @@ def make_method(critic, generator, budget: int):
                 "action=generate_and_score",
                 flush=True,
             )
-            img = generator.generate(prompt, refs, seed=s)
+            img = generator.generate(prompt, refs, seed=seed_offset + s)
             sc = critic.score(img, task)
             print(
                 f"[BEST-OF-N][{task.task_id}] candidate={s+1}/{budget} "
@@ -36,6 +36,7 @@ def make_method(critic, generator, budget: int):
         info = {
             "budget": budget,
             "gen_calls": budget,
+            "seed_offset": seed_offset,
             "final_total": best_score["total"],
             "final_dims": {d: best_score[d] for d in common.DIMS},
         }
@@ -50,6 +51,7 @@ def main():
     ap.add_argument("--name", default="best_of_n")
     ap.add_argument("--generator", default="omnigen2")
     ap.add_argument("--budget", type=int, default=8)
+    ap.add_argument("--seed_offset", type=int, default=0)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--no_scr", action="store_true")
     args = ap.parse_args()
@@ -58,7 +60,12 @@ def main():
     critic = common.build_critic()
     generator = build_generator(args.generator)
     scorer = None if args.no_scr else common.DinoScorer()
-    common.run_over_dataset(args.name, make_method(critic, generator, args.budget), tasks, scorer)
+    common.run_over_dataset(
+        args.name,
+        make_method(critic, generator, args.budget, args.seed_offset),
+        tasks,
+        scorer,
+    )
 
 
 if __name__ == "__main__":

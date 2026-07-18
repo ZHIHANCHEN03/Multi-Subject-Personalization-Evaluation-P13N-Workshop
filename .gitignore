@@ -13,3 +13,10 @@ models/
 external/
 round1/.cache/
 round1/results/
+round1_1/trials/
+round1_1/*.log
+round2/.cache/
+round2/results/
+round2/results_r2/
+round2/human_eval/pairs/
+refs_papers/

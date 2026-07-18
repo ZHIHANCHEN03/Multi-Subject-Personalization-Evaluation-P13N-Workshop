@@ -78,7 +78,8 @@ echo "[setup] downloading Grounding-DINO (shared by SCR and FreeGraftor)"
 
 echo "[setup] downloading FreeGraftor dependencies"
 # FLUX.1-dev is gated: accept its HF license and provide HF_TOKEN if required.
-"$VENVS/freegraftor/bin/hf" download black-forest-labs/FLUX.1-dev \
+# Use the omni venv's hf CLI (freegraftor pins an older huggingface_hub without it).
+"$VENVS/omni/bin/hf" download black-forest-labs/FLUX.1-dev \
   --local-dir "$MODELS/FLUX.1-dev" "${HF_ARGS[@]}"
 if [[ ! -f "$MODELS/sam_vit_h_4b8939.pth" ]]; then
   curl -L --fail --retry 3 \

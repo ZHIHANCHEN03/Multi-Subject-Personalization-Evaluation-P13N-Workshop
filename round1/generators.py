@@ -62,8 +62,10 @@ class OmniGen2Generator(BaseGenerator):
         text_guidance_scale: float = 5.0,
         image_guidance_scale: float = 2.5,
         negative_prompt: str = "blurry, low quality, text, watermark, deformed",
-        cpu_offload: bool = True,
+        cpu_offload: bool = None,
     ):
+        if cpu_offload is None:
+            cpu_offload = os.environ.get("ROUND1_CPU_OFFLOAD", "0") == "1"
         if not OMNIGEN2_SRC.exists():
             raise FileNotFoundError(
                 f"OmniGen2 source not found at {OMNIGEN2_SRC}. "
@@ -91,6 +93,8 @@ class OmniGen2Generator(BaseGenerator):
         self.pipe.transformer = OmniGen2Transformer2DModel.from_pretrained(
             model_id, subfolder="transformer", torch_dtype=td
         )
+        # On a large GPU (A100 80GB) keep the model resident: CPU offload reloads
+        # weights every call and dominates cost for best-of-N / ours (8x gens).
         if cpu_offload and torch.cuda.is_available():
             self.pipe.enable_model_cpu_offload()
         elif torch.cuda.is_available():
@@ -99,6 +103,7 @@ class OmniGen2Generator(BaseGenerator):
         self.tgs = text_guidance_scale
         self.igs = image_guidance_scale
         self.neg = negative_prompt
+        self.steps = int(os.environ.get("OMNIGEN2_STEPS", "28"))
 
     def _call_pipe(self, prompt: str, refs: list[Image.Image], generator):
         return self.pipe(
@@ -111,7 +116,7 @@ class OmniGen2Generator(BaseGenerator):
             align_res=False,
             width=1024,
             height=1024,
-            num_inference_steps=50,
+            num_inference_steps=self.steps,
             max_sequence_length=1024,
             cfg_range=(0.0, 1.0),
             num_images_per_prompt=1,
@@ -119,8 +124,16 @@ class OmniGen2Generator(BaseGenerator):
             output_type="pil",
         )
 
+    # OmniGen2's image_index_embedding has 5 slots -> at most 5 reference images.
+    MAX_REFS = 5
+
     def generate(self, prompt: str, refs: list[Image.Image], seed: int = 0) -> Image.Image:
         refs = [ImageOps.exif_transpose(image.convert("RGB")) for image in refs]
+        if len(refs) > self.MAX_REFS:
+            raise ValueError(
+                f"OmniGen2 supports at most {self.MAX_REFS} reference images, "
+                f"got {len(refs)}; this task exceeds the base model's capacity."
+            )
         gen = self.torch.Generator(
             device="cuda" if self.torch.cuda.is_available() else "cpu"
         ).manual_seed(int(seed))

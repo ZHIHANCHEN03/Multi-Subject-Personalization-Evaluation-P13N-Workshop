@@ -24,10 +24,17 @@ from actions import CalibratedRouter, RawRouter, apply_action
 from generators import build_generator
 
 
-def make_method(critic, generator, router, n_init: int, k_steps: int):
+def make_method(critic, generator, router, n_init: int, k_steps: int, action_mode: str = "both", seed_offset: int = 0):
     total_eps = float(os.environ.get("MIE_TOTAL_EPS", "0.0"))
     dim_eps = float(os.environ.get("MIE_DIM_EPS", "0.0"))
     collateral_tol = float(os.environ.get("MIE_COLLATERAL_TOL", "0.05"))
+    # Only correct when the worst standardized deficit is meaningfully large;
+    # small deficits mean the image is essentially fine -> leave it (fixes
+    # easy-case regression where tinkering hurt already-good outputs).
+    deficit_min = float(os.environ.get("OURS_DEFICIT_MIN", "0.75"))
+    # Per correction step, propose several candidates (seed diversity) and let
+    # MIE pick the best -> directed mini-search instead of a single blind edit.
+    proposals = int(os.environ.get("OURS_PROPOSALS", "2"))
 
     def method(task: common.Task):
         base_refs = task.load_refs()
@@ -41,7 +48,7 @@ def make_method(critic, generator, router, n_init: int, k_steps: int):
                 f"candidate={s+1}/{n_init} action=generate",
                 flush=True,
             )
-            img = generator.generate(base_prompt, base_refs, seed=s)
+            img = generator.generate(base_prompt, base_refs, seed=seed_offset + s)
             sc = critic.score(img, task)
             print(
                 f"[OURS][{task.task_id}] phase=initialization "
@@ -61,31 +68,36 @@ def make_method(critic, generator, router, n_init: int, k_steps: int):
         # ---- correction steps ----
         for step in range(k_steps):
             dim, before_deficits = router.route(best_score, task.num_subjects)
-            if max(before_deficits.values()) <= 0:
+            # Trigger gate: only correct when the worst deficit is large enough.
+            if max(before_deficits.values()) <= deficit_min:
                 print(
                     f"[OURS][{task.task_id}] phase=correction step={step+1}/{k_steps} "
-                    "action=early_stop reason=all_dims_above_norm",
+                    f"action=early_stop reason=worst_deficit<={deficit_min}",
                     flush=True,
                 )
                 log.append(
-                    {
-                        "step": step,
-                        "stopped": "all dimensions at/above calibrated norm",
-                        "deficits": before_deficits,
-                    }
+                    {"step": step, "stopped": f"worst_deficit<={deficit_min}",
+                     "deficits": before_deficits}
                 )
                 break
             new_prompt, new_refs, action = apply_action(
-                task, cur_prompt, base_refs, dim, step
+                task, cur_prompt, base_refs, dim, step, action_mode=action_mode
             )
             print(
                 f"[OURS][{task.task_id}] phase=correction step={step+1}/{k_steps} "
-                f"route={dim} deficits={before_deficits} action={action}",
+                f"route={dim} deficits={before_deficits} action={action} "
+                f"proposals={proposals}",
                 flush=True,
             )
-            img = generator.generate(new_prompt, new_refs, seed=1000 + step)
-            gen_calls += 1
-            sc = critic.score(img, task)
+            # Multi-proposal: MIE picks the best candidate for this diagnosed edit.
+            cand_img, cand_sc = None, None
+            for p in range(proposals):
+                img_p = generator.generate(new_prompt, new_refs, seed=seed_offset + 1000 + step * 10 + p)
+                gen_calls += 1
+                sc_p = critic.score(img_p, task)
+                if cand_sc is None or sc_p["total"] > cand_sc["total"]:
+                    cand_img, cand_sc = img_p, sc_p
+            sc = cand_sc
             _, after_deficits = router.route(sc, task.num_subjects)
             total_improved = sc["total"] > best_score["total"] + total_eps
             target_improved = sc[dim] > best_score[dim] + dim_eps
@@ -121,7 +133,7 @@ def make_method(critic, generator, router, n_init: int, k_steps: int):
                 }
             )
             if improved:
-                best_img, best_score = img, sc
+                best_img, best_score = cand_img, sc
                 cur_prompt = new_prompt
                 accepted += 1
             else:
@@ -158,12 +170,20 @@ def main():
     )
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--no_scr", action="store_true")
+    ap.add_argument("--routing", default="calibrated", choices=["calibrated", "raw"],
+                    help="ablation: calibrated deficit routing vs raw-argmin (lowest score)")
+    ap.add_argument("--action", default="both", choices=["both", "prompt_only"],
+                    help="ablation: prompt+reference-set vs prompt-only")
+    ap.add_argument("--seed_offset", type=int, default=0,
+                    help="shift all generation seeds (for multi-seed Round-2 runs)")
     args = ap.parse_args()
 
     tasks = common.load_tasks(args.data, limit=args.limit)
     critic = common.build_critic()
     generator = build_generator(args.generator)
-    if Path(args.calibration).exists():
+    if args.routing == "raw":
+        router = RawRouter()
+    elif Path(args.calibration).exists():
         router = CalibratedRouter(args.calibration)
     elif args.generator == "mock":
         print("[ours] calibration missing in mock mode; using raw router")
@@ -173,7 +193,8 @@ def main():
             f"frozen MIE calibration missing: {args.calibration}"
         )
     scorer = None if args.no_scr else common.DinoScorer()
-    method = make_method(critic, generator, router, args.n_init, args.k)
+    method = make_method(critic, generator, router, args.n_init, args.k,
+                         action_mode=args.action, seed_offset=args.seed_offset)
     common.run_over_dataset(args.name, method, tasks, scorer)
 
 
