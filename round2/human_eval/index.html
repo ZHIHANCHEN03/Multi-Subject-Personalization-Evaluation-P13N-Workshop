@@ -110,7 +110,7 @@
   <div id="summary">
     <h2>结果汇总 <span class="sub">(你自己的判定分布,揭盲需交回 JSON 后由组织者用 key.json 做)</span></h2>
     <div id="sumBody"></div>
-    <p class="sub">导出的 JSON 含每题 Q1/Q2 选择 + 此汇总,交回给我合并即可。</p>
+    <p class="sub">导出的 JSON 含每题 Q1/Q2/Q3/Q4 选择 + 此汇总,交回给我合并即可。</p>
   </div>
 </div>
 
@@ -159,8 +159,15 @@ function render(){
   document.getElementById("progbar").style.width=(100*d/Math.max(1,M.length))+"%";
 }
 
+function needName(){
+  if(reviewer()) return true;
+  alert("请先在左上角填写你的名字/工号,再开始判。");
+  document.getElementById("rev").focus();
+  return false;
+}
 function choose(q,val){
   if(idx>=M.length) return;
+  if(!needName()) return;
   const p=M[idx];
   if(!votes[p.pair_id]) votes[p.pair_id]={q1:null,q2:null,q3:null,q4:null,comparison:p.comparison,pair_id:p.pair_id};
   votes[p.pair_id][q]=val; save(); render();
@@ -173,7 +180,7 @@ function advance(){
   idx=n; render();
 }
 function prev(){if(idx>0){idx--;render();}}
-function skip(){idx++;render();}
+function skip(){if(!needName())return;idx++;render();}
 
 function wilson(k,n,z=1.96){if(!n)return[0,0];const p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return[Math.max(0,c-h),Math.min(1,c+h)];}
 function computeSummary(){
@@ -228,13 +235,17 @@ function exportJSON(){
 
 const revEl=document.getElementById("rev");
 revEl.value=localStorage.getItem(V+"_rev")||"";
-revEl.oninput=()=>{localStorage.setItem(V+"_rev",revEl.value);load();render();};
-document.querySelectorAll(".qrow .opts button").forEach(b=>b.onclick=()=>choose(b.dataset.q,b.dataset.v));
-document.getElementById("btnPrev").onclick=prev;
-document.getElementById("btnSkip").onclick=skip;
-document.getElementById("btnSummary").onclick=showSummary;
-document.getElementById("btnExport").onclick=exportJSON;
-document.getElementById("btnReset").onclick=()=>{if(confirm("清空当前用户的所有判定?")){votes={};save();idx=0;render();}};
+revEl.oninput=()=>{
+  localStorage.setItem(V+"_rev",revEl.value);
+  if(Object.keys(votes).length===0) load();
+  render();
+};
+document.querySelectorAll(".qrow .opts button").forEach(b=>b.onclick=()=>{choose(b.dataset.q,b.dataset.v);b.blur();});
+document.getElementById("btnPrev").onclick=()=>{prev();document.getElementById("btnPrev").blur();};
+document.getElementById("btnSkip").onclick=()=>{skip();document.getElementById("btnSkip").blur();};
+document.getElementById("btnSummary").onclick=()=>{showSummary();document.getElementById("btnSummary").blur();};
+document.getElementById("btnExport").onclick=()=>{exportJSON();document.getElementById("btnExport").blur();};
+document.getElementById("btnReset").onclick=()=>{if(confirm("清空当前用户的所有判定?")){votes={};save();idx=0;render();}document.getElementById("btnReset").blur();};
 document.addEventListener("keydown",e=>{
   if(e.target.tagName==="INPUT")return;
   const k=e.key;
