@@ -15,9 +15,13 @@ interaction prompts, then export their votes as JSON for aggregation.
    - the **reference subjects** (the images identities should be judged against),
    - a **LEFT | RIGHT** composite of two generated images (which side is ours
      is randomized and hidden).
-5. Answer two forced-binary questions (no ties):
-   - **Q1 (identity):** Which side better preserves the identity of ALL referenced subjects?
-   - **Q2 (overall):** Which side has better overall image quality?
+5. Answer four questions per pair (each: 左 / 右 / 平):
+   - **Q1 存在性:** 哪边所有点名主体都出现了(少一个 = 另一边;都全/都缺 = 平)
+   - **Q2 身份/外观:** 哪边主体外观更匹配参考图(脸/服饰/辨识特征)
+   - **Q3 交互:** 哪边的交互/动作/空间关系更符合 prompt
+   - **Q4 整体质量:** 哪边整体画面更好(构图/清晰度/伪影/美观度)
+   快捷键:Q1 `1/2/3` · Q2 `4/5/6` · Q3 `7/8/9` · Q4 `0/-/=` · `B` 上一题 · `Space` 跳过 · `Enter` 下一题。
+   维度对齐 MIE 的 E/A/I + overall,方便跟 MIE 分维度分对照。
 6. Use **Next →** to advance (disabled until both Q1 and Q2 are answered).
    Progress is saved in the browser's localStorage, so you can close and resume.
 7. When done (or any time), click **Export votes JSON** → downloads `votes_<yourID>.json`.
@@ -80,6 +84,6 @@ supplementary so reviewers can verify the sampling was pre-registered.
 - **Comparisons**: `ours_v2_s0` vs `umo_s0` + `ours_v2_s0` vs `best_of_n_s0` (the two core claims).
 - **Slice**: `num_subjects=4` (hard_4, the pre-declared main battlefield where the claim lives).
 - **Per comparison**: 100 pairs → 200 pairs total.
-- **Questions**: 2 (identity + overall), forced binary (no tie).
-- **Labelers**: 3, majority vote, Fleiss' κ reported.
+- **Questions**: 4 (存在/身份/交互/整体), each 左/右/平 — aligned with MIE E/A/I + overall.
+- **Labelers**: 3, majority vote (ties excluded from win-rate), Fleiss' κ reported.
 - **Seed**: 0 (fixed). Change `--seed` only for a new, separately-pre-registered sample.

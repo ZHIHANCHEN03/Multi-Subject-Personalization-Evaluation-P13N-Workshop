@@ -1,182 +1,253 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh">
 <head>
 <meta charset="utf-8">
-<title>Multi-Subject Human Eval (Blind A/B)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-Subject 盲判 — Identity / Overall</title>
 <style>
-  * { box-sizing: border-box; }
-  body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-         margin: 0; padding: 0; background: #f4f5f7; color: #1c1e21; }
-  #wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 80px; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  .sub { color: #65676b; font-size: 13px; margin-bottom: 18px; }
-  #setup { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 18px; }
-  #setup label { font-weight: 600; display: block; margin-bottom: 6px; }
-  #setup input { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; width: 260px; font-size: 14px; }
-  #setup button, .nav button, .q button { cursor: pointer; border: none; border-radius: 8px;
-         padding: 10px 18px; font-size: 14px; font-weight: 600; }
-  #startBtn { background: #1877f2; color: #fff; }
-  #startBtn:hover { background: #166fe0; }
-  .progress { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 13px; color: #65676b; }
-  .bar { flex: 1; height: 8px; background: #e4e6eb; border-radius: 5px; overflow: hidden; }
-  .bar > div { height: 100%; background: #1877f2; width: 0%; transition: width .2s; }
-  #pair { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 18px; }
-  .prompt { background: #f0f2f5; padding: 10px 12px; border-radius: 8px; font-size: 14px;
-            margin-bottom: 14px; line-height: 1.45; }
-  .prompt b { color: #1877f2; }
-  .refs { margin-bottom: 14px; }
-  .refs img { max-width: 100%; border: 1px solid #eee; border-radius: 8px; }
-  .pairimg { width: 100%; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 14px; }
-  .q { margin-bottom: 14px; }
-  .q .qlabel { font-weight: 600; margin-bottom: 8px; display: block; font-size: 14px; }
-  .q .qlabel .hint { color: #65676b; font-weight: 400; font-size: 12px; }
-  .q button { background: #e4e6eb; color: #1c1e21; margin-right: 8px; min-width: 110px; }
-  .q button.chosen { background: #1877f2; color: #fff; }
-  .q button:hover { background: #d8dadf; }
-  .q button.chosen:hover { background: #166fe0; }
-  .nav { margin-top: 18px; display: flex; gap: 10px; justify-content: space-between; }
-  .nav .right { display: flex; gap: 10px; }
-  #prevBtn { background: #e4e6eb; }
-  #nextBtn { background: #42b72a; color: #fff; }
-  #nextBtn:disabled { background: #cfd2d6; color: #fff; cursor: not-allowed; }
-  #exportBtn { background: #1877f2; color: #fff; }
-  .done { text-align: center; padding: 40px; }
-  .done h2 { color: #42b72a; }
-  .hidden { display: none; }
-  .warn { color: #b00020; font-size: 12px; margin-top: 4px; }
+  :root{ --bg:#0f1115; --panel:#171a21; --line:#2a2f3a; --fg:#e7e9ee; --mut:#9aa3b2;
+         --accent:#4f8cff; --good:#37c871; --warn:#f0a63a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft Yahei",sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+         padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header .title{font-weight:700}
+  .bar{flex:1;min-width:140px;height:8px;background:#0b0d11;border-radius:6px;overflow:hidden}
+  .bar>div{height:100%;background:var(--accent);width:0%}
+  .muted{color:var(--mut)}
+  button{font:inherit;color:var(--fg);background:#222733;border:1px solid var(--line);
+          border-radius:8px;padding:7px 12px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.ghost{background:transparent}
+  input{background:#0b0d11;border:1px solid var(--line);border-radius:8px;color:var(--fg);
+        padding:6px 10px;font:inherit}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+  .prompt{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+  .prompt .p{font-size:16px}
+  .badge{display:inline-block;background:#243044;color:#bcd2ff;border-radius:20px;padding:1px 10px;font-size:12px;margin-left:8px}
+  .refs{margin:10px 0}
+  .refs img{max-width:100%;border:1px solid var(--line);border-radius:8px}
+  .pairimg{width:100%;border:2px solid var(--line);border-radius:12px;margin-bottom:12px;background:#000}
+  .qrow{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .qrow .ql{font-weight:600;margin-bottom:8px;display:block}
+  .qrow .ql .hint{color:var(--mut);font-weight:400;font-size:12px}
+  .qrow .opts{display:flex;gap:10px;flex-wrap:wrap}
+  .qrow .opts button{min-width:120px}
+  .qrow .opts button.chosen{background:var(--good);color:#06210f;border-color:var(--good);font-weight:700}
+  .center{display:flex;gap:10px;justify-content:center;margin:14px 0;flex-wrap:wrap}
+  .hint{color:var(--mut);font-size:12.5px;text-align:center;margin-top:6px}
+  kbd{background:#0b0d11;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;font-size:12px}
+  #summary{display:none}
+  table{border-collapse:collapse;width:100%;margin-top:10px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:center}
+  th{background:#1c2129;color:var(--mut);font-weight:600}
+  .win{color:var(--good);font-weight:700}
+  .sub{color:var(--mut);font-size:13px}
 </style>
 </head>
 <body>
-<div id="wrap">
-  <h1>Multi-Subject Image Generation — Blind A/B Evaluation</h1>
-  <div class="sub">For each pair, you see two generated images (LEFT and RIGHT) and the reference subjects.
-  Pick which side better preserves identities / has better quality. Your answers are saved locally;
-  export a JSON file when done (or any time).</div>
+<header>
+  <span class="title">Multi-Subject 盲判</span>
+  <input id="rev" placeholder="你的名字/工号(必填)" autocomplete="off" style="width:160px">
+  <span id="prog" class="muted">0 / 0</span>
+  <div class="bar"><div id="progbar"></div></div>
+  <button class="ghost" id="btnPrev">← 上一题</button>
+  <button class="ghost" id="btnSummary">看结果</button>
+  <button id="btnExport">导出 JSON</button>
+  <button class="ghost" id="btnReset">重置</button>
+</header>
 
-  <div id="setup">
-    <label for="labeler">Your labeler ID (initials or name):</label>
-    <input id="labeler" placeholder="e.g. AB" autocomplete="off">
-    <div style="margin-top:12px"><button id="startBtn">Start labeling</button></div>
-    <div class="warn hidden" id="setupWarn">Please enter a labeler ID first.</div>
-  </div>
-
-  <div id="main" class="hidden">
-    <div class="progress">
-      <span id="counter">0 / 0</span>
-      <div class="bar"><div id="barFill"></div></div>
-      <span id="savedNote" style="color:#42b72a"></span>
+<div class="wrap">
+  <div id="judge">
+    <div class="prompt">
+      <div class="p"><span id="pPrompt"></span><span class="badge" id="pCmp"></span><span class="badge" id="pIdx"></span></div>
+      <div class="refs" id="pRefs"></div>
     </div>
-    <div id="pair"></div>
-    <div class="nav">
-      <button id="prevBtn">← Prev</button>
-      <div class="right">
-        <button id="exportBtn">Export votes JSON</button>
-        <button id="nextBtn">Next →</button>
+    <img class="pairimg" id="pImg" alt="pair">
+    <div class="qrow" id="q1box">
+      <span class="ql">Q1. 存在性 — 哪边<b>所有点名主体都出现</b>了？
+        <span class="hint">(少一个主体 = 另一边赢;都全/都缺 = 平)</span></span>
+      <div class="opts">
+        <button data-q="q1" data-v="LEFT">◀ 左　<span class="sub">1</span></button>
+        <button data-q="q1" data-v="RIGHT">右 ▶　<span class="sub">2</span></button>
+        <button data-q="q1" data-v="TIE">平局　<span class="sub">3</span></button>
       </div>
     </div>
+    <div class="qrow" id="q2box">
+      <span class="ql">Q2. 身份/外观 — 哪边主体外观更匹配参考图？
+        <span class="hint">(脸 / 服饰 / 辨识特征;都匹配或都跑偏 = 平)</span></span>
+      <div class="opts">
+        <button data-q="q2" data-v="LEFT">◀ 左　<span class="sub">4</span></button>
+        <button data-q="q2" data-v="RIGHT">右 ▶　<span class="sub">5</span></button>
+        <button data-q="q2" data-v="TIE">平局　<span class="sub">6</span></button>
+      </div>
+    </div>
+    <div class="qrow" id="q3box">
+      <span class="ql">Q3. 交互 — 哪边的交互/动作/空间关系更符合 prompt？
+        <span class="hint">(谁面向谁 / 谁拿什么 / 谁在谁前面;都符合或都不符 = 平)</span></span>
+      <div class="opts">
+        <button data-q="q3" data-v="LEFT">◀ 左　<span class="sub">7</span></button>
+        <button data-q="q3" data-v="RIGHT">右 ▶　<span class="sub">8</span></button>
+        <button data-q="q3" data-v="TIE">平局　<span class="sub">9</span></button>
+      </div>
+    </div>
+    <div class="qrow" id="q4box">
+      <span class="ql">Q4. 整体质量 — 哪边整体画面更好？
+        <span class="hint">(构图 / 清晰度 / 伪影 / 美观度;差不多 = 平)</span></span>
+      <div class="opts">
+        <button data-q="q4" data-v="LEFT">◀ 左　<span class="sub">0</span></button>
+        <button data-q="q4" data-v="RIGHT">右 ▶　<span class="sub">-</span></button>
+        <button data-q="q4" data-v="TIE">平局　<span class="sub">=</span></button>
+      </div>
+    </div>
+    <div class="center">
+      <button class="ghost" id="btnSkip">跳过本题　<kbd>Space</kbd></button>
+    </div>
+    <div class="hint">快捷键:Q1 <kbd>1</kbd>左 <kbd>2</kbd>右 <kbd>3</kbd>平 · Q2 <kbd>4</kbd>左 <kbd>5</kbd>右 <kbd>6</kbd>平 · Q3 <kbd>7</kbd>左 <kbd>8</kbd>右 <kbd>9</kbd>平 · Q4 <kbd>0</kbd>左 <kbd>-</kbd>右 <kbd>=</kbd>平 · <kbd>B</kbd>上一题 · <kbd>Space</kbd>跳过 · <kbd>Enter</kbd>下一题</div>
   </div>
 
-  <div id="doneBox" class="done hidden">
-    <h2>✓ All pairs labeled!</h2>
-    <p>Click "Export votes JSON" to download your <code>votes_&lt;labeler&gt;.json</code>
-       and send it back.</p>
-    <button id="exportBtn2" class="exportBtn">Export votes JSON</button>
+  <div id="summary">
+    <h2>结果汇总 <span class="sub">(你自己的判定分布,揭盲需交回 JSON 后由组织者用 key.json 做)</span></h2>
+    <div id="sumBody"></div>
+    <p class="sub">导出的 JSON 含每题 Q1/Q2 选择 + 此汇总,交回给我合并即可。</p>
   </div>
 </div>
 
 <script src="manifest.js"></script>
 <script>
-(function(){
-  "use strict";
-  const M = window.MANIFEST || [];
-  const LS_KEY = "misc_human_eval_votes_v1";
-  let labeler = "";
-  let idx = 0;
-  let votes = {};  // pair_id -> {q1:"LEFT"/"RIGHT", q2:..., comparison, task_id}
+"use strict";
+const V="misc_human_eval_v2";
+const M=window.MANIFEST||[];
 
-  const $ = id => document.getElementById(id);
-  $("startBtn").onclick = () => {
-    labeler = $("labeler").value.trim();
-    if (!labeler) { $("setupWarn").classList.remove("hidden"); return; }
-    $("setup").classList.add("hidden");
-    $("main").classList.remove("hidden");
-    loadProgress();
-    render();
-  };
+function reviewer(){return (document.getElementById("rev").value||"").trim();}
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9_-]+/g,"_").replace(/^_+|_+$/g,"")||"anon";}
+function escapeHtml(s){return (s||"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-  function loadProgress(){
-    try {
-      const raw = localStorage.getItem(LS_KEY + ":" + labeler);
-      if (raw) votes = JSON.parse(raw);
-    } catch(e){ votes = {}; }
-  }
-  function saveProgress(){
-    try { localStorage.setItem(LS_KEY + ":" + labeler, JSON.stringify(votes)); } catch(e){}
-    const s = $("savedNote"); s.textContent = "saved"; setTimeout(()=>{ if(s) s.textContent=""; }, 1200);
-  }
+let votes={}; // pair_id -> {q1,q2,comparison,pair_id}
+let idx=0;
 
-  function render(){
-    if (idx < 0) idx = 0;
-    if (idx >= M.length) { showDone(); return; }
-    const p = M[idx];
-    const v = votes[p.pair_id] || {q1:null, q2:null};
-    let refsHtml = p.refs ? `<div class="refs"><div class="qlabel">Reference subjects (judge identity against these):</div><img src="${p.refs}"></div>` : "";
-    $("pair").innerHTML = `
-      <div class="prompt"><b>Prompt:</b> ${escapeHtml(p.prompt || "(no prompt)")}</div>
-      ${refsHtml}
-      <img class="pairimg" src="${p.image}" alt="pair">
-      <div class="q">
-        <span class="qlabel">Q1. Which side better preserves the <b>identity</b> of ALL referenced subjects?
-          <span class="hint">(face / appearance / distinguishing features — pick one, no tie)</span></span>
-        <button data-q="q1" data-v="LEFT" class="${v.q1==='LEFT'?'chosen':''}">LEFT</button>
-        <button data-q="q1" data-v="RIGHT" class="${v.q1==='RIGHT'?'chosen':''}">RIGHT</button>
-      </div>
-      <div class="q">
-        <span class="qlabel">Q2. Which side has better <b>overall image quality</b>?
-          <span class="hint">(composition / interaction realism / artifacts — pick one, no tie)</span></span>
-        <button data-q="q2" data-v="LEFT" class="${v.q2==='LEFT'?'chosen':''}">LEFT</button>
-        <button data-q="q2" data-v="RIGHT" class="${v.q2==='RIGHT'?'chosen':''}">RIGHT</button>
-      </div>`;
-    // attach vote handlers
-    document.querySelectorAll(".q button").forEach(btn => {
-      btn.onclick = () => {
-        const q = btn.getAttribute("data-q"), val = btn.getAttribute("data-v");
-        if (!votes[p.pair_id]) votes[p.pair_id] = {q1:null, q2:null};
-        votes[p.pair_id][q] = val;
-        votes[p.pair_id].comparison = p.comparison;
-        votes[p.pair_id].pair_id = p.pair_id;
-        saveProgress();
-        render();
-      };
+function load(){
+  const rev=reviewer();
+  if(!rev) return;
+  try{const raw=localStorage.getItem(V+":"+rev); if(raw) votes=JSON.parse(raw);}catch(e){votes={}}
+}
+function save(){
+  const rev=reviewer(); if(!rev) return;
+  try{localStorage.setItem(V+":"+rev, JSON.stringify(votes));}catch(e){}
+}
+function done(){return Object.keys(votes).filter(k=>{const v=votes[k];return v&&["LEFT","RIGHT","TIE"].includes(v.q1)&&["LEFT","RIGHT","TIE"].includes(v.q2)&&["LEFT","RIGHT","TIE"].includes(v.q3)&&["LEFT","RIGHT","TIE"].includes(v.q4);}).length;}
+
+function render(){
+  if(idx>=M.length){showSummary();return;}
+  if(idx<0) idx=0;
+  document.getElementById("judge").style.display="";
+  document.getElementById("summary").style.display="none";
+  const p=M[idx], v=votes[p.pair_id]||{q1:null,q2:null,q3:null,q4:null};
+  document.getElementById("pPrompt").textContent=p.prompt||"(no prompt)";
+  document.getElementById("pCmp").textContent="cmp: "+(p.comparison||"?");
+  document.getElementById("pIdx").textContent=(idx+1)+" / "+M.length+(v.q1?"  已答":"");
+  const refs=document.getElementById("pRefs");
+  refs.innerHTML = p.refs ? '<img src="'+p.refs+'">' : "";
+  document.getElementById("pImg").src=p.image;
+  document.querySelectorAll(".qrow .opts button").forEach(b=>{
+    const q=b.dataset.q, vv=b.dataset.v;
+    b.classList.toggle("chosen", v[q]===vv);
+  });
+  const d=done();
+  document.getElementById("prog").textContent=d+" / "+M.length;
+  document.getElementById("progbar").style.width=(100*d/Math.max(1,M.length))+"%";
+}
+
+function choose(q,val){
+  if(idx>=M.length) return;
+  const p=M[idx];
+  if(!votes[p.pair_id]) votes[p.pair_id]={q1:null,q2:null,q3:null,q4:null,comparison:p.comparison,pair_id:p.pair_id};
+  votes[p.pair_id][q]=val; save(); render();
+  const v=votes[p.pair_id];
+  if(v.q1&&v.q2&&v.q3&&v.q4) advance();
+}
+function advance(){
+  let n=idx+1;
+  while(n<M.length){const v=votes[M[n].pair_id]; if(!(v&&v.q1&&v.q2&&v.q3&&v.q4)) break; n++;}
+  idx=n; render();
+}
+function prev(){if(idx>0){idx--;render();}}
+function skip(){idx++;render();}
+
+function wilson(k,n,z=1.96){if(!n)return[0,0];const p=k/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return[Math.max(0,c-h),Math.min(1,c+h)];}
+function computeSummary(){
+  const QS=["q1","q2","q3","q4"];
+  const QL={q1:"存在",q2:"身份",q3:"交互",q4:"整体"};
+  const byCmp={};
+  for(const p of M){
+    const v=votes[p.pair_id]; if(!v) continue;
+    const c=p.comparison||"?";
+    if(!byCmp[c]) byCmp[c]={};
+    QS.forEach(q=>{
+      if(!byCmp[c][q]) byCmp[c][q]={L:0,R:0,T:0};
+      if(v[q]==="LEFT")byCmp[c][q].L++;
+      else if(v[q]==="RIGHT")byCmp[c][q].R++;
+      else if(v[q]==="TIE")byCmp[c][q].T++;
     });
-    $("counter").textContent = `${idx+1} / ${M.length}`;
-    $("barFill").style.width = ((idx+1)/M.length*100) + "%";
-    const cur = votes[p.pair_id];
-    $("nextBtn").disabled = !(cur && cur.q1 && cur.q2);
-    $("nextBtn").textContent = idx === M.length-1 ? "Finish" : "Next →";
   }
-
-  $("prevBtn").onclick = () => { idx--; render(); };
-  $("nextBtn").onclick = () => { idx++; render(); };
-  $("exportBtn").onclick = exportJson;
-  $("exportBtn2").onclick = exportJson;
-
-  function showDone(){
-    $("main").classList.add("hidden");
-    $("doneBox").classList.remove("hidden");
+  return {answered:done(),total:M.length,byCmp};
+}
+function showSummary(){
+  document.getElementById("judge").style.display="none";
+  document.getElementById("summary").style.display="";
+  const s=computeSummary();
+  const QS=["q1","q2","q3","q4"];
+  const QL={q1:"存在",q2:"身份",q3:"交互",q4:"整体"};
+  let html='<p class="sub">已答 '+s.answered+' / '+s.total+'</p>';
+  for(const c of Object.keys(s.byCmp).sort()){
+    html+='<h3>对比: '+c+'</h3><table><tr><th>维度</th><th>左</th><th>右</th><th>平</th><th>左率(非平)</th></tr>';
+    QS.forEach(q=>{
+      const d=s.byCmp[c][q]; const n=d.L+d.R;
+      const [lo,hi]=wilson(d.L,n);
+      html+='<tr><td>'+QL[q]+'</td><td>'+d.L+'</td><td>'+d.R+'</td><td>'+d.T+'</td>'+
+        '<td>'+(n?(d.L/n).toFixed(2)+' <span class="sub">['+lo.toFixed(2)+','+hi.toFixed(2)+']</span>':'—')+'</td></tr>';
+    });
+    html+='</table>';
   }
+  html+='<p class="sub" style="margin-top:10px">注:左右是盲的,这里只看你自己有没有系统性偏向左边。揭盲后组织者用 key.json 算 ours 的真实胜率(平局不计入胜率)。</p>';
+  document.getElementById("sumBody").innerHTML=html;
+  window.__summary=s;
+}
+function exportJSON(){
+  const rev=reviewer();
+  if(!rev){alert("请先在左上角填写你的名字/工号,再导出。");document.getElementById("rev").focus();return;}
+  const d=done();
+  if(d<M.length && !confirm("还有 "+(M.length-d)+" 题未答,确定现在导出?")) return;
+  const s=window.__summary||computeSummary();
+  const out={labeler:rev, n_pairs:M.length, n_voted:d, votes:votes, summary:s};
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="votes_"+slug(rev)+".json";a.click();
+}
 
-  function exportJson(){
-    const out = { labeler: labeler, n_pairs: M.length, n_voted: Object.keys(votes).length, votes: votes };
-    const blob = new Blob([JSON.stringify(out, null, 2)], {type:"application/json"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `votes_${labeler}.json`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  }
-
-  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-})();
+const revEl=document.getElementById("rev");
+revEl.value=localStorage.getItem(V+"_rev")||"";
+revEl.oninput=()=>{localStorage.setItem(V+"_rev",revEl.value);load();render();};
+document.querySelectorAll(".qrow .opts button").forEach(b=>b.onclick=()=>choose(b.dataset.q,b.dataset.v));
+document.getElementById("btnPrev").onclick=prev;
+document.getElementById("btnSkip").onclick=skip;
+document.getElementById("btnSummary").onclick=showSummary;
+document.getElementById("btnExport").onclick=exportJSON;
+document.getElementById("btnReset").onclick=()=>{if(confirm("清空当前用户的所有判定?")){votes={};save();idx=0;render();}};
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  const k=e.key;
+  const map={"1":["q1","LEFT"],"2":["q1","RIGHT"],"3":["q1","TIE"],
+             "4":["q2","LEFT"],"5":["q2","RIGHT"],"6":["q2","TIE"],
+             "7":["q3","LEFT"],"8":["q3","RIGHT"],"9":["q3","TIE"],
+             "0":["q4","LEFT"],"-":["q4","RIGHT"],"=":["q4","TIE"]};
+  if(map[k]){e.preventDefault();choose(map[k][0],map[k][1]);}
+  else if(k.toLowerCase()==="b")prev();
+  else if(k===" "){e.preventDefault();skip();}
+  else if(k==="Enter"){e.preventDefault();advance();}
+});
+load();render();
 </script>
 </body>
 </html>
