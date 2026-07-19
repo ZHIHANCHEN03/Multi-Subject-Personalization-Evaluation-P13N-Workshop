@@ -11,6 +11,8 @@ __pycache__/
 .venvs/
 models/
 external/
+.hf_cache/
+*.log
 round1/.cache/
 round1/results/
 round1_1/trials/
@@ -18,5 +20,10 @@ round1_1/*.log
 round2/.cache/
 round2/results/
 round2/results_r2/
+# human-eval generated artifacts (regenerable from results; key is sensitive)
 round2/human_eval/pairs/
+round2/human_eval/manifest.js
+round2/human_eval/ballot.csv
+round2/human_eval.zip
+round2/human_eval_key.json
 refs_papers/

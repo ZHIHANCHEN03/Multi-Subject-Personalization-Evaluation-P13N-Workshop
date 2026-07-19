@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Multi-Subject Human Eval (Blind A/B)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         margin: 0; padding: 0; background: #f4f5f7; color: #1c1e21; }
+  #wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #65676b; font-size: 13px; margin-bottom: 18px; }
+  #setup { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 18px; }
+  #setup label { font-weight: 600; display: block; margin-bottom: 6px; }
+  #setup input { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; width: 260px; font-size: 14px; }
+  #setup button, .nav button, .q button { cursor: pointer; border: none; border-radius: 8px;
+         padding: 10px 18px; font-size: 14px; font-weight: 600; }
+  #startBtn { background: #1877f2; color: #fff; }
+  #startBtn:hover { background: #166fe0; }
+  .progress { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 13px; color: #65676b; }
+  .bar { flex: 1; height: 8px; background: #e4e6eb; border-radius: 5px; overflow: hidden; }
+  .bar > div { height: 100%; background: #1877f2; width: 0%; transition: width .2s; }
+  #pair { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 18px; }
+  .prompt { background: #f0f2f5; padding: 10px 12px; border-radius: 8px; font-size: 14px;
+            margin-bottom: 14px; line-height: 1.45; }
+  .prompt b { color: #1877f2; }
+  .refs { margin-bottom: 14px; }
+  .refs img { max-width: 100%; border: 1px solid #eee; border-radius: 8px; }
+  .pairimg { width: 100%; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 14px; }
+  .q { margin-bottom: 14px; }
+  .q .qlabel { font-weight: 600; margin-bottom: 8px; display: block; font-size: 14px; }
+  .q .qlabel .hint { color: #65676b; font-weight: 400; font-size: 12px; }
+  .q button { background: #e4e6eb; color: #1c1e21; margin-right: 8px; min-width: 110px; }
+  .q button.chosen { background: #1877f2; color: #fff; }
+  .q button:hover { background: #d8dadf; }
+  .q button.chosen:hover { background: #166fe0; }
+  .nav { margin-top: 18px; display: flex; gap: 10px; justify-content: space-between; }
+  .nav .right { display: flex; gap: 10px; }
+  #prevBtn { background: #e4e6eb; }
+  #nextBtn { background: #42b72a; color: #fff; }
+  #nextBtn:disabled { background: #cfd2d6; color: #fff; cursor: not-allowed; }
+  #exportBtn { background: #1877f2; color: #fff; }
+  .done { text-align: center; padding: 40px; }
+  .done h2 { color: #42b72a; }
+  .hidden { display: none; }
+  .warn { color: #b00020; font-size: 12px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Multi-Subject Image Generation — Blind A/B Evaluation</h1>
+  <div class="sub">For each pair, you see two generated images (LEFT and RIGHT) and the reference subjects.
+  Pick which side better preserves identities / has better quality. Your answers are saved locally;
+  export a JSON file when done (or any time).</div>
+
+  <div id="setup">
+    <label for="labeler">Your labeler ID (initials or name):</label>
+    <input id="labeler" placeholder="e.g. AB" autocomplete="off">
+    <div style="margin-top:12px"><button id="startBtn">Start labeling</button></div>
+    <div class="warn hidden" id="setupWarn">Please enter a labeler ID first.</div>
+  </div>
+
+  <div id="main" class="hidden">
+    <div class="progress">
+      <span id="counter">0 / 0</span>
+      <div class="bar"><div id="barFill"></div></div>
+      <span id="savedNote" style="color:#42b72a"></span>
+    </div>
+    <div id="pair"></div>
+    <div class="nav">
+      <button id="prevBtn">← Prev</button>
+      <div class="right">
+        <button id="exportBtn">Export votes JSON</button>
+        <button id="nextBtn">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="doneBox" class="done hidden">
+    <h2>✓ All pairs labeled!</h2>
+    <p>Click "Export votes JSON" to download your <code>votes_&lt;labeler&gt;.json</code>
+       and send it back.</p>
+    <button id="exportBtn2" class="exportBtn">Export votes JSON</button>
+  </div>
+</div>
+
+<script src="manifest.js"></script>
+<script>
+(function(){
+  "use strict";
+  const M = window.MANIFEST || [];
+  const LS_KEY = "misc_human_eval_votes_v1";
+  let labeler = "";
+  let idx = 0;
+  let votes = {};  // pair_id -> {q1:"LEFT"/"RIGHT", q2:..., comparison, task_id}
+
+  const $ = id => document.getElementById(id);
+  $("startBtn").onclick = () => {
+    labeler = $("labeler").value.trim();
+    if (!labeler) { $("setupWarn").classList.remove("hidden"); return; }
+    $("setup").classList.add("hidden");
+    $("main").classList.remove("hidden");
+    loadProgress();
+    render();
+  };
+
+  function loadProgress(){
+    try {
+      const raw = localStorage.getItem(LS_KEY + ":" + labeler);
+      if (raw) votes = JSON.parse(raw);
+    } catch(e){ votes = {}; }
+  }
+  function saveProgress(){
+    try { localStorage.setItem(LS_KEY + ":" + labeler, JSON.stringify(votes)); } catch(e){}
+    const s = $("savedNote"); s.textContent = "saved"; setTimeout(()=>{ if(s) s.textContent=""; }, 1200);
+  }
+
+  function render(){
+    if (idx < 0) idx = 0;
+    if (idx >= M.length) { showDone(); return; }
+    const p = M[idx];
+    const v = votes[p.pair_id] || {q1:null, q2:null};
+    let refsHtml = p.refs ? `<div class="refs"><div class="qlabel">Reference subjects (judge identity against these):</div><img src="${p.refs}"></div>` : "";
+    $("pair").innerHTML = `
+      <div class="prompt"><b>Prompt:</b> ${escapeHtml(p.prompt || "(no prompt)")}</div>
+      ${refsHtml}
+      <img class="pairimg" src="${p.image}" alt="pair">
+      <div class="q">
+        <span class="qlabel">Q1. Which side better preserves the <b>identity</b> of ALL referenced subjects?
+          <span class="hint">(face / appearance / distinguishing features — pick one, no tie)</span></span>
+        <button data-q="q1" data-v="LEFT" class="${v.q1==='LEFT'?'chosen':''}">LEFT</button>
+        <button data-q="q1" data-v="RIGHT" class="${v.q1==='RIGHT'?'chosen':''}">RIGHT</button>
+      </div>
+      <div class="q">
+        <span class="qlabel">Q2. Which side has better <b>overall image quality</b>?
+          <span class="hint">(composition / interaction realism / artifacts — pick one, no tie)</span></span>
+        <button data-q="q2" data-v="LEFT" class="${v.q2==='LEFT'?'chosen':''}">LEFT</button>
+        <button data-q="q2" data-v="RIGHT" class="${v.q2==='RIGHT'?'chosen':''}">RIGHT</button>
+      </div>`;
+    // attach vote handlers
+    document.querySelectorAll(".q button").forEach(btn => {
+      btn.onclick = () => {
+        const q = btn.getAttribute("data-q"), val = btn.getAttribute("data-v");
+        if (!votes[p.pair_id]) votes[p.pair_id] = {q1:null, q2:null};
+        votes[p.pair_id][q] = val;
+        votes[p.pair_id].comparison = p.comparison;
+        votes[p.pair_id].pair_id = p.pair_id;
+        saveProgress();
+        render();
+      };
+    });
+    $("counter").textContent = `${idx+1} / ${M.length}`;
+    $("barFill").style.width = ((idx+1)/M.length*100) + "%";
+    const cur = votes[p.pair_id];
+    $("nextBtn").disabled = !(cur && cur.q1 && cur.q2);
+    $("nextBtn").textContent = idx === M.length-1 ? "Finish" : "Next →";
+  }
+
+  $("prevBtn").onclick = () => { idx--; render(); };
+  $("nextBtn").onclick = () => { idx++; render(); };
+  $("exportBtn").onclick = exportJson;
+  $("exportBtn2").onclick = exportJson;
+
+  function showDone(){
+    $("main").classList.add("hidden");
+    $("doneBox").classList.remove("hidden");
+  }
+
+  function exportJson(){
+    const out = { labeler: labeler, n_pairs: M.length, n_voted: Object.keys(votes).length, votes: votes };
+    const blob = new Blob([JSON.stringify(out, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `votes_${labeler}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+})();
+</script>
+</body>
+</html>
