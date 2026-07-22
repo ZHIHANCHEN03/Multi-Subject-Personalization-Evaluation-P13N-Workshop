@@ -153,4 +153,7 @@ def build_generator(kind: str = "omnigen2") -> BaseGenerator:
                 str(local_model) if local_model.exists() else "OmniGen2/OmniGen2",
             )
         )
+    if kind in ("flux2", "flux.2"):
+        from external_generators import Flux2Generator
+        return Flux2Generator()
     raise ValueError(f"unknown generator: {kind}")
