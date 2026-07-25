@@ -29,5 +29,7 @@ round2/human_eval_key.json
 # UMO vs one-shot human-eval package (regenerable; 58MB tarball for distribution)
 round2/human_eval_umo_vs_oneshot/
 round2/human_eval_umo_vs_oneshot.tar.gz
+round2/human_eval_umo_vs_oneshot_forlabelers/
+round2/human_eval_umo_vs_oneshot_forlabelers.tar.gz
 refs_papers/
 eta_human_review/
