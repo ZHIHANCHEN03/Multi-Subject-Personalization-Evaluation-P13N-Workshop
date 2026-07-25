@@ -179,7 +179,7 @@ with a small tolerance $\tau$. This prevents the loop from trading one failure f
 
 \subsection{Algorithm}
 
-\begin{algorithm}[h]
+\begin{algorithm}[ht]
 \caption{MIDC inference (one task)}
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} prompt, refs $\{r_i\}$, generator $G$, verifier $V$, calibration $\{\mathrm{median}_d^{(n)}, \mathrm{scale}_d^{(n)}\}$, steps $K$, proposals $K_p$
@@ -190,7 +190,9 @@ with a small tolerance $\tau$. This prevents the loop from trading one failure f
   \STATE $\rho_i \leftarrow \mathrm{DINOv2Sim}(I, r_i)$; $i^\star \leftarrow \arg\min_i \rho_i$ \hfill // dual-signal diagnosis
   \STATE Sample actions $\mathcal{A}$ from portfolio conditioned on $d^\star$
   \STATE Generate $K_p$ proposals per action; pick best $I'$ by $V.\text{total}$
-  \IF{$\mathrm{accept}(I')$} $I \leftarrow I'$ \ENDIF
+  \IF{$\mathrm{accept}(I')$}
+    \STATE $I \leftarrow I'$
+  \ENDIF
 \ENDFOR
 \STATE \textbf{return} $I$
 \end{algorithmic}
@@ -217,7 +219,7 @@ with a small tolerance $\tau$. This prevents the loop from trading one failure f
 
 Table~\ref{tab:main} reports SCR and DINO on the 500-task OmniGen2 split over 3 seeds. MIDC achieves the lowest SCR and highest DINO on both difficulty slices.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \small
 \caption{OmniGen2, 3 seeds. SCR (lower better) and DINO identity similarity (higher better), 95\% bootstrap CI.}
@@ -250,7 +252,7 @@ UMO & 0.455 [0.441, 0.469] & 0.499 [0.483, 0.515] \\
 
 Table~\ref{tab:flux2} tests whether MIDC generalizes to a larger, distilled base model and whether gains hold or widen as subjects increase. On FLUX.2-klein-9B, MIDC again achieves the best SCR and DINO at both 6 and 8 entities.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \small
 \caption{FLUX.2-klein-9B, 3 seeds, n=100 tasks per cell. 95\% bootstrap CI.}
@@ -302,7 +304,7 @@ Two observations stand out. First, \textbf{collapse worsens with subject count}:
 
 Table~\ref{tab:ablation} ablates each MIDC component on the hard 4-entity OmniGen2 split over 2 seeds.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \small
 \caption{Ablation, OmniGen2 hard 4-entity, 2 seeds, n=100. SCR (lower better). $\Delta$ is relative to the full model.}
@@ -343,6 +345,5 @@ We introduced MIDC, a training-free, inference-time correction paradigm for mult
 \section*{Acknowledgments}
 Anonymized for submission.
 
-\bibliographystyle{aaai}
 \bibliography{refs}
 \end{document}
