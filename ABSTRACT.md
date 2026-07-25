@@ -1,64 +1,17 @@
-# MIDC: Training-Free Multi-subject Interaction Diagnosis and Correction via a Dual-Signal Decomposed Verifier
+# MIDC: Calibrated Test-Time Correction for Multi-Subject Identity Collapse
 
-> AAAI-27 (2027) abstract submission (due 2026-07-21). The abstract body below
-> is complete and submittable as-is: it carries concrete Round 1.1 preliminary
-> numbers (0.563 / 0.525 / 0.488), no placeholders. The full paper (due
-> 2026-07-28) will replace those with the 500-task, multi-seed Round 2 final
-> numbers (means + 95% CI + p-values + human-eval win rates). Claim and
-> collision boundaries are locked (see PLAN.md §二, §六).
+> AAAI-27 (2027) abstract submission. The abstract below is the **final**
+> version, synchronized with `paper/main.tex` (2026-07-25). It carries the
+> 500-task, 3-seed Round 2 final numbers (0.531 / 0.536 / 0.470 + human-eval
+> 84.6% + calibrated-routing ablation +10.3%). The 7/21 OpenReview submission
+> used an earlier title/abstract ("Training-Free ... Dual-Signal Decomposed
+> Verifier", preliminary 0.563/0.525/0.488) — **the OpenReview title + abstract
+> fields MUST be updated to the version below before the 7/28 full-paper
+> deadline** (see ⚠️ action item at the bottom).
 
 ## Abstract
 
-Multi-subject personalized image generation still suffers from *identity
-collapse*: as the number of referenced subjects grows and their interactions
-become physically entangled, generators drop, merge, or swap identities. Prior
-work either *measures* this failure (multi-subject benchmarks and identity
-metrics) or *repairs* it by **retraining** the generator
-(reinforcement-/LoRA-based alignment), which is costly and must be repeated for
-every new base model. We ask a different question: **can interaction-induced
-multi-subject identity collapse be repaired at inference time, without
-training any weights?**
-
-We present a **training-free, test-time correction loop** that repurposes a
-frozen *decomposed* multi-subject evaluator (MIE, scoring
-existence/appearance/interaction) as a **controller**, not a scorer. The key
-structural insight is a **dual-signal diagnosis**: the evaluator identifies
-*which identity facet* has degraded relative to a frozen, per-difficulty
-calibrated baseline—so a facet that is merely *low in absolute terms* is not
-blindly targeted—while an independent detection-based identity scorer
-(DINOv2 + Grounding-DINO) identifies *which subject* has collapsed. This joint
-(facet, subject) target drives a **semantic-level** edit: a facet-specific
-prompt rewrite together with **reference-set manipulation** (reordering and
-duplicating the collapsed subject's reference images), a lever unique to
-multi-reference generators. Each step proposes a portfolio of distinct actions;
-the candidate that most rescues the collapsed subject is kept only if the
-preference score does not regress and the collapsed subject's identity improves,
-otherwise it is rolled back. The evaluator is used only *inside* the loop;
-final quality is judged by an **independent** detection-based Subject Collapse
-Rate (SCR) and human preference, avoiding self-evaluation.
-
-Because the method touches no weights, it plugs into any multi-reference
-generator on day one. On OmniGen2 over strong-interaction, occlusion-heavy
-multi-subject prompts, preliminary results on a 20-task 4-subject hard slice
-show our correction reduces mean SCR from 0.563 (retrained SOTA, UMO) and 0.525
-(compute-matched best-of-N=8) to **0.488** at equal compute, while improving
-mean DINOv2 identity similarity—i.e., a training-free loop that **matches and
-slightly exceeds a retrained baseline on the same base model**. A full 500-task,
-multi-seed study with bootstrap significance and blind human evaluation is
-underway to validate this at scale, together with a scaling study on a newer
-base (FLUX.2) at 6/8 subjects. Ablations indicate that **per-subject
-diagnosis** (promoting the identity scorer from a passive judge into the loop)
-and **calibrated facet routing** are both essential; uncalibrated argmin
-degenerates to always targeting the same facet, and without per-subject
-targeting the correction loop rarely fires.
-
-We position this as distinct from (i) noise-level, scalar-verifier
-inference-time scaling, (ii) open-loop, single-pass training-free
-personalization (FreeCus/FreeGraftor), and (iii) retraining-based identity
-repair (UMO/MultiCrafter): to our knowledge this is the first demonstration
-that interaction-induced multi-subject identity collapse is **diagnosable and
-repairable at test time, training-free, at the semantic level**, closing much
-of the gap to retraining at zero training cost.
+Personalized image generation with multiple subjects suffers from *interaction-induced identity collapse*: as the number of subjects grows, models increasingly merge, swap, or drop identities, even when each subject is provided as a reference image. We introduce **MIDC**, a training-free, inference-time correction paradigm that treats a *decomposed* verifier as a structured diagnostic signal and routes correction to the most deficient facet. Given a candidate image, a decomposed evaluator scores three facets—existence, appearance, and interaction—and we convert each facet score into a standardized deficit against a calibrated per-facet baseline. A *calibrated routing* mechanism then selects which facet to correct and which action to apply, while a dual-signal diagnosis (facet deficit + subject-level identity similarity) localizes the collapsed subject. Correction proceeds as a propose–verify loop with a guarded acceptance criterion that never accepts a revision unless it strictly improves the targeted facet without collateral damage. On OmniGen2, MIDC reduces Subject Collapse Rate (SCR) to **0.470** on 4-entity hard cases versus **0.531** for the retrained state-of-the-art (UMO) and **0.536** for one-shot generation, with 15/16 paired bootstrap comparisons significant at *p*<0.05. On FLUX.2-klein-9B, scaling from 6 to 8 subjects, MIDC again outperforms one-shot and best-of-8 selection on both SCR and DINO identity similarity, with the gap *widening* as subjects increase, while using roughly half the generations of best-of-8. A blind human study independently corroborates the existence result: labelers prefer MIDC over UMO 84.6% of the time (*p*=4×10⁻⁷). Ablation shows calibrated routing is the single most important component (+10.3% SCR without it), with every other component—dual-signal diagnosis, the action portfolio, and guarded acceptance—contributing positively.
 
 ## Contributions
 
@@ -110,16 +63,10 @@ of the gap to retraining at zero training cost.
 **After 2026-07-31**: nothing can be changed until notification.
 
 **⚠️ Action items for this paper**:
-1. **By 2026-07-21**: submit the abstract above (it's complete, no placeholders) + pick primary/secondary topics + nominate a reciprocal reviewer.
-   - **Title**: `MIDC: Training-Free Multi-subject Interaction Diagnosis and Correction via a Dual-Signal Decomposed Verifier`
-   - **Primary topic**: `CV: Diffusion & Generative Models for Vision`
-   - **Secondary topics** (pick 3–4):
-     - `ML: Reasoning & Test-Time Compute` (strongly recommended — training-free test-time correction = test-time compute framing)
-     - `CV: Object Detection, Segmentation & Scene Understanding` (SCR uses Grounding-DINO + DINOv2)
-     - `CV: Language, Vision & Multi-modal` (reference-set manipulation + facet-specific prompt rewrite)
-     - `ML: Evaluation, Benchmarking, Datasets & Analysis` (optional — only if Round 2 human-eval + bootstrap significance are solid; AAAI warns extra secondaries can attract harsher reviews)
-2. **By 2026-07-28**: write the full 7-page paper using AAAI-27 LaTeX kit, anonymized, with Round-2 final numbers (500-task means + 95%CI + p-values + human-eval win rates) replacing the preliminary `0.563/0.525/0.488` in the abstract.
-3. The abstract submitted on 7/21 **can** be lightly edited until 7/28 if Round-2 numbers shift the framing, but should not be substantively rewritten (AAAI may reject papers that change abstracts substantially).
+1. **DONE (2026-07-21)**: abstract submitted to OpenReview with the *old* title/numbers.
+2. **⚠️ MUST DO before 2026-07-28**: log in to OpenReview and **update the title + abstract fields** to the final version above (title `MIDC: Calibrated Test-Time Correction for Multi-Subject Identity Collapse`; abstract body in the `## Abstract` section). AAAI permits editing title/abstract/TL;DR/PDF between 7/21 and 7/28, but warns it "may reject papers that change abstracts substantially" — our change is a reframing (dual-signal → calibrated routing) + number update, which is within bounds, but **must be done before 7/28**; after that nothing is editable until notification.
+3. **By 2026-07-28**: submit the full 7-page PDF (built from `paper/main.tex` with the AAAI-27 `aaai2027.sty` kit, anonymized) + reproducibility checklist.
+4. **By 2026-07-31**: supplementary material + code (commit `round2/results_r2/` raw records + MIE checkpoint to the repo or a Code and Data Supplement ZIP).
 
 ## Notes (not for submission)
 

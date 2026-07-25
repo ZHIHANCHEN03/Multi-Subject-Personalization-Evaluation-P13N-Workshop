@@ -19,7 +19,7 @@ round1_1/trials/
 round1_1/*.log
 round2/.cache/
 round2/results/
-round2/results_r2/
+# round2/results_r2/ is COMMITTED (raw per-task records for Table 1, ~4.3M)
 # human-eval generated artifacts (regenerable from results; key is sensitive)
 round2/human_eval/pairs/
 round2/human_eval/manifest.js
