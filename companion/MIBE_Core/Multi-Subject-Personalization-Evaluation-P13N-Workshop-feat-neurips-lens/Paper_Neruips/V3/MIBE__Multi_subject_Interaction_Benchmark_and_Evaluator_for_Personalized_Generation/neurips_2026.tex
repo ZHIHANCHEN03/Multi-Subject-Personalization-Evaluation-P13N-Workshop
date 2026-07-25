@@ -1,0 +1,882 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2026
+
+% The authors should use one of these tracks.
+% Before accepting by the NeurIPS conference, select one of the options below.
+% 0. "default" for submission
+% \usepackage{neurips_2026}
+% \usepackage[eandd]{neurips_2026}
+% the "default" option is equal to the "main" option, which is used for the Main Track with double-blind reviewing.
+% 1. "main" option is used for the Main Track
+%  \usepackage[main]{neurips_2026}
+% 2. "position" option is used for the Position Paper Track
+%  \usepackage[position]{neurips_2026}
+% 3. "eandd" option is used for the Evaluations & Datasets Track
+ \usepackage[eandd]{neurips_2026}
+% 4. "creativeai" option is used for the Creative AI Track
+%  \usepackage[creativeai]{neurips_2026}
+% 5. "sglblindworkshop" option is used for the Workshop with single-blind reviewing
+ % \usepackage[sglblindworkshop]{neurips_2026}
+% 6. "dblblindworkshop" option is used for the Workshop with double-blind reviewing
+%  \usepackage[dblblindworkshop]{neurips_2026}
+
+\usepackage{amssymb}
+\newcommand{\cmark}{\checkmark}
+\newcommand{\xmark}{$\times$}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{float}
+% After being accepted, the authors should add "final" behind the track to compile a camera-ready version.
+% 1. Main Track
+ % \usepackage[main, final]{neurips_2026}
+% 2. Position Paper Track
+%  \usepackage[position, final]{neurips_2026}
+% 3. Evaluations & Datasets Track
+ % \usepackage[eandd, final]{neurips_2026}
+% 4. Creative AI Track
+%  \usepackage[creativeai, final]{neurips_2026}
+% 5. Workshop with single-blind reviewing
+%  \usepackage[sglblindworkshop, final]{neurips_2026}
+% 6. Workshop with double-blind reviewing
+%  \usepackage[dblblindworkshop, final]{neurips_2026}
+% Note. For the workshop paper template, both \title{} and \workshoptitle{} are required, with the former indicating the paper title shown in the title and the latter indicating the workshop title displayed in the footnote.
+% For workshops (5., 6.), the authors should add the name of the workshop, "\workshoptitle" command is used to set the workshop title.
+% \workshoptitle{WORKSHOP TITLE}
+
+% "preprint" option is used for arXiv or other preprint submissions
+ % \usepackage[preprint]{neurips_2026}
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2026}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+\usepackage{amsmath} 
+% Note. For the workshop paper template, both \title{} and \workshoptitle{} are required, with the former indicating the paper title shown in the title and the latter indicating the workshop title displayed in the footnote. 
+\title{MIBE: Multi-subject Interaction Benchmark and Evaluator for Personalized Image Generation}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+\author{%
+    Zhihan Chen\thanks{Equal contribution}\\
+    University of California, Los Angeles\\
+    % Los Angeles, CA 90095\\
+    \texttt{chenz23@ucla.edu}\\
+    \AND
+    Yuhuan Zhao\footnotemark[1]\\
+    University of Southern California\\
+    % Los Angeles, CA 90007\\
+    \texttt{yuhuanzh@usc.edu}\\
+    \AND
+    Yijie Zhu\footnotemark[1]\\
+    DeerLab LLC\\
+    % Mountain View, CA 94043\\
+    \texttt{ ejzhu2025@gmail.com}\\
+    \AND
+    Xinyu Yao\footnotemark[1] \\
+    Carnegie Mellon University\\
+    % Pittsburgh, PA 15213 \\
+    \texttt{xinyuyao@andrew.cmu.edu} \\
+    \AND
+    Mengcong Ren\\
+    Clemson University\\
+    % Clemson, SC 29634\\
+    \texttt{mengcongren@gmail.com}
+    \AND
+    Suwen Wang\\
+    University of California, Los Angeles\\
+    \AND
+    Qiuyang Yin\\
+    Google\\
+    \texttt{davidyqy@google.com}
+    \AND
+    Yuchen Sun\\
+    San Jose State University\\
+    \AND
+    Qin Wang\\
+    University of Illinois at Urbana-Champaign\\
+    \AND 
+    Lu Xin\\
+    DeerLab LLC\\
+    \texttt{lucasxinlu@outlook.com}
+  % examples of more authors
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+
+\begin{document}
+
+
+\maketitle
+
+
+\begin{abstract}
+Multi-subject personalized image generation requires the precise rendering of all requested reference identities and their specified interactions based on a guiding prompt. However, state-of-the-art models still struggle with this process, frequently omitting subjects, failing to preserve reference appearances, or misattributing interactions. Furthermore, existing metrics designed primarily for single-subject fidelity cannot reliably capture these errors, suffering severe degradation in ranking separability and failing to align with human preference as the subject count increases. To address this gap, we introduce Multi-subject Interaction Benchmark and Evaluator (MIBE), a unified framework comprising a Multi-subject Interaction Benchmark (MIB) and a Multi-subject Interaction Evaluator (MIE). MIB systematically covers diverse relation types and scene complexities through a decoupled data regime. This consists of a 60K-pair VLM-labeled Silver Set for scalable metric training and a 4K-pair double-blind Human Evaluation Gold Set covering a diverse range of state-of-the-art generators, with the Silver Set reaching 95.1\% cross-VLM preference agreement. To demonstrate the utility of this benchmark, we present MIE, a lightweight, reference-conditioned evaluator trained exclusively on the Silver Set with a dual-head ranking and diagnosis objective. MIE exhibits strong cross-generator generalization on the Gold Set, achieving 0.922 overall pairwise accuracy against human preference, including 0.982 on seen generators and 0.884 on unseen generators. By outperforming a broad spectrum of baseline metrics, including CLIP and DINO variants, MIE demonstrates that diagnostic supervision can preserve ranking separability and human alignment where traditional evaluators collapse. Ultimately, by providing data with the diagnostic and preference labels required to train robust evaluators, MIBE serves as a comprehensive framework to benchmark multi-subject image generation and guide future model alignment.
+\end{abstract}
+
+\section{Introduction}
+
+State-of-the-art personalized image generators can faithfully render a single reference identity, but as soon as a second subject is introduced, let alone four or eight, the generated image often contains the right scene, the right colors, and the wrong subjects. A model conditioned on reference photos of a specific child and a specific dog, asked to depict the child playing with the dog, may instead produce a generic child with a different dog, two children and no dog, or the right child standing beside an empty patch of grass. These are not merely aesthetic flaws; they are \emph{binding} failures, and they are largely invisible to current metrics.
+
+We call this the \emph{binding} problem: every requested reference subject must (1) appear in the generated image (\emph{Existence}), (2) preserve its reference appearance without leakage from other subjects (\emph{Appearance}), and (3) participate in the prompt-specified role, relation, or object assignment (\emph{Interaction}). These dimensions are coupled: a missing subject often causes the model to redistribute its visual features onto surviving subjects, making appearance corruption a downstream consequence of existence failure (Appendix ~\ref{sec:appendix_failure_modes}). The problem is especially fragile in contact-rich and occlusion-heavy scenes, where local evidence is ambiguous. Prior stress-test evaluation has documented this ``illusion of scalability,'' showing identity collapse in dense scenes while global CLIP-based scores remain misleadingly stable~\cite{chen2026identities}; MIBE complements that curated identity-collapse stress test with human-grounded labels, factorized binding stress, and a learned evaluator.
+
+Existing automatic metrics are fragmented. CLIP- and DINO-based reference similarity captures appearance overlap but cannot verify which subject participates in which interaction. General preference models such as PickScore~\cite{kirstain2023pick}, ImageReward~\cite{xu2023imagereward}, and HPS~\cite{wu2023human} can favor visually polished but compositionally broken images. As Figure~\ref{fig:metric_agreement_subject_count} shows, as subject count grows from 2 to 8, the pairwise agreement of standard metrics with double-blind human judgment drops toward random choice; on MIB-Gold, HPS v2.1 reaches only 0.520 agreement and PickScore falls slightly below random at 0.486. Existing benchmarks are similarly under-equipped, focusing on single-subject fidelity~\cite{ruiz2023dreambooth,peng2024dreambench}, text-only composition~\cite{huang2023t2i}, or broad multi-subject capability~\cite{chen2025xverse,wang2025psr}, without factorizing the conditions that induce binding failures. 
+Binding is therefore both a generation and a measurement bottleneck.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=1.0\linewidth]{figures/baseline_alignment.png}
+  \caption{
+  \textbf{Existing metrics approach random agreement as subject count grows; MIE retains higher human alignment.}
+  Pairwise agreement with double-blind human preference on MIB-Gold by subject count ($N \in \{2,4,6,8\}$). Standard metrics, including SCR~\cite{chen2026identities}, approach random agreement (dashed line) in high-subject-count settings; MIE, trained exclusively on MIB-Silver, retains higher agreement, with the gap widening as scenes grow more crowded.
+  }
+  \label{fig:metric_agreement_subject_count}
+\end{figure}
+
+\begin{figure*}[!ht]
+    \centering
+    \includegraphics[
+        width=0.9\textwidth,
+        height=0.3\textheight
+    ]{mibe_overview_v3.png}
+    \caption{Overview of MIBE. MIB constructs a controlled benchmark through reference pooling, hierarchical prompt construction, Silver Set supervision, and Gold Set human evaluation. MIE is trained on Silver labels and evaluated against double-blind human Gold labels for cross-generator, human-aligned assessment.}
+    \label{fig:mibe_overview}
+\end{figure*}
+
+We address this gap with \textbf{MIBE}, a unified framework that pairs a controlled \textbf{Multi-subject Interaction Benchmark (MIB)} with a learned \textbf{Multi-subject Interaction Evaluator (MIE)}. As summarized in Figure~\ref{fig:mibe_overview}, MIBE decouples benchmark construction from evaluator learning: MIB defines controlled prompt-reference tasks and silver/gold supervision, while MIE uses this supervision to learn human-aligned ranking and diagnostic evaluation.
+
+
+
+In summary, this paper makes three contributions:
+
+1) We introduce \textbf{MIB}, a controlled benchmark for reference-conditioned multi-subject generation that factorizes subject count, human/object composition, and relation type, with a 60K dual-VLM-consensus silver set and a 4{,}020-pair double-blind human-labeled gold set covering six state-of-the-art generators.
+
+2) We propose \textbf{MIE}, a reference-conditioned evaluator that jointly learns pairwise ranking and structured diagnostics over \emph{Existence}, \emph{Appearance}, and \emph{Interaction}, providing both human-aligned preference prediction and interpretable failure attribution.
+
+3) Through cross-generator meta-evaluation on MIB-Gold, we reveal systematic failure patterns, failure rates that scale with subject count, coupled Existence--Appearance failures, and interaction-induced subject deformation, providing actionable targets for future model alignment.
+
+\section{Related Work}
+\textbf{Personalized and Multi-Subject Generation}
+Personalized image generation has evolved from early optimization-based methods like DreamBooth \cite{ruiz2023dreambooth} and Textual Inversion \cite{gal2022image} to efficient encoder-based models such as IP-Adapter \cite{ye2023ip} and PhotoMaker \cite{li2024photomaker}. While effective for single subjects, these methods struggle with binding in multi-subject scenarios, ensuring each reference identity is correctly assigned to its specific role and attributes. Recent works like FastComposer \cite{xiao2023fastcomposer}, MS-Diffusion \cite{wang2024ms}, and Interact-Custom \cite{xu2025interactcustom} address this through localized attention and identity decoupling. However, a significant measurement gap remains: existing methods are rarely tested in contact-rich or occlusion-heavy regimes where subjects overlap, leading to frequent failures in physical grounding and identity leakage that current metrics fail to capture.
+
+\textbf{Benchmark Evolution}
+While compositional benchmarks like T2I-CompBench \cite{huang2023t2i} evaluate text-to-image alignment, they lack the reference conditioning necessary to measure identity preservation. Recent efforts such as XVerseBench \cite{chen2025xverse}, PSRBench \cite{wang2025psr}, and MultiHuman-Testbench \cite{borse2025multihuman} have introduced multi-subject evaluations, yet they primarily focus on subject count or spatial positioning.
+Unlike MultiBind \cite{tian2026multibind}, which explores attribute-level misbinding, MIB factorizes complex physical interactions and occlusions. It serves as both a diagnostic testbed and a training substrate, decoupling scalable "silver" supervision from human "gold" evaluation to provide a more granular view of how models handle locally ambiguous visual evidence. A detailed comparison with prior benchmarks is provided in Appendix~\ref{sec:appendix_related_work}.
+
+\textbf{Metrics and Scalable Evaluators}
+Standard metrics often provide incomplete assessments of multi-subject quality: CLIP-based scores lack instance-specific grounding, while reward models like ImageReward \cite{xu2023imagereward} often prioritize aesthetics over logical binding. Although Vision-Language Models (VLMs) are increasingly used as automated judges, they remain sensitive to prompting and poorly calibrated for absolute scoring \cite{kumar2026vlm}. MIBE addresses these limitations by adopting a pairwise ranking format and a latent scalar utility model, rather than absolute numeric ratings. By combining an "errors-first" VLM consensus for scalable MIB-Silver labels with human-verified MIB-Gold data, MIBE unifies preference learning with structured diagnostic supervision for more robust, reference-grounded evaluation.
+
+
+% \paragraph{Personalized Image Generation}
+% Personalized image generation aims to synthesize images that preserve the appearance of reference subjects while following a target prompt. Early methods such as Textual Inversion~\cite{gal2022image}, DreamBooth~\cite{ruiz2023dreambooth}, and Custom Diffusion~\cite{kumari2023multi} personalize diffusion models through token learning or model adaptation. More recent encoder-based methods, including IP-Adapter~\cite{ye2023ip}, InstantID~\cite{wang2024instantid}, and PhotoMaker~\cite{li2024photomaker}, amortize personalization through feed-forward reference conditioning. These methods substantially improve efficiency and single-subject fidelity, but are primarily studied in settings where one dominant subject, or a small number of visually separable concepts, must be preserved.
+
+% Multi-subject personalization introduces a harder problem: \emph{binding}. Each reference subject must be assigned to the correct generated instance, visual attributes, and prompt-specified role. Recent methods such as FastComposer~\cite{xiao2023fastcomposer}, Mix-of-Show~\cite{gu2023mix}, MS-Diffusion~\cite{wang2024ms}, MuDI~\cite{jang2024mudi}, UniPortrait~\cite{he2024uniportrait}, AnyStory~\cite{he2025anystory}, MOSAIC~\cite{she2025mosaic}, XVerse~\cite{chen2025xverse}, RealCustom++~\cite{realcustom2024}, FocusDPO~\cite{jin2025focusdpo}, and PSR~\cite{wang2025psr} address multi-concept or multi-subject composition through localized attention, routing, identity decoupling, disentanglement, architecture-specific modulation, or preference optimization. Interact-Custom~\cite{xu2025interactcustom} further highlights customized human-object interaction as an important generation setting where identity preservation and interaction control must be handled jointly.
+
+% However, progress on generation methods exposes a measurement gap. Existing evaluations still provide limited systematic evidence in contact-rich and occlusion-heavy regimes, where subjects are no longer visually separable. Dense physical interactions, partial occlusions, shared objects, and overlapping body regions can expose failures that are not fully captured by standard identity-similarity or subject-consistency metrics, including missing subjects, fused boundaries, appearance leakage, role confusion, and relation misassignment. Our focus is therefore not merely whether multiple references can be rendered together, but whether each reference remains correctly bound to its generated instance, appearance, prompt-specified role, and interaction target when visual evidence becomes locally ambiguous. In this sense, robust benchmark infrastructure is a prerequisite for further progress: without binding-diagnostic supervision and human-grounded evaluation, methods optimized for narrow identity or consistency objectives may improve aggregate scores while still failing at relation-level grounding.
+
+% \paragraph{Benchmarks for Personalized and Compositional Generation} 
+% Existing benchmarks capture only part of this problem. Text-only compositional benchmarks such as T2I-CompBench~\cite{huang2023t2i} evaluate attribute, object, and spatial alignment, but they do not provide reference images and therefore cannot measure identity preservation, identity collapse, or appearance leakage. Personalized generation benchmarks such as DreamBench~\cite{ruiz2023dreambooth}, DreamBench++~\cite{peng2024dreambench}, and CustomConcept101~\cite{kumari2023multi} introduce reference-conditioned evaluation, but mainly focus on single-subject or limited multi-concept settings rather than systematic multi-subject interaction and occlusion stress.
+
+% Recent benchmarks move closer to reference-conditioned multi-subject evaluation. XVerseBench~\cite{chen2025xverse} evaluates single-, dual-, and triple-subject personalized generation. Concurrent PSRBench~\cite{wang2025psr} provides a broad capability-oriented benchmark over attributes, backgrounds, actions, positions, complex prompts, and three- or four-subject generation. OmniContext~\cite{wu2025omnigen2} evaluates in-context generation across characters, objects, and scenes, while MultiBanana~\cite{oshima2025multibanana} studies multi-reference text-to-image generation under reference-count variation and other multi-reference-specific challenges. MultiHuman-Testbench~\cite{borse2025multihuman} focuses on multi-human generation with face identity, action, and prompt-alignment metrics. Concurrently, spatial benchmarks such as SpatialGenEval~\cite{spatialgeneval2026} systematically explore spatial intelligence and occlusion, but are confined to general text-to-image generation rather than reference-conditioned personalization.
+
+% Most closely related to our binding motivation, MultiBind~\cite{tian2026multibind} studies cross-subject attribute misbinding in multi-reference, multi-subject generation, using slot-level correspondence and confusion-aware evaluation to expose drift, swap, dominance, and blending. MIB differs by targeting \emph{relation-level} binding rather than only attribute-level or slot-level misbinding. Specifically, MIB factorizes non-contact relations, occlusion, and physical interaction under reference conditioning, and evaluates whether the correct reference identities participate in the correct prompt-specified roles and interaction targets.
+
+% MIB is designed to fill this missing benchmark regime and to support evaluator learning, not merely leaderboard-style comparison. Instead of treating multi-subject generation as simply ``more subjects in one image,'' MIB explicitly controls subject count, human/object composition, and relation type. It further decouples scalable silver supervision from human gold evaluation, allowing the benchmark to serve both as a controlled testbed for generator and metric comparison and as a training substrate for reference-conditioned evaluators. Table~\ref{tab:benchmark_comparison} summarizes how MIB differs from prior benchmarks.
+
+
+
+% \paragraph{Metrics and Scalable Evaluation}
+% Existing metrics capture only partial projections of multi-subject personalization quality. Text-image metrics such as CLIP-T and SigLIP-T measure coarse prompt alignment and approximate subject existence, but cannot verify whether each generated instance matches the correct reference. Reference-image metrics such as CLIP-I, SigLIP-I, DINO-based similarities, and Detect-and-Compare-style subject metrics~\cite{jang2024mudi} are closer to appearance or identity evaluation, but global similarity can hide localized identity failures, while crop-based evaluation becomes unreliable under contact, occlusion, and overlapping subjects. Relation-oriented or VQA-style metrics, such as TIFA~\cite{hu2023tifa} and VQAScore / GenAI-Bench~\cite{lin2024vqascore}, improve compositional text-image evaluation, but they do not verify whether the correct reference identities participate in the correct relation.
+
+% General preference and reward models, including ImageReward~\cite{xu2023imagereward}, PickScore~\cite{kirstain2023pick}, and HPS~\cite{wu2023human}, provide holistic assessments of realism, aesthetics, and prompt preference. MLLM-based explainable evaluators such as VIEScore~\cite{ku2024viescore} further demonstrate the potential of language-guided multimodal evaluation. However, these metrics are not calibrated for strict reference-grounded binding: a visually pleasing image may still contain missing subjects, identity swaps, appearance leakage, or incorrect interaction targets. Conversely, purely diagnostic binary checks cannot capture relative failure severity: two generations may both fail Existence or Interaction, yet differ substantially in how many subjects are missing or how severely relations are misassigned.
+
+% To overcome the limitations of holistic reward models, recent paradigms increasingly adopt Vision-Language Models (VLMs) as automated judges. However, studies of MLLM/VLM-as-a-judge evaluation show that multimodal judges remain task-dependent and can be poorly calibrated for absolute scoring, while relative comparison is often more suitable than standalone numeric ratings~\cite{chen2024mllmjudge,kumar2026vlmjudge}. This ranking-scoring decoupling motivates a pairwise supervision format. MIBE avoids using standalone absolute numeric ratings as training targets; instead, MIE learns a latent scalar utility through pairwise comparisons, together with structured diagnostic prediction. Ranking captures which candidate is better overall, while diagnosis identifies whether failures arise from Existence, Appearance, or Interaction.
+
+% Scalable evaluator training further requires supervision beyond small human-labeled sets. Large vision-language models can provide scalable annotations by inspecting references, prompts, and generated candidates together, but generic VLM preference prompting may over-weight aesthetics or global plausibility. MIBE therefore treats VLM labels as scalable but noisy supervision rather than final ground truth. MIB-Silver uses an errors-first SOP and cross-model consensus to obtain dense preference and diagnostic labels, while MIB-Gold reserves human annotations for final meta-evaluation of generators and learned evaluators.
+
+% Taken together, prior work has advanced multi-subject generation and its evaluation, but existing benchmarks and metrics still do not jointly provide factorized interaction/occlusion stress, reference-grounded binding diagnosis, pairwise preference supervision, and human gold meta-evaluation. MIBE is designed to unify these components.
+
+
+\section{Methods}
+\subsection{MIB Construction}
+
+MIB is the data substrate of MIBE, consisting of controlled prompt-reference tasks, paired generated candidates, and preference/diagnostic labels. Each task specifies a guiding prompt, a set of reference subjects, and two candidate generations produced under the same prompt-reference condition. This decoupled design separates reference construction, prompt-task design, candidate generation, and label acquisition, allowing subject identity, scene complexity, relation type, generator source, and annotation source to be controlled independently.
+
+\subsubsection{Prompt Construction}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[
+        width=0.7\textwidth,height=0.25\textheight
+    ]{hierarchical_entity_and_relation_diagram.png}
+    \caption{
+    Hierarchical prompt construction and entity-composition templates. 
+    Each Level-8 seed is reduced into strict Level-6/4/2 subsets by removing entities together with their associated relations, preserving core scene semantics while varying entity-relation density. 
+    The example illustrates a human-heavy physical-interaction bucket, while the table summarizes the human/non-human composition templates used across balanced, human-heavy, and object-heavy ratio types.
+    }
+    \label{fig:hierarchical_prompt_construction}
+\end{figure*}
+
+We construct 60K prompt-reference tasks from 15K hierarchical Level-8 seeds. Each seed starts from an eight-subject scene and is reduced into Level-6, Level-4, and Level-2 variants by removing entities together with their associated relations, as illustrated in Figure~\ref{fig:hierarchical_prompt_construction}. This strict subset construction keeps scene semantics approximately invariant across levels, so performance degradation can be more directly attributed to increasing entity-relation density.
+
+The prompt space is factorized into 36 buckets from 4 subject counts, 3 human/non-human ratio types, and 3 relation types. The entity-composition templates for balanced, human-heavy, and object-heavy ratios are shown in Figure~\ref{fig:hierarchical_prompt_construction}. Relation types include non-contact relations, occlusion relations, and physical interactions. When relations overlap, we assign the task to the most restrictive category using the priority physical interaction $>$ occlusion $>$ non-contact. To keep role assignment interpretable, each entity participates in at most one core relation.
+
+All prompts use a white-studio setting and a global realistic-scale constraint to reduce background, lighting, layout, and scale confounders. We apply rule-based parsing and a lightweight LLM validator to verify: (i) assigned entities are explicitly mentioned, (ii) unassigned entities are excluded, (iii) human/non-human counts match the target bucket, (iv) lower-complexity prompts remain strict subsets of higher-complexity prompts, (v) duplicate prompts are removed, (vi) no entity is reused as the subject of multiple independent relations, and (vii) interaction-specific keywords are excluded from non-contact prompts.
+
+\subsubsection{Reference and Candidate Image Generation}
+
+MIB uses a fixed pool of 80 GPT-Image-1 reference subjects, including 30 human and 50 non-human identities. Human references vary in age, gender presentation, ethnicity, clothing, hairstyle, and appearance, while non-human references include animals, furniture, tools, wearables, and manipulable objects. All references are standardized as isolated single-subject studio images at $512 \times 512$, allowing the same identity anchors to be recombined across prompts. For each prompt-reference task, a personalized generator receives the guiding prompt and reference images as visual conditioning inputs, producing a candidate image. MIB forms pairwise comparisons by placing two candidates under the same prompt-reference condition, so labels capture relative generation quality rather than prompt difficulty. References are generated separately from all candidate generators to reduce generator-specific leakage.
+
+For the Silver Set, we generate 60K Nano Banana-versus-MOSAIC candidate pairs. This matchup was selected to maximize failure diversity observed in preliminary inspection, including subject omission, identity loss, appearance leakage, and relation hallucination. These complementary errors yield informative pairwise supervision across Existence, Appearance, and Interaction. Reference images are generated in a separate single-subject construction stage, while candidate images are generated as multi-subject interaction scenes under prompt-reference conditioning. For MIB-Silver, the reference generator is also model-disjoint from the two candidate generators, reducing generator-specific leakage in scalable supervision.
+
+MIB-Gold contains 4,020 human-labeled pairs: 2,520 pairs from two fixed cross-model matchups among GPT-Image-1.5, Flux2, Seedream 4.5, and GLM, plus 1,500 Nano Banana-versus-MOSAIC pairs for seen-generator evaluation. Candidate order is randomized, and invalid generations are removed before annotation. Dataset statistics are summarized in Table~\ref{tab:dataset_statistics}.
+
+\begin{table}[!ht]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{4pt}
+\scalebox{0.95}{
+\begin{tabular}{p{0.23\linewidth}p{0.33\linewidth}p{0.35\linewidth}}
+\toprule
+\textbf{Attribute} & \textbf{Silver Set} & \textbf{Gold Set} \\
+\midrule
+Purpose 
+& MIE training 
+& Human benchmark evaluation \\
+\addlinespace[2pt]
+
+Scale 
+& 60,000 candidate pairs; 56,909 usable pairs 
+& 4,020 human-labeled pairs \\
+\addlinespace[2pt]
+
+Prompt coverage 
+& \multicolumn{2}{p{0.70\linewidth}}{Hierarchical prompts with strict high-to-low complexity subsets, approximately uniformly distributed across relation type, human/object ratio, and subject count.} \\
+\addlinespace[2pt]
+
+Candidate generators 
+& Nano Banana, MOSAIC 
+& GPT-Image-1.5, Flux2, Seedream 4.5, GLM; plus Nano Banana/MOSAIC for seen-generator evaluation \\
+\addlinespace[2pt]
+
+Annotation source 
+& SOP-guided dual VLM consensus 
+& Double-blind human annotation \\
+\addlinespace[2pt]
+
+Annotators 
+& Gemini-2.5-Flash and Gemini-3.1-Flash-Lite 
+& Two independent human annotators per pair \\
+\addlinespace[2pt]
+
+Label types 
+& Pairwise preference; Existence; Appearance; Interaction 
+& Pairwise preference; Existence; Appearance; Interaction \\
+\addlinespace[2pt]
+
+Evaluation role 
+& Train and Val
+& Seen-generator: 1,500 pairs; unseen-generator: 2,520 pairs \\
+\bottomrule
+\addlinespace[3pt]
+\end{tabular}
+}
+\caption{Dataset statistics for MIB. The Silver Set provides scalable SOP-guided VLM supervision for training MIE, while the Gold Set is fully human-labeled under a double-blind protocol.}
+\label{tab:dataset_statistics}
+\end{table}
+
+\subsubsection{Label Construction}
+\label{sec:method_label}
+
+MIB provides two complementary label types: pairwise preference labels for global ranking and diagnostic labels for failure localization. Pairwise preference asks which candidate is better overall under the same prompt-reference condition, avoiding the calibration difficulty of absolute scores while preserving relative severity information. Diagnostic labels decompose multi-subject generation quality into three dimensions:
+\begin{itemize}
+    \item \textbf{Existence}: whether all requested reference subjects are present without omission, duplication, or severe unidentifiable collapse.
+    \item \textbf{Appearance}: whether generated subjects preserve the structure and local appearance of their references without severe distortion or cross-subject feature bleeding.
+    \item \textbf{Interaction}: whether subject-to-subject relations, actions, and object assignments align with the prompt.
+\end{itemize}
+For diagnostic labels, annotator disagreements are averaged as soft scores, while pairwise preferences require strict consensus.
+
+\textbf{MIB-Silver annotation with SOP-guided VLM judges.}
+Training MIE requires large-scale supervision, so we construct MIB-Silver with two SOP-guided VLM judges, reserving human annotation for MIB-Gold. The SOP decomposes each comparison into Existence, Appearance, and Interaction checks and requires candidate-specific flaw logs before the final preference decision, grounding judgments in concrete failures rather than holistic aesthetics. We independently query \texttt{gemini-2.5-flash} and \texttt{gemini-3.1-flash-lite-preview} with the same SOP, retain pairs with matching pairwise preferences, and average their per-dimension diagnostic outputs as soft supervision. Across 59,852 valid overlapping Silver comparisons, the judges reach 95.1\% preference agreement, yielding 56,909 usable Silver pairs after agreement-based filtering. The full SOP appears in Appendix~\ref{sec:app_SOP}.
+
+\paragraph{MIB-Gold annotation with double-blind human evaluation.}
+MIB-Gold provides the human-controlled benchmark layer for validating metrics and learned evaluators. Each Gold pair is independently reviewed by two annotators under a double-blind protocol, with both pairwise preference and Existence, Appearance, and Interaction labels collected. We require strict consensus for preference labels and average diagnostic disagreements as soft labels. After preference-consistency filtering, both Gold subsets retain over 90\% of pairs, indicating stable human judgments while preserving enough difficulty to expose non-trivial generator and evaluator disagreement.
+
+\subsection{Evaluator Modeling}
+
+The primary goal of MIBE is to establish a rigorous evaluation framework for multi-subject personalized image generation. To demonstrate the reusability of our benchmark and provide an immediate, out-of-the-box tool for the community, we instantiate the \textbf{Multi-subject Interaction Evaluator (MIE)}. Trained exclusively on MIB-Silver and assessed on MIB-Gold, MIE bridges the gap between human judgment and automated metrics.
+
+\textbf{Input-Output Formulation.}
+For each task, let $p$ denote the prompt, $R=\{r_1,\dots,r_N\}$ denote the set of reference images, and let $y$ denote a candidate generation. MIE is a reference-conditioned multimodal evaluator that maps the triplet $(R,p,y)$ to two types of outputs:
+\begin{enumerate}
+    \item A scalar quality score $s_\theta(R,p,y)\in\mathbb{R}$ used for global pairwise ranking.
+    \item A three-dimensional diagnostic prediction vector of logits
+    $\hat d_\theta(R,p,y) = (\hat d_{\text{exist}}, \hat d_{\text{app}}, \hat d_{\text{inter}})$,
+    corresponding to \emph{Existence}, \emph{Appearance}, and \emph{Interaction}.
+\end{enumerate}
+
+\textbf{Dual-Head Design.} 
+A purely diagnostic model with binary labels cannot capture relative failure severity (e.g., missing one subject vs. missing all). Conversely, a purely scalar reward model acts as an opaque black box, offering no actionable feedback on the nature of the failure. MIE solves this via a dual-head architecture. The \textbf{ranking head} provides a continuous global signal for pairwise comparison, which is essential for leaderboard benchmarking. Simultaneously, the \textbf{diagnostic head} explicitly attributes errors to Existence, Appearance, or Interaction, providing interpretable feedback for model developers. By optimizing these jointly ($\mathcal{L} = \alpha \mathcal{L}_{\text{rank}} + \beta \mathcal{L}_{\text{diag}}$), the scalar score is forced to ground itself in concrete binding failures rather than superficial aesthetics. This design mirrors the human annotation procedure directly, preserving both ranking separability and interpretability.
+
+\textbf{Lightweight Tuning.} 
+To ensure that the evaluator remains practical and highly reusable, we adopt a parameter-efficient fine-tuning strategy (LoRA and layer-only updates) over off-the-shelf vision-language backbones (e.g., Qwen3.5-VLM). This design choice proves the exceptional quality and data efficiency of our dataset: one does not need to pretrain a massive multimodal model from scratch; simply fine-tuning a lightweight VLM on just a 9.6K subset of the 56.9K available MIB-Silver pairs yields an evaluator that highly correlates with humans. This guarantees that MIB-Silver is a highly reusable resource for future metric alignment in the community.
+
+
+
+
+
+
+
+
+
+\section{Results}
+All training and evaluation are conducted on a single NVIDIA A100 GPU, with 16 vCPUs (Intel(R) Xeon(R) Platinum 8462Y+) and 251 GB of system memory. The configurations of training and evaluation processes are provided in Appendix~\ref{sec:appendix_configuration}.
+% \subsection{MIB Label Alignment Results}
+% \subsubsection{MIB-Silver Results}
+
+% When constructing the MIB-Silver dataset label, we apply the SOP detailed in Section~\ref{sec:method_label} across a large-scale corpus of $\sim$60K candidate pairs, which also yields compelling insights into VLM evaluation behavior. Notably, the two VLM judges achieve a robust \emph{Preference Agreement} of $95.1\%$ ($56,909 / 59,852$ valid overlapping tasks). Looking at the fundamental sub-scores (Figure~\ref{fig:agreement_analysis}a), the models exhibit high consensus on \emph{Existence} ($89.1\%$) and substantial agreement on \emph{Interaction} ($71.9\%$) and \emph{Appearance} ($69.0\%$). This overall high preference consensus demonstrates that the SOP effectively anchors the models' global decision-making, confirming that the intersection-filtered labels are highly reliable and well-suited for training our lightweight evaluator. 
+
+
+% \paragraph{Qualitative Analysis of SOP Effectiveness.}
+% To further validate the robustness of our SOP, we qualitatively examine cases where both \texttt{gemini-2.5-flash} and \texttt{gemini-3.1-flash-lite-preview} reach a strict consensus on all sub-scores and the final preference (Figure~\ref{fig:sop_demos}). The externalized \emph{flaw logs} reveal that the VLMs successfully internalize the multi-dimensional constraints defined in the SOP. This is initially evident in the models' ability to enforce precise semantic adherence for action and target grounding. For instance, in Figure~\ref{fig:sop_demos}(a), the VLMs correctly penalize Candidate B for hallucinating an interaction target (using a stick instead of a hand) and missing a secondary interaction entirely. Beyond semantic accuracy, the SOP effectively drives strict geometric and physical verification. As highlighted in Figure~\ref{fig:sop_demos}(b) and (d), the models identify violations of realistic physics, such as a floating mug embedded in a strange artifact, and catch severe scale distortions like an abnormally giant fried chicken. Furthermore, the evaluators demonstrate a keen sensitivity to fine-grained attribute fidelity. As seen in Figure~\ref{fig:sop_demos}(c) and (d), they effectively scrutinize wardrobe and identity details, successfully catching subtle errors like an incorrect donut color (pink instead of chocolate) or a wrong suitcase color (black instead of white). Importantly, this diagnostic rigor remains robust even in highly complex scenes. Figure~\ref{fig:sop_demos}(e) demonstrates a dense 6-subject composition where Candidate B suffers from severe collapse; despite the visual clutter, both models accurately and consistently isolate multiple concurrent failures across appearance (wrong clothing) and interactions (missing petting, closing, and carrying actions).
+
+% Overall, these qualitative results confirm that the ``errors-first'' scaffolding successfully prevents the VLMs from falling back on holistic aesthetic biases, forcing them to conduct rigorous, localized compositional verification.
+
+% \subsubsection{MIB-Gold Results}
+
+% While Section~4.1.1 shows that our SOP yields reliable large-scale silver supervision, \texttt{MIB-Gold} serves a different role: it is the human-controlled benchmark that tests whether multi-subject evaluation remains reliable once ambiguity is no longer filtered by model-model agreement alone. In total, \texttt{MIB-Gold} contains 4,020 raw pair groups. Of these, 1,500 come from the \texttt{Nano Banana + Mosaic} subset, while the remaining 2,520 are drawn from a broader cross-platform pool. After preference-consistency filtering, the retained-pair rate is 94.1\% for the \texttt{Nano Banana + Mosaic} subset and 90.4\% for the broader cross-platform subset, indicating that difficulty is not uniform across generator sources.
+
+% This difficulty is structured rather than noisy. As shown in Figure~\ref{fig:mib_gold_benchmark}, human preference consistency rises from 87.0\% at level 2 to 94.9\% at level 6, and remains high at level 8. Even as scenes become denser and compositionally more demanding, annotators still converge on a stable preference signal after consistency control. Thus, \texttt{MIB-Gold} does not simply introduce additional annotation variance; it reveals a meaningful difficulty distribution while preserving a dependable human judgment target.
+
+% Taken together, these results establish \texttt{MIB-Gold} as more than a small human-labeled subset. It is the benchmark layer that makes the rest of our evaluation possible: difficult enough to expose non-trivial disagreement, yet reliable enough to serve as the reference set for testing both existing metrics and learned evaluators.
+
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/section_4_1_2_gold_benchmark.png}
+%     \caption{Human annotation findings on `MIB-Gold'. Left: preference consistency by benchmark level. Right: preference consistency by spatial relationship. The lower retention in the broader cross-platform subset indicates that `MIB-Gold' captures a meaningful benchmark difficulty gap rather than annotation noise.}
+%     \label{fig:mib_gold_benchmark}
+% \end{figure}
+
+
+
+\subsection{Existing Metrics Fail on MIB-Gold}
+
+We begin by testing whether existing automatic metrics can serve as reliable proxies for human judgment on \texttt{MIB-Gold}. This is a meaningful stress test rather than an artifact of noisy annotation: after preference-consistency filtering, \texttt{MIB-Gold} retains 94.1\% of seen-generator pairs and 90.4\% of unseen-generator pairs, providing a stable yet challenging benchmark for metric evaluation. To establish a comprehensive performance ceiling, we therefore select a representative suite of baselines spanning four distinct paradigms: 1) \textbf{Low-level Reconstruction Metrics}: PSNR~\cite{hore2010image}, SSIM~\cite{wang2004image}, and MS-SSIM~\cite{wang2003multiscale} are included to measure pixel-level fidelity; 2) \textbf{Semantic Alignment Metrics}: DINOv2~\cite{oquab2023dinov2}, CLIP~\cite{radford2021learning}, and SigLIP~\cite{zhai2023sigmoid} (both Text-based and Image-based) are used to evaluate high-level semantic consistency and identity similarity; 3) \textbf{General Human Preference Models}: PickScore~\cite{kirstain2023pick}, ImageReward~\cite{xu2023imagereward}, and HPS v2.1~\cite{wu2023human}, which are specifically trained on human feedback for text-to-image alignment and aesthetics; 4) \textbf{Identity-Specific Metrics}: SCR (Subject Consistency Rate)~\cite{chen2026identities}, which focus on  identity-preserving features critical for personalization.
+
+To assess whether existing metrics can reliably evaluate multi-subject personalized generation, we conduct a systematic comparison against human pairwise preference on MIB-Gold. Specifically, we evaluate each metric on 4,020 valid pairwise comparisons, measuring pairwise agreement with double-blind human annotations, where 0.5 corresponds to random chance in a balanced binary setting. As shown in Figure~\ref{fig:metric_agreement_subject_count}, the results reveal a consistent failure across existing paradigms. General-purpose preference models collapse near or below random chance,  PickScore achieves 0.4857, HPS v2.1 reaches 0.5201, and PSNR yields 0.3987, indicating active misalignment with human judgment. Identity-specific metrics including SCR, DINOv2, and SigLIP-I demonstrate non-trivial alignment, yet their gains remain confined to single-dimensional facets such as identity preservation or global semantic consistency. Critically, no existing metric provides a unified reasoning signal across Existence, Appearance, and Interaction simultaneously—the multi-dimensional structure underlying human preference in this setting. This confirms a fundamental evaluation gap and motivates the design of MIE.
+% Table~\ref{tab:overall_metrics} summarizes the mean score of each model on the benchmark. For similarity-style metrics such as PSNR, SSIM, MS-SSIM, DINO, CLIP-T, CLIP-I, SigLIP-T, SigLIP-I, ImageReward, PickScore, and HPS v2.1, larger values indicate better performance. For SCR, smaller values are preferable.
+
+% \begin{table}[t]
+% \centering
+% \scriptsize
+% \setlength{\tabcolsep}{6pt}
+% \caption{Overall mean score of each model.}
+% \label{tab:overall_metrics}
+% \begin{tabular}{lcccc}
+% \hline
+% \textbf{Metric} & \textbf{GLM} & \textbf{FLUX-2} & \textbf{GPT-image-1.5-high} & \textbf{Seedream-4.5} \\
+% \hline
+% PSNR & 9.2313 & \textbf{11.0662} & 10.4655 & 9.3190 \\
+% SSIM & 0.6308 & 0.7195 & 0.7159 & \textbf{0.7354} \\
+% MS-SSIM & 0.5412 & 0.6215 & 0.5983 & \textbf{0.6358} \\
+% DINOv2 & 0.5410 & 0.6300 & 0.6627 & \textbf{0.6384} \\
+% CLIP-T & 0.3430 & 0.3569 & 0.3564 & \textbf{0.3599} \\
+% CLIP-I & 0.7144 & 0.7388 & \textbf{0.7488 }& 0.7356 \\
+% SigLIP-T & 0.1809 & \textbf{0.2084} & 0.2050 & 0.2036 \\
+% SigLIP-I & 0.7235 & 0.7379 & \textbf{0.7526} & 0.7453 \\
+% PickScore & 20.7658 &\textbf{ 21.2998 }& 20.8713 & 21.1139 \\
+% ImageReward & 0.7122 & 1.1499 & 1.0351 & \textbf{1.1638} \\
+% HPS v2.1 & 0.2827 & 0.2970 & 0.2826 & \textbf{0.2979} \\
+% \hline 
+% SCR & 0.2006 & 0.2003 & \textbf{0.1245} & 0.1436 \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+%  We compare automatic metrics against human pairwise preference annotations. After excluding 49 samples marked as prompt-ilogical, the analysis uses 4,991 valid pairwise comparisons. For each comparison, we determine which model is preferred by the annotator and then check whether each automatic metric would rank the same model higher on the corresponding sample. In Figure~\ref{fig:metric_agreement_subject_count}, we report pairwise agreement with human preference, where 0.5 corresponds to random guessing in a balanced binary comparison.
+
+% % \begin{figure}[t]
+% % \centering
+% % \includegraphics[width=\linewidth]{figures/human_vs_metric_pairwise_accuracy.png}
+% % \caption{Pairwise agreement between automatic metrics and human preference. The dashed line indicates random-choice accuracy (0.5).}
+% % \label{fig:human_metric_pairwise_accuracy}
+% % \end{figure}
+
+
+% The comparison shows that the automatic baselines are far from uniformly reliable as proxies for human preference. Several metrics remain only slightly above random choice, including HPS v2.1 (0.5201), while PickScore (0.4857) falls slightly below the random baseline and PSNR (0.3987) is substantially misaligned with human judgments in this setting. Therefore, these metrics should not be treated as dependable replacements for direct human evaluation on this benchmark.
+
+% At the same time, the results are not uniformly negative across all baselines. Though metrics like SCR, DINOv2, and SigLIP-I show non-trivial alignment, these successes are largely confined to single-dimensional facets such as identity preservation or global semantic consistency. The failure of general-purpose preference scorers (e.g., PickScore, HPS v2.1) to significantly outperform random choice, coupled with the high variance across different metric categories, reveals a fundamental gap in current evaluation paradigms. These fragmented baselines lack a unified reasoning framework to handle the complex ``binding" problem (existence, identity, and interaction) inherent in human judgment. This misalignment underscores the critical need for a more structured, multi-dimensional evaluator that can faithfully replicate the human decision-making process.
+
+\subsection{MIE Aligns Better with Human Preference}
+
+Given that existing metrics are misaligned with human preference on \texttt{MIB-Gold}, we next ask whether \texttt{MIB-Silver} can be used to train a better evaluator. Our results show that it can. Across all six exported checkpoints, the strongest variant is \texttt{qwen35\_4b\_lora\_layer}, which achieves an overall pairwise accuracy of 0.922, including 0.982 on the seen-generator subset (\texttt{Nano Banana/MOSAIC}) and 0.884 on the unseen-generator subset (\texttt{GPT-Image-1.5}, \texttt{Flux2}, \texttt{Seedream~4.5}, and \texttt{GLM}). This substantially exceeds the strongest third-party baseline, showing that supervision derived from \texttt{MIB} can be translated into a materially stronger human-aligned metric.
+
+The gains are not limited to pairwise ranking. The same 4B LoRA-layer model reaches a macro-F1 of 0.818, indicating that the evaluator is not merely learning a shallow preference score, but capturing a meaningful portion of the fine-grained diagnostic structure underlying human judgments. More importantly, this result shows not only that a larger model can rank better, but that \texttt{MIB-Silver} provides sufficiently structured supervision to train a human-aligned and diagnostically meaningful evaluator. As Figure~\ref{fig:mie_alignment} shows, the strongest model is also strongest on category-level F1, linking pairwise alignment to meaningful per-dimension supervision. This matters because the binding problem in multi-subject personalization is inherently multi-dimensional: a useful evaluator must jointly reason about existence, appearance, and interaction rather than collapse everything into a single weak aesthetic signal.
+
+More broadly, the six-checkpoint comparison now supports a full scaling narrative. LoRA-layer variants consistently outperform their layer-only counterparts, and the largest LoRA-based model achieves the strongest overall human alignment. As shown in Figure~\ref{fig:mie_alignment}, the advantage is visible not only in pairwise accuracy but also in the category-level F1 breakdown. Thus, \texttt{MIB} does not only expose the failure of existing metrics; it also enables the training of a new evaluator that tracks human preference far more faithfully while preserving meaningful per-dimension diagnostics in multi-subject settings.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth]{figures/Human alignment of MIE.png}
+    \caption{Human alignment of MIE variants on \texttt{MIB-Gold}. Left: overall, seen-generator, and unseen-generator pairwise accuracy. Right: category-level F1 across existence, appearance, and interaction. The 4B LoRA-layer evaluator is the strongest overall model and remains clearly above third-party baselines even on the unseen-generator subset.}
+    \label{fig:mie_alignment}
+\end{figure}
+
+\paragraph{MIE Breakdown Analysis} We analyze where the gains of the learned evaluator actually come from. A consistent pattern emerges across all six checkpoints: every model performs better on the seen-generator subset than on the unseen-generator subset, confirming that cross-generator generalization remains a non-trivial challenge. However, the size of this gap depends strongly on the tuning regime. The smallest seen-to-unseen drop is achieved by \texttt{qwen35\_4b\_lora\_layer} at $-0.098$, whereas the largest drop appears in \texttt{2b layer\_only} at $-0.221$. This shows that additional model capacity alone is not enough; how that capacity is adapted is equally important.
+
+The LoRA-versus-layer comparison reinforces this conclusion. At 2B, LoRA-layer tuning improves pairwise accuracy by 0.061 and macro-F1 by 0.116 relative to \texttt{2B layer\_only}. At 4B, it still yields gains of 0.046 in pairwise accuracy and 0.044 in macro-F1 over \texttt{4B layer\_only}. Even at 0.8B, where the pairwise gain is nearly neutral, LoRA-layer tuning improves macro-F1 by 0.128. These results suggest that the primary benefit of LoRA-layer tuning is not merely stronger ranking, but consistently sharper diagnostic discrimination. In other words, the full six-checkpoint comparison supports a benchmark-utility claim rather than a simple ``bigger is better'' story.
+
+The category-level breakdown points to the same conclusion. \texttt{Existence} remains the easiest dimension overall, whereas \texttt{Appearance} and \texttt{Interaction} provide the more discriminative diagnostic challenge. As shown in Figure~\ref{fig:mie_breakdown}, generator shift is not uniform across dimensions: the strongest checkpoint remains highly stable on \texttt{Existence}, while the more semantic categories continue to differentiate model quality and adaptation strategy. Overall, the breakdown analysis clarifies that the best-performing evaluator is not simply the largest model, but the model that combines additional capacity with the right adaptation strategy and preserves diagnostic sensitivity under distribution shift.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth]{figures/Breakdown analysis of MIE variants.png}
+    \caption{Breakdown analysis of MIE variants. Left: seen-to-unseen generalization gap. Middle: LoRA-layer gains over layer-only tuning at different model scales. Right: category-level F1 for the strongest checkpoint. The results show that LoRA-layer tuning improves diagnostic quality across scales, while generator shift affects diagnostic categories non-uniformly: \texttt{Existence} remains the most stable dimension, and \texttt{Appearance}/\texttt{Interaction} remain more discriminative.}
+    \label{fig:mie_breakdown}
+\end{figure}
+
+\section{Limitations}
+
+\textbf{Scale and Diversity of the Gold Set.} While our 4K gold evaluation set was curated under a rigorous double-blind protocol, it inherently captures a finite subspace of the vast combinations of subjects and interactions. The current benchmark relies on 80 unique reference subjects, which, despite covering major categories of humans, animals, and everyday objects, may not fully represent the long-tail distribution of real-world identities or culturally specific concepts. The white-studio setting and global realistic-scale constraint further narrow the visual distribution to controlled compositional stress, leaving in-the-wild backgrounds and stylistic variations beyond the current scope. Future iterations will expand the reference concept library along long-tail axes and extend evaluation to less constrained visual settings.
+
+\textbf{Temporal Snapshot of Baseline Generators} 
+The MIB gold set reflects the performance of six representative generators at the time of collection. 
+Given the rapid velocity of the field, newer architectures may encounter unique failure modes, such as specific multi-modal reasoning bottlenecks, not fully captured by the current distribution. 
+To ensure the benchmark’s longevity, we commit to releasing versioned extensions as transformative models emerge, providing a standardized re-annotation protocol to facilitate community-driven growth.
+
+\textbf{VLM-Induced Noise in the Silver Set} 
+The 60K silver set utilizes a VLM-based pipeline for scalable preference pseudo-labeling. Despite its utility, VLM labeling is susceptible to model-specific biases, such as the tendency to conflate surface-level image fidelity with structural binding accuracy. 
+Furthermore, these models may underperform on culturally specific concepts underrepresented in their pretraining data. We recommend that practitioners using the silver set for model alignment (e.g., via DPO) treat these labels as high-fidelity but noisy proxies, incorporating human-in-the-loop auditing for safety-critical applications.
+
+
+\section{Conclusion}
+We introduced \textbf{MIBE}, a benchmark-and-metric framework for multi-subject personalized image generation, centered on the concept of \emph{binding}: the correct assignment of visual identities, appearances, and interactions to their designated subjects.
+The primary contribution of this work is \textbf{MIB}, a large-scale, rigorously annotated benchmark constructed via hierarchical prompt design and factorized scene buckets.  
+MIB provides (i) a 60K-pair silver training corpus with VLM-derived preference labels and attribute annotations, reaching 95.1\% cross-VLM preference agreement, enabling scalable metric learning and model alignment; and (ii) a 4K-pair gold evaluation set with double-blind human judgments across six state-of-the-art generators, providing a reproducible, human-grounded testbed for future comparisons.  
+To our knowledge, MIB is the first dataset to diagnose binding failures across factorized relation types and subject counts up to eight.
+Building on MIB, we further propose \textbf{MIE}, a reference-conditioned evaluator that operationalizes binding quality into three interpretable dimensions, Existence, Appearance, and Interaction, alongside a scalar preference signal.  
+MIE validates the utility of MIB as a training resource: trained exclusively on the silver set, MIE achieves 0.922 overall pairwise accuracy against human preference on the gold set, including 0.982 on seen generators and 0.884 on unseen generators, without any target-specific fine-tuning, demonstrating that the annotation protocol captures transferable binding signals rather than generator-specific artifacts.
+We position MIBE as open infrastructure for the multi-subject personalization community, and hope it becomes a standard testbed that accelerates progress on the binding problem and raises the bar for rigorous evaluation in personalized image generation.
+All data, annotations, and evaluation code will be publicly released under permissive licenses to maximize reproducibility and community uptake.
+
+
+
+\bibliographystyle{plain}  
+\bibliography{main.bib}
+
+
+\newpage
+\appendix
+
+
+\section{Appendix: Human Annotation Observations and Failure Mode Analysis}
+\label{sec:appendix_failure_modes}
+During the human annotation process for the gold test set, annotators systematically recorded recurring failure patterns across evaluated image pairs. These observations surfaced three consistent and practically significant findings, which we document here to inform future dataset construction and model development efforts.
+
+\paragraph{Failure Rates Increase with Subject Count.}
+Annotators consistently found that images depicting a larger number of subjects were significantly harder to evaluate correctly, and that generative models performed more poorly on such cases. The most common failure modes in high-subject-count scenes were subject omission, where one or more individuals were missing from the generated output, and appearance drift, where the physical attributes of individual subjects degraded as the total number of subjects increased. This trend was particularly pronounced for visually similar subjects (e.g., individuals wearing comparable outfits or sharing similar physical features), where models frequently confused or merged identities. Facial attributes and clothing details were identified as the two most error-prone visual channels under these conditions.
+
+% A representative 6-subject, 2-object prompt (ID: 6905) evaluated across four generative models. All models exhibit Existence failures, with subject omission ranging from 1 missing subject (FLUX2, ARK, GPT) to 3 missing subjects (GLM). Appearance drift co-occurs in proportion to the severity of omission, as models compensate for missing identities by blending residual subject features into the remaining figures. This example illustrates a consistent empirical trend: as the number of requested subjects increases, both the frequency and severity of compositional failures escalate across all evaluated models.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figures/Appendix-Failure Rates Increase with Subject Count.png}
+  \caption{\textbf{Failure Rates Increase with Subject Count} A representative 6-subject, 2-object prompt (ID: 6905) evaluated across four generative models. All models exhibit Existence failures, with subject omission ranging from 1 missing subject (FLUX2, Seedream-4.5, GPT) to 3 missing subjects (GLM).}
+  \label{fig:appendix-failure-rates-subject-count}
+\end{figure}
+
+\paragraph{Existence Failures Frequently Co-occur with Appearance Failures.}
+A substantial proportion of annotated samples exhibited a systematic co-occurrence between Existence and Appearance failures. When a model fails to render all requested subjects as distinct entities, it often compensates by blending the features of missing subjects into the remaining ones, for instance, combining the facial identity of subject $A$ with the wardrobe of subject $B$ into a single generated figure. This entanglement means that Existence failures are rarely isolated: they tend to cascade into cross-subject feature bleeding, inflating Appearance failure rates in a correlated rather than independent manner. This observation motivates treating the three diagnostic dimensions as structured but not fully orthogonal signals in practice, despite their conceptual independence.
+
+% A representative 4-subject prompt (ID: 32062) generated by Seedream, the best-performing model on this sample. The missing subject (Man in Black Suit) is not simply absent: its visual attributes,  the black tie and formal shirt,  are redistributed onto the surviving Bomber Jacket figure, producing a hybrid identity. This demonstrates that Existence and Appearance failures are structurally coupled: when a subject is omitted, the model tends to absorb its features into remaining figures, making Appearance degradation a systematic downstream consequence of Existence failure rather than an independent error.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/Appendix-Existence Failures Frequently Co-occur with Appearance Failures.png}
+  \caption{\textbf{Existence Failures Frequently Co-occur with Appearance Failures} A representative 4-subject prompt (ID: 32062) generated by Seedream, the best-performing model on this sample. The missing subject (Man in Black Suit) is not simply absent: its visual attributes,  the black tie and formal shirt,  are redistributed onto the surviving Bomber Jacket figure, producing a hybrid identity.}
+  \label{fig:appendix-existence-appearance-cooccurrence}
+\end{figure}
+
+\paragraph{Multi-Action Overload Leads to Subject Deformation}
+Annotators consistently observed that when a single subject is assigned more than one concurrent action or interaction, generative models struggle to faithfully execute all specified behaviors. This overload manifests in two characteristic failure patterns. First, \textit{figure splitting}: the model resolves the conflict by duplicating or fragmenting the subject, distributing distinct actions across two visually similar but non-identical figures,  effectively cloning the identity to satisfy each action independently. Second, \textit{action dropout}: the model selectively ignores or partially executes one of the assigned actions, producing a subject that satisfies only a subset of the prompt specification. Both failure modes were reproducible across multiple models and prompt configurations, suggesting that multi-action binding exceeds the compositional capacity of current generative architectures rather than reflecting prompt ambiguity.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{figures/Appendix-Multi-Action Overload Leads to Subject Deformation.png}
+  \caption{\textbf{Multi-Action Overload Leads to Subject Deformation.} When a subject is assigned more than one concurrent action, models either clone the subject to satisfy each action independently (Figure Splitting, ID: 61186) or silently discard one of the assigned actions (Action Dropout, ID: 60869). Both failure modes are observed in Nano Banana, a better performing model in these cases.}
+  \label{fig:appendix-multi-action-overload}
+\end{figure}
+
+\section{Appendix: Summarized Table of Related Work}
+\label{sec:appendix_related_work}
+Existing benchmarks for personalized and multi-subject image generation have made significant progress, yet they collectively leave a critical evaluation gap that MIB is designed to address.
+As summarized in Table~\ref{tab:benchmark_comparison}, earlier text-to-image benchmarks such as T2I-CompBench~\cite{huang2023t2i} entirely lack reference image support, making them unable to measure subject identity fidelity.
+Single-subject benchmarks like DreamBench~\cite{ruiz2023dreambooth} and DreamBench++~\cite{peng2024dreambench} introduced reference-based evaluation but restrict testing to one concept at a time, leaving multi-subject binding behavior unexamined.
+More recent efforts including XVerseBench~\cite{chen2025xverse}, PSRBench~\cite{wang2025psr}, OmniContext~\cite{wu2025omnigen2}, MultiBanana~\cite{oshima2025multibanana}, and MultiHuman-Testbench~\cite{borse2025multihuman} extend evaluation to multiple subjects, yet none provides factorized relation-level stress testing that isolates failure modes arising from physical interaction, occlusion, and identity leakage under increasing subject count.
+MultiBind~\cite{tian2026multibind} targets attribute-level misbinding diagnostics but does not consider the geometric and occlusion-driven binding failures that emerge in contact-rich scenes.
+Crucially, no prior benchmark provides human pairwise gold evaluation labels, which are essential for validating automated metric reliability in the multi-subject setting.
+MIB addresses all of these gaps simultaneously: it introduces factorized relation-level binding stress tests across up to eight subjects, pairs scalable silver supervision with human gold pairwise preference labels, and provides the first diagnostic framework specifically designed to expose and quantify identity collapse and appearance leakage in complex multi-subject generation.
+
+
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{1.12}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c c c c c p{3.2cm}}
+\toprule
+\textbf{Benchmark} 
+& \textbf{Year}
+& \textbf{Ref. Images} 
+& \textbf{Multi-subj.} 
+& \textbf{Stress / Eval. Design} 
+& \textbf{Human Gold Eval.}
+& \textbf{Pref./Diag. Supervision}
+& \textbf{Main Gap} \\
+\midrule
+
+T2I-CompBench~\cite{huang2023t2i}
+& 2023
+& \xmark
+& Text-only
+& Text-only composition
+& \xmark
+& \xmark
+& Cannot measure reference identity, identity collapse, or appearance leakage. \\
+
+DreamBench~\cite{ruiz2023dreambooth}
+& 2023
+& \cmark
+& \xmark
+& Single-subject prompts
+& \xmark
+& \xmark
+& No multi-subject binding or interaction evaluation. \\
+
+DreamBench++~\cite{peng2024dreambench}
+& 2024
+& \cmark
+& \xmark
+& Single-subject, human-aligned automated eval.
+& \xmark
+& \xmark
+& Broader single-subject evaluation, but no high-subject-count binding stress. \\
+
+CustomConcept101~\cite{kumari2023multi}
+& 2023
+& \cmark
+& Limited
+& Multi-concept composition
+& \xmark
+& \xmark
+& Not designed for contact-rich or occlusion-driven identity binding. \\
+
+XVerseBench~\cite{chen2025xverse}
+& 2025
+& \cmark
+& \cmark
+& Single / dual / triple subjects
+& \xmark
+& \xmark
+& Limited high-subject-count and relation-level stress factorization. \\
+
+PSRBench~\cite{wang2025psr}
+& 2025
+& \cmark
+& \cmark
+& Broad capability subsets
+& \xmark
+& Reward metrics
+& Capability-oriented; not a factorized diagnostic benchmark for interaction/occlusion binding failures. \\
+
+OmniContext~\cite{wu2025omnigen2}
+& 2025
+& \cmark
+& \cmark
+& In-context character / object / scene eval.
+& \xmark
+& Automated judge scores
+& Broad in-context consistency benchmark, but lacks human gold and factorized relation-level binding stress. \\
+
+MultiBanana~\cite{oshima2025multibanana}
+& 2025
+& \cmark
+& \cmark
+& Multi-reference challenges
+& \xmark
+& VLM-based scores
+& Covers multi-reference difficulty, but not hierarchical interaction/occlusion diagnosis or human pairwise gold labels. \\
+
+MultiHuman-Testbench~\cite{borse2025multihuman}
+& 2025
+& \cmark
+& \cmark
+& Multi-human actions / faces
+& \xmark
+& Metric suite
+& Restricted to human subjects; does not cover human-object or object-object binding. \\
+
+MultiBind~\cite{tian2026multibind}
+& 2026
+& \cmark
+& \cmark
+& Attribute / slot misbinding
+& \xmark
+& Diagnostic metrics
+& Focuses on attribute-level misbinding rather than factorized physical interaction and occlusion stress. \\
+
+\midrule
+\textbf{MIB (Ours)}
+& \textbf{2026}
+& \cmark
+& \cmark
+& \textbf{Factorized relation-level binding stress}
+& \cmark
+& \cmark
+& -- \\
+\bottomrule
+\end{tabular}
+}
+\vspace{1em}
+\caption{Comparison with existing benchmarks. DreamBench and CustomConcept101 refer to evaluation sets from DreamBooth and Custom Diffusion respectively. MIB uniquely targets factorized relation-level binding stress with both scalable silver supervision and human gold evaluation.}
+\label{tab:benchmark_comparison}
+\end{table}
+
+
+
+\section{Appendix: SOP Prompt}
+\label{sec:app_SOP}
+\begin{verbatim}
+You are an expert judge for multi-subject personalized image generation.
+
+You will receive:
+1. The original generation prompt.
+2. Reference images for each subject mentioned in the prompt.
+3. Candidate image A.
+4. Candidate image B.
+
+Your job consists of two parts:
+Part 1: Independent Evaluation
+Evaluate candidate A and candidate B independently. For each image, strictly evaluate:
+- Existence: Are ALL the required subjects in the references physically present?
+  (Generic versions count as 1; completely missing counts as 0).
+- Appearance: Are the subjects rendered WITHOUT structural deformations? Do the
+  generated subjects strictly match the references across ALL features:
+  Face/Skin tone, Hair style, Top clothing, AND Bottoms (pants)?
+- Interaction: Does the generated image reflect the described actions, maintain
+  correct proportions, and follow realistic spatial/physical laws?
+
+Part 2: Overall Comparison
+Compare Candidate A and B and decide the overall winner.
+
+OUTPUT RULES:
+- Use ONLY the provided prompt and images.
+- All dimensional scores (`*_existence', `*_appearance', `*_interaction') must be
+  strictly binary: 1 (fully correct) or 0 (any issue exists).
+- `winner' must be either "A" or "B" (Never "Tie").
+- Return valid JSON ONLY. Absolutely NO markdown formatting.
+- CRITICAL: To focus on errors, the JSON MUST begin with `a_flaw_log` and
+  `b_flaw_log`. DO NOT list perfect subjects. ONLY list subjects with errors and
+  explicitly state what is wrong (Missing, Wrong Face/Hair/Skin, Wrong Top,
+  Wrong Pants, Action/Spatial/Physics Error). If an image is 100% perfect,
+  write "None".
+
+SCORING NOTES & SPECIFIC EDGE CASES:
+- Appearance (Strict Identity & Wardrobe): You MUST check the whole person. If a
+  subject has the correct top but wrong pants, wrong hair, or mismatched skin
+  tone/face compared to the reference, score Appearance as 0 and log the
+  specific flaw (e.g., "Woman red hoodie: Wrong face/skin color",
+  "Man flannel shirt: Wrong pants color").
+- Appearance (Mangled/Melted): Any structural artifacts (extra limbs, mangled
+  faces) = Appearance 0.
+- Existence vs Appearance: If requested "man denim jacket" is drawn as a generic
+  man in a grey sweater, Existence is 1, Appearance is 0.
+- Interaction (Partial): Evaluate interactions based ONLY on rendered subjects.
+  If an interaction requires a missing subject, Interaction is 0.
+- Interaction (Physics, Environment & Scale): Obvious physical violations
+  (e.g., objects floating in mid-air without support) OR severe scale distortions
+  between objects (e.g., abnormally giant bread, miniature people) = Interaction 0.
+  HOWEVER, the presence of unprompted but logical supporting structures
+  (e.g., tables, pedestals) used to hold objects is PERMITTED and should NOT be
+  penalized.
+
+EXPECTED JSON SCHEMA:
+{
+  "a_flaw_log": "Middle eastern man: Appearance (wears green sweater instead of
+  beige shirt). Man flannel shirt: Appearance (wrong pants color). Woman red
+  hoodie: Appearance (mismatched face/skin/hair). Interaction: Man is not
+  occluded by the woman; The burger is floating in mid-air.",
+  "b_flaw_log": "Middle eastern man: Missing. Man bomber jacket: Missing. DSLR
+  camera: Missing. Interaction: Man is not walking towards/staring at the woman;
+  Fails due to missing interaction targets.",
+  "a_existence": 1,
+  "a_appearance": 0,
+  "a_interaction": 0,
+  "b_existence": 0,
+  "b_appearance": 0,
+  "b_interaction": 0,
+  "winner": "A"
+}
+\end{verbatim}
+
+\newpage
+\section{Appendix: Demos of Generated Training Labels}
+\label{sec:app_SOP_demo}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_1.png}
+        \caption{Action and Target Errors}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_2.png}
+        \caption{Physics and Spatial Violations}
+    \end{subfigure}
+    \vspace{1em}
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_3.png}
+        \caption{Appearance and Occlusion Errors}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.46\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_4.png}
+        \caption{Scale Distortion and Color Mismatch}
+    \end{subfigure}
+    \vspace{1em}
+    \begin{subfigure}[b]{0.8\textwidth}
+        \includegraphics[width=\textwidth]{figures/SOP_demo_5.png}
+        \caption{Robust Diagnostics in Highly Complex (6-Subject) Scenes}
+    \end{subfigure}
+    \caption{Qualitative examples of strict cross-model consensus. The externalized flaw logs demonstrate that both VLMs effectively utilize the SOP to catch fine-grained errors in appearance, physical realism, interaction semantics, and complex multi-subject scaling.}
+    \label{fig:sop_demos}
+\end{figure}
+
+\section{MIE Configuration}
+\label{sec:appendix_configuration}
+
+
+\begin{table}[H]
+\centering
+\caption{Training Hyperparameters (configuration shown for the 0.8B variant; 2B/4B variants use the same setup with adjusted batch size to fit memory constraints).}
+\label{tab:training_hparams}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{l l}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Base Model & Qwen3.5-0.8B (via unsloth) \\
+Fine-tuning Strategy & Layer-only unfreezing (top 4 layers) \\
+Optimizer & AdamW \\
+Learning Rate & $2 \times 10^{-5}$ \\
+Weight Decay & 0.01 \\
+LR Scheduler & Cosine schedule with warmup \\
+Warmup Ratio & 0.03 \\
+Batch Size (per device) & 4 \\
+Gradient Accumulation Steps & 8 \\
+Target Effective Batch Size & 16 \\
+Max Epochs & 3 (dynamic auto-scaling: 2--6) \\
+Gradient Clipping Norm & 1.0 \\
+Image Resolution & $512 \times 512$ \\
+Global Random Seed & 3407 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Multi-task Loss Configuration}
+\label{tab:loss_config}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{l l}
+\toprule
+\textbf{Component} & \textbf{Setting} \\
+\midrule
+Preference Ranking Loss & Margin Ranking Loss ($\text{margin} = 0.1$) \\
+Ranking Loss Weight ($\alpha$) & 1.0 \\
+Diagnostic Classification Loss & BCEWithLogitsLoss \\
+Classification Loss Weight ($\beta$) & 0.5 \\
+Early Stopping & Patience: 2 epochs, $\text{min\_delta} = 10^{-3}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Inference and Evaluation Setup}
+\label{tab:eval_config}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{l p{8.5cm}}
+\toprule
+\textbf{Setting} & \textbf{Detail} \\
+\midrule
+MIE Inference Precision & Default checkpoint precision (bf16/fp16) \\
+Evaluation Resolution & $512 \times 512$ (preserving aspect ratio) \\
+Metric 1: Preference Accuracy & Binary choice based on scoring head logits \\
+Metric 2: Diagnostic Output & Weakest dimension via Sigmoid from classification head \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Baseline Models Configuration}
+\label{tab:baselines_config}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l p{8.5cm}}
+\toprule
+\textbf{Model} & \textbf{Configuration} \\
+\midrule
+CLIP Baseline & \texttt{openai/clip-vit-base-patch32} \newline Text Truncation: Enabled \newline Scoring: Cosine similarity between text embedding and pooled image embedding \\
+\addlinespace
+DINO Baseline & \texttt{facebook/dinov2-base} \newline Scoring: Cosine similarity between the average normalized subject reference embeddings and generated image embeddings \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\newpage
+\input{checklist}
+\end{document}
+
+

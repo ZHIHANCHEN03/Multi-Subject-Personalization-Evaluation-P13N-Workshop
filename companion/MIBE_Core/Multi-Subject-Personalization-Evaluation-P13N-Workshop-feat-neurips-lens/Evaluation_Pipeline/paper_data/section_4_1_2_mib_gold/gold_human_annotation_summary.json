@@ -1,0 +1,26 @@
+{
+  "source_files": [
+    "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/Evaluation_Pipeline/data/human_annotations/round10_annotations_latest.csv",
+    "/Users/bytedance/Downloads/Multi-Subject-Personalization-Evaluation-P13N-Workshop/Evaluation_Pipeline/data/human_annotations/export_round1260_20260503.csv"
+  ],
+  "group_counts": {
+    "total_groups": 4020,
+    "by_dataset": {
+      "v10": 1500,
+      "v13": 2520
+    },
+    "kept_pairs_by_dataset": {
+      "v10": 1411,
+      "v13": 2279
+    },
+    "dropped_preference_inconsistent_by_dataset": {
+      "v10": 89,
+      "v13": 241
+    }
+  },
+  "category_ambiguous_counts": {
+    "appearance": 1595,
+    "existence": 601,
+    "interaction": 2027
+  }
+}

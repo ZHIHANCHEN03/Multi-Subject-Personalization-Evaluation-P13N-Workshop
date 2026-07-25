@@ -1,7 +1,7 @@
 {
   "labelers": [
-    "Qin",
-    "Suwen"
+    "labeler_A",
+    "labeler_B"
   ],
   "summary": {
     "best_of_n_s0": {

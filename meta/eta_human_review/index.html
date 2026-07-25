@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>η 盲判工具 — Diag-DPO</title>
+<style>
+  :root{ --bg:#0f1115; --panel:#171a21; --line:#2a2f3a; --fg:#e7e9ee; --mut:#9aa3b2;
+         --accent:#4f8cff; --good:#37c871; --warn:#f0a63a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft Yahei",sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);
+         padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header .title{font-weight:700}
+  .bar{flex:1;min-width:160px;height:8px;background:#0b0d11;border-radius:6px;overflow:hidden}
+  .bar>div{height:100%;background:var(--accent);width:0%}
+  .muted{color:var(--mut)}
+  button{font:inherit;color:var(--fg);background:#222733;border:1px solid var(--line);
+          border-radius:8px;padding:7px 12px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.ghost{background:transparent}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+  .prompt{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+  .prompt .p{font-size:16px}
+  .badge{display:inline-block;background:#243044;color:#bcd2ff;border-radius:20px;padding:1px 10px;font-size:12px;margin-left:8px}
+  .refs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .refs figure{margin:0;text-align:center}
+  .refs img{height:74px;border-radius:8px;border:1px solid var(--line);display:block}
+  .refs figcaption{font-size:11px;color:var(--mut);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .cand{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:10px;text-align:center;transition:border-color .1s}
+  .cand.sel{border-color:var(--good)}
+  .cand img{width:100%;max-height:62vh;object-fit:contain;border-radius:8px;background:#000}
+  .cand .k{font-size:12px;color:var(--mut);margin-bottom:6px}
+  .cand .pick{margin-top:8px;width:100%}
+  .center{display:flex;gap:10px;justify-content:center;margin:14px 0}
+  .hint{color:var(--mut);font-size:12.5px;text-align:center;margin-top:6px}
+  kbd{background:#0b0d11;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;font-size:12px}
+  #summary{display:none}
+  table{border-collapse:collapse;width:100%;margin-top:10px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:center}
+  th{background:#1c2129;color:var(--mut);font-weight:600}
+  .win{color:var(--good);font-weight:700}
+  .sub{color:var(--mut);font-size:13px}
+  a.dl{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <span class="title">η 盲判</span>
+  <input id="rev" placeholder="你的名字/工号(必填)" autocomplete="off"
+         style="background:#0b0d11;border:1px solid var(--line);border-radius:8px;color:var(--fg);padding:6px 10px;font:inherit;width:160px">
+  <span id="prog" class="muted">0 / 0</span>
+  <div class="bar"><div id="progbar"></div></div>
+  <button class="ghost" id="btnPrev">← 上一题</button>
+  <button class="ghost" id="btnSummary">看结果</button>
+  <button id="btnExport">导出 JSON</button>
+  <button class="ghost" id="btnReset">重置</button>
+</header>
+
+<div class="wrap">
+  <div id="judge">
+    <div class="prompt">
+      <div class="p"><span id="pPrompt"></span><span class="badge" id="pN"></span><span class="badge" id="pIdx"></span></div>
+      <div class="refs" id="pRefs"></div>
+    </div>
+    <div class="pair">
+      <div class="cand" id="candL">
+        <div class="k">左图</div>
+        <img id="imgL" alt="左">
+        <button class="pick" data-side="left">◀ 左更好　<span class="sub">←</span></button>
+      </div>
+      <div class="cand" id="candR">
+        <div class="k">右图</div>
+        <img id="imgR" alt="右">
+        <button class="pick" data-side="right">右更好 ▶　<span class="sub">→</span></button>
+      </div>
+    </div>
+    <div class="center">
+      <button data-side="tie">平局 / 看不出　<kbd>空格</kbd></button>
+      <button class="ghost" data-side="skip">跳过　<kbd>S</kbd></button>
+    </div>
+    <div class="hint">盲判:左右哪张更好地满足 prompt(所有主体都<b>出现</b>、<b>外观</b>匹配参考图、<b>交互</b>符合描述)。
+      快捷键 <kbd>←</kbd> 左 · <kbd>→</kbd> 右 · <kbd>空格</kbd> 平 · <kbd>S</kbd> 跳过 · <kbd>B</kbd> 上一题</div>
+  </div>
+
+  <div id="summary">
+    <h2>结果汇总 <span class="sub">(盲判揭盲)</span></h2>
+    <div id="sumBody"></div>
+    <p class="sub">导出的 JSON 含每题选择 + 此汇总,交回给我合并进 <code>eval/best_eta/result/</code>。</p>
+  </div>
+</div>
+
+<script src="manifest.js"></script>
+<script>
+const V="eta_human_v3";
+const ASSET="assets/";
+const ETAS=["0.0","0.5"];
+const PAIRS=[["0.0","0.5"]];
+const TASKS=window.MANIFEST.tasks;
+const PEAK=window.MANIFEST.peak_steps;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function buildList(){
+  let items=[];
+  for(const t of TASKS){
+    for(const [x,y] of PAIRS){
+      const flip=Math.random()<0.5;
+      const left=flip?y:x, right=flip?x:y;
+      items.push({tid:t.tid, N:t.N, left_eta:left, right_eta:right, choice:null});
+    }
+  }
+  return shuffle(items);
+}
+function taskOf(tid){return TASKS.find(t=>t.tid===tid)}
+
+let list, idx;
+function load(){
+  const raw=localStorage.getItem(V+"_list");
+  if(raw){ list=JSON.parse(raw); idx=+(localStorage.getItem(V+"_idx")||0); }
+  else { list=buildList(); idx=0; save(); }
+}
+function save(){ localStorage.setItem(V+"_list",JSON.stringify(list)); localStorage.setItem(V+"_idx",idx); }
+
+function done(){ return list.filter(i=>i.choice!==null).length; }
+function render(){
+  if(idx>=list.length){ showSummary(); return; }
+  document.getElementById("judge").style.display="";
+  document.getElementById("summary").style.display="none";
+  const it=list[idx], t=taskOf(it.tid);
+  document.getElementById("pPrompt").textContent=t.prompt;
+  document.getElementById("pN").textContent="N="+t.N;
+  document.getElementById("pIdx").textContent=(idx+1)+" / "+list.length+(it.choice?"  已答:"+labelOf(it.choice):"");
+  const refs=document.getElementById("pRefs"); refs.innerHTML="";
+  t.subjects.forEach((s,i)=>{
+    const f=document.createElement("figure");
+    f.innerHTML='<img src="'+ASSET+t.refs[i]+'"><figcaption>'+s+'</figcaption>';
+    refs.appendChild(f);
+  });
+  document.getElementById("imgL").src=ASSET+t.imgs[it.left_eta];
+  document.getElementById("imgR").src=ASSET+t.imgs[it.right_eta];
+  document.getElementById("candL").classList.toggle("sel",it.choice==="left");
+  document.getElementById("candR").classList.toggle("sel",it.choice==="right");
+  const d=done();
+  document.getElementById("prog").textContent=d+" / "+list.length;
+  document.getElementById("progbar").style.width=(100*d/list.length)+"%";
+}
+function labelOf(c){return {left:"左",right:"右",tie:"平",skip:"跳"}[c]||c}
+
+function choose(side){
+  if(idx>=list.length)return;
+  list[idx].choice=side; save();
+  // 前进到下一未答(或末尾)
+  let n=idx+1;
+  while(n<list.length && list[n].choice!==null) n++;
+  idx=n; save(); render();
+}
+function prev(){ if(idx>0){idx--; save(); render();} }
+
+// —— 汇总(Wilson CI, 同 judge_eta 口径) ——
+function wilson(k,n,z=1.96){ if(!n)return[0,0]; const p=k/n,d=1+z*z/n,
+  c=(p+z*z/(2*n))/d, h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d; return [Math.max(0,c-h),Math.min(1,c+h)];}
+function computeSummary(){
+  // head-to-head
+  const key=(a,b)=>[a,b].sort().join("|");
+  const h2h={}; ETAS.forEach((a,i)=>ETAS.slice(i+1).forEach(b=>h2h[key(a,b)]={[a]:0,[b]:0,tie:0}));
+  const byN={}; // N -> {eta:{w,n}}
+  let answered=0;
+  for(const it of list){
+    if(it.choice===null||it.choice==="skip")continue;
+    answered++;
+    const win = it.choice==="left"?it.left_eta : it.choice==="right"?it.right_eta : "tie";
+    const K=key(it.left_eta,it.right_eta);
+    if(win==="tie") h2h[K].tie++; else h2h[K][win]++;
+    const t=taskOf(it.tid), nb=t.N;
+    byN[nb]=byN[nb]||{};
+    [it.left_eta,it.right_eta].forEach(e=>{byN[nb][e]=byN[nb][e]||{w:0,n:0};});
+    if(win!=="tie"){ byN[nb][it.left_eta].n++; byN[nb][it.right_eta].n++;
+      byN[nb][win].w++; }
+  }
+  // overall
+  const tot={}; ETAS.forEach(e=>tot[e]={w:0,n:0});
+  for(const [x,y] of PAIRS){ const d=h2h[key(x,y)]; const n=d[x]+d[y];
+    tot[x].w+=d[x]; tot[x].n+=n; tot[y].w+=d[y]; tot[y].n+=n; }
+  const overall={}; ETAS.forEach(e=>{const [lo,hi]=wilson(tot[e].w,tot[e].n);
+    overall[e]={wins:tot[e].w,n:tot[e].n,winrate:tot[e].n?+(tot[e].w/tot[e].n).toFixed(4):0,ci_lo:+lo.toFixed(4),ci_hi:+hi.toFixed(4)};});
+  const best=ETAS.slice().sort((a,b)=>overall[b].winrate-overall[a].winrate)[0];
+  return {judge:"human", peak_steps:PEAK, answered, total:list.length, h2h, overall, best_eta:best, byN};
+}
+function showSummary(){
+  document.getElementById("judge").style.display="none";
+  document.getElementById("summary").style.display="";
+  const s=computeSummary();
+  let html='<p class="sub">已答 '+s.answered+' / '+s.total+' · 最优 η(名义)= <b class="win">'+s.best_eta+'</b> @ step'+PEAK[s.best_eta]+'</p>';
+  html+='<h3>各 η 总体胜率</h3><table><tr><th>η</th><th>胜率</th><th>胜/决</th><th>95% CI</th></tr>';
+  for(const e of ETAS){const o=s.overall[e];const b=e===s.best_eta?' class="win"':'';
+    html+='<tr><td'+b+'>'+e+'</td><td'+b+'>'+o.winrate+'</td><td>'+o.wins+'/'+o.n+'</td><td>['+o.ci_lo+', '+o.ci_hi+']</td></tr>';}
+  html+='</table>';
+  html+='<h3>Head-to-head</h3><table><tr><th>对比</th><th>比分</th><th>平</th></tr>';
+  for(const [x,y] of PAIRS){const d=s.h2h[[x,y].sort().join("|")];
+    html+='<tr><td>'+x+' vs '+y+'</td><td>'+d[x]+' – '+d[y]+'</td><td>'+d.tie+'</td></tr>';}
+  html+='</table>';
+  html+='<h3>按 N 分桶(η 是否在高 N 更有用)</h3><table><tr><th>N</th>'+ETAS.map(e=>'<th>'+e+'</th>').join('')+'</tr>';
+  Object.keys(s.byN).sort((a,b)=>a-b).forEach(nb=>{
+    html+='<tr><td>'+nb+'</td>'+ETAS.map(e=>{const c=s.byN[nb][e];return '<td>'+(c&&c.n?(c.w/c.n).toFixed(2)+' <span class="sub">('+c.w+'/'+c.n+')</span>':'—')+'</td>';}).join('')+'</tr>';
+  });
+  html+='</table>';
+  document.getElementById("sumBody").innerHTML=html;
+  window.__summary=s;
+}
+function reviewer(){ return (document.getElementById("rev").value||"").trim(); }
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9_-]+/g,"_").replace(/^_+|_+$/g,"")||"anon"; }
+function exportJSON(){
+  const rev=reviewer();
+  if(!rev){ alert("请先在左上角填写你的名字/工号,再导出。"); document.getElementById("rev").focus(); return; }
+  const d=done();
+  if(d<list.length && !confirm("还有 "+(list.length-d)+" 题未答,确定现在导出?")) return;
+  const s=window.__summary||computeSummary();
+  const out={generated_at:new Date().toISOString(), reviewer:rev, judge:"human",
+    answered:d, total:list.length,
+    comparisons:list.map(i=>({tid:i.tid,N:i.N,left_eta:i.left_eta,right_eta:i.right_eta,choice:i.choice})),
+    summary:s};
+  const blob=new Blob([JSON.stringify(out,null,1)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="human_eta_votes__"+slug(rev)+".json"; a.click();
+}
+
+const revEl=document.getElementById("rev");
+revEl.value=localStorage.getItem(V+"_rev")||"";
+revEl.oninput=()=>localStorage.setItem(V+"_rev",revEl.value);
+document.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>choose(b.dataset.side));
+document.getElementById("btnPrev").onclick=prev;
+document.getElementById("btnSummary").onclick=showSummary;
+document.getElementById("btnExport").onclick=exportJSON;
+document.getElementById("btnReset").onclick=()=>{ if(confirm("清空所有判定并重新随机排序?")){localStorage.removeItem(V+"_list");localStorage.removeItem(V+"_idx");load();idx=0;save();render();}};
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if(e.key==="ArrowLeft")choose("left");
+  else if(e.key==="ArrowRight")choose("right");
+  else if(e.key===" "||e.key==="ArrowDown"){e.preventDefault();choose("tie");}
+  else if(e.key.toLowerCase()==="s")choose("skip");
+  else if(e.key.toLowerCase()==="b")prev();
+});
+load(); render();
+</script>
+</body>
+</html>

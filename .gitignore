@@ -1,39 +1,43 @@
+# === Minimal .gitignore — only true junk / regenerable caches / secrets ===
+# Everything else (submission/, companion/, meta/) IS tracked in the repo.
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Secrets / env
 .env
 *.env
 **/.env
 *token*
 *credentials*
+*secret*
 
-# === Repo structure: 3 folders at root ===
-# submission/  -> MIDC source (paper + code + results), git-tracked, submit-ready
-# companion/   -> MIBE companion-paper data, gitignored (under review separately)
-# meta/        -> working docs, refs, human-eval tarballs, external repos, gitignored
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# --- companion/: MIBE data, not part of MIDC submission ---
-companion/
-
-# --- meta: working material, not part of MIDC submission ---
-meta/
-
-# --- within submission/: caches, generated outputs, human-eval artifacts ---
-.venvs/
-*.log
+# Regenerable model / cache dirs (large, not source)
 **/.cache/
-submission/round1/results/
-submission/round1_1/trials/
-submission/round1_1/*.log
-submission/round2/.cache/
-submission/round2/results/
-submission/round2/human_eval/pairs/
-submission/round2/human_eval/manifest.js
-submission/round2/human_eval/ballot.csv
-submission/round2/human_eval.zip
-submission/round2/human_eval_key.json
-submission/round2/human_eval_umo_vs_oneshot/
-submission/round2/human_eval_umo_vs_oneshot.tar.gz
-submission/round2/human_eval_umo_vs_oneshot_forlabelers/
-submission/round2/human_eval_umo_vs_oneshot_forlabelers.tar.gz
-# round2/results_r2/ and round2/results_flux2/ ARE committed (raw per-task records)
+**/.venv/
+.venvs/
+**/hf_cache/
+**/torch_cache/
+
+# Logs
+*.log
+
+# === Explicitly NOT ignored (tracked) ===
+# submission/   — MIDC source (paper + code + results)
+# companion/    — MIBE companion-paper data
+# meta/         — working docs, refs, human-eval tarballs, external reference clones

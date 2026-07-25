@@ -1,0 +1,6 @@
+XVerse-main/face_pth/InsightFace_Pytorch%2Bmodel_ir_se50.pth filter=lfs diff=lfs merge=lfs -text
+Model_Training/data_v2/60k_LLM_Result/*.jsonl filter=lfs diff=lfs merge=lfs -text
+Model_Training/data_v2/v2_prefilter_candidates.json filter=lfs diff=lfs merge=lfs -text
+Model_Training/data_v2/train_v2.json filter=lfs diff=lfs merge=lfs -text
+Model_Training/data_v2/val_v2.json filter=lfs diff=lfs merge=lfs -text
+Model_Training/data_v2/test_v2.json filter=lfs diff=lfs merge=lfs -text

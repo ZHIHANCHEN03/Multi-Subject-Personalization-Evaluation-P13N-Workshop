@@ -1,0 +1,1657 @@
+{
+  "labeler": "labeler_C",
+  "n_pairs": 200,
+  "n_voted": 200,
+  "votes": {
+    "ours_v2_s0_vs_umo_s0__hard_041443": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_041443"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_040895": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_040895"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_053443": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_053443"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_043971": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_043971"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_058431": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_058431"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_058591": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_058591"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_047807": {
+      "q1": "LEFT",
+      "q2": "RIGHT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_047807"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_049787": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_049787"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_057135": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_057135"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_049315": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_049315"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_052975": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_052975"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046803": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046803"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_059075": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_059075"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_057411": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_057411"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046659": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046659"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_055403": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_055403"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_041155": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_041155"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_050515": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_050515"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_045879": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_045879"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_047271": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_047271"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_047199": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_047199"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_048579": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_048579"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_040539": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_040539"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_047891": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_047891"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_040327": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_040327"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_058435": {
+      "q1": "LEFT",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_058435"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_047151": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_047151"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_054063": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_054063"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_052671": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_052671"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_050519": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_050519"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_053703": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_053703"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_047875": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_047875"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_043375": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_043375"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_056551": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_056551"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_059099": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_059099"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_055899": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_055899"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_041671": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_041671"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_045303": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_045303"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046247": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046247"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_049027": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_049027"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_055739": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_055739"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_059499": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_059499"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_044103": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_044103"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_043655": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_043655"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_056535": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_056535"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_057827": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_057827"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046751": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046751"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_055695": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_055695"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_058047": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_058047"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_043559": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_043559"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_040399": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_040399"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_052607": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_052607"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_052983": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_052983"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_054123": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_054123"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_059947": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_059947"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_042663": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "LEFT",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_042663"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_041683": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_041683"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046615": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046615"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_050135": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_050135"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_045095": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_045095"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_054299": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_054299"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_054839": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_054839"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_045295": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_045295"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_053395": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_053395"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046259": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046259"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_042491": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_042491"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_055343": {
+      "q1": "LEFT",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_055343"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_048983": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_048983"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_048007": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_048007"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_044883": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_044883"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_042895": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_042895"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_054407": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_054407"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_045339": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_045339"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046907": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046907"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_046323": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_046323"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_051747": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_051747"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_055583": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_055583"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_052927": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_052927"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_056851": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_056851"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_041463": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_041463"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_057387": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_057387"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_043223": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_043223"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_051155": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_051155"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_054447": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_054447"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_040111": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_040111"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_059379": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_059379"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_052023": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_052023"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_056955": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_056955"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_056395": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_056395"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_042251": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_042251"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_050399": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_050399"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_043031": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_043031"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_051315": {
+      "q1": "LEFT",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_051315"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_045223": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_045223"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_053915": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_053915"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_052839": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_052839"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_051627": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_051627"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_041231": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_041231"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_058767": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_058767"
+    },
+    "ours_v2_s0_vs_umo_s0__hard_058655": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "umo_s0",
+      "pair_id": "ours_v2_s0_vs_umo_s0__hard_058655"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_056659": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_056659"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040695": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040695"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_059499": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_059499"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_045631": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_045631"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_054051": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_054051"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_051155": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_051155"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_058603": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_058603"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_057135": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_057135"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_053703": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_053703"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_052975": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_052975"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_051275": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_051275"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_052287": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_052287"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_052527": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_052527"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_059379": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_059379"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_054299": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_054299"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_055343": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_055343"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_045251": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_045251"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_057483": {
+      "q1": "LEFT",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_057483"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_046895": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_046895"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041783": {
+      "q1": "LEFT",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041783"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_048583": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_048583"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040959": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040959"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_049787": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_049787"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_042127": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_042127"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_048151": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_048151"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_058431": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_058431"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_058711": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_058711"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041731": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041731"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_043655": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_043655"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_057699": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_057699"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_043103": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_043103"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_043971": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_043971"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040035": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040035"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_046283": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_046283"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_052423": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_052423"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_046191": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_046191"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_053915": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_053915"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_052407": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_052407"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040399": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040399"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_059099": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_059099"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_059723": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_059723"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_045883": {
+      "q1": "RIGHT",
+      "q2": "RIGHT",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_045883"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_054095": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_054095"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_055739": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_055739"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_046659": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_046659"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_042251": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_042251"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_044263": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_044263"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_045879": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_045879"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_043559": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_043559"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_053443": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_053443"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_050291": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_050291"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_052023": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_052023"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041931": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041931"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041719": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041719"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_057251": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_057251"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_047807": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_047807"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_058435": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_058435"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_052607": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_052607"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_043091": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_043091"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040375": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040375"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_053139": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_053139"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_055899": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_055899"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041563": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041563"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_054547": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_054547"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041683": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041683"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_055667": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_055667"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040363": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040363"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_057923": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_057923"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_050519": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_050519"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_059631": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_059631"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_053931": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_053931"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_057755": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_057755"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_047199": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_047199"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_054839": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_054839"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_048983": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_048983"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_059947": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_059947"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_055999": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_055999"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_058631": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_058631"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041155": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041155"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_056039": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_056039"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_042703": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_042703"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_042447": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_042447"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_043375": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_043375"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_055475": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_055475"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_046975": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_046975"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_041671": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_041671"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_050415": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_050415"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_046615": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "RIGHT",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_046615"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_058691": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_058691"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_050399": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_050399"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_046987": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_046987"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_056563": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_056563"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_058655": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_058655"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040327": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040327"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_040167": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "RIGHT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_040167"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_045339": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_045339"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_047271": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_047271"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_056851": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_056851"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_056595": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "q3": "LEFT",
+      "q4": "LEFT",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_056595"
+    },
+    "ours_v2_s0_vs_best_of_n_s0__hard_051747": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "q3": "TIE",
+      "q4": "TIE",
+      "comparison": "best_of_n_s0",
+      "pair_id": "ours_v2_s0_vs_best_of_n_s0__hard_051747"
+    }
+  },
+  "summary": {
+    "answered": 200,
+    "total": 200,
+    "byCmp": {
+      "umo_s0": {
+        "q1": {
+          "L": 14,
+          "R": 16,
+          "T": 70
+        },
+        "q2": {
+          "L": 11,
+          "R": 11,
+          "T": 78
+        },
+        "q3": {
+          "L": 9,
+          "R": 17,
+          "T": 74
+        },
+        "q4": {
+          "L": 15,
+          "R": 23,
+          "T": 62
+        }
+      },
+      "best_of_n_s0": {
+        "q1": {
+          "L": 7,
+          "R": 12,
+          "T": 81
+        },
+        "q2": {
+          "L": 6,
+          "R": 7,
+          "T": 87
+        },
+        "q3": {
+          "L": 7,
+          "R": 13,
+          "T": 80
+        },
+        "q4": {
+          "L": 11,
+          "R": 16,
+          "T": 73
+        }
+      }
+    }
+  }
+}
