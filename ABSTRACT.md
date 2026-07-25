@@ -1,4 +1,4 @@
-# Training-Free Test-Time Repair of Multi-Subject Identity Collapse via a Dual-Signal Decomposed Verifier
+# MIDC: Training-Free Multi-subject Interaction Diagnosis and Correction via a Dual-Signal Decomposed Verifier
 
 > AAAI-27 (2027) abstract submission (due 2026-07-21). The abstract body below
 > is complete and submittable as-is: it carries concrete Round 1.1 preliminary
@@ -111,7 +111,7 @@ of the gap to retraining at zero training cost.
 
 **⚠️ Action items for this paper**:
 1. **By 2026-07-21**: submit the abstract above (it's complete, no placeholders) + pick primary/secondary topics + nominate a reciprocal reviewer.
-   - **Title**: `Training-Free Test-Time Repair of Multi-Subject Identity Collapse via a Dual-Signal Decomposed Verifier`
+   - **Title**: `MIDC: Training-Free Multi-subject Interaction Diagnosis and Correction via a Dual-Signal Decomposed Verifier`
    - **Primary topic**: `CV: Diffusion & Generative Models for Vision`
    - **Secondary topics** (pick 3–4):
      - `ML: Reasoning & Test-Time Compute` (strongly recommended — training-free test-time correction = test-time compute framing)
