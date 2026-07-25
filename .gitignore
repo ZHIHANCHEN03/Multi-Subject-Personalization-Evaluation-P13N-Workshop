@@ -20,12 +20,17 @@ round1_1/*.log
 round2/.cache/
 round2/results/
 # round2/results_r2/ is COMMITTED (raw per-task records for Table 1, ~4.3M)
-# MIBE companion-paper data (moved out of this repo; under review, will be
-# released with the MIBE paper). Scripts reference it via $DATA_SRC env var.
+# MIBE companion-paper data (lives in this repo for local convenience but is
+# gitignored; under review separately, will be released with the MIBE paper).
+# MIDC experiment scripts reference it via $DATA_SRC env var.
 MIBE_Core/
 MIBE Rebuttal/
 prompt/
 ABSTRACT_MIBE.md
+
+# submission/ is a clean export built by build_submission.py (gitignored,
+# regenerable). Zip it to upload to OpenReview.
+submission/
 
 # human-eval generated artifacts (regenerable from results; key is sensitive)
 round2/human_eval/pairs/
