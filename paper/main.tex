@@ -19,6 +19,8 @@
 \usepackage{multirow}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds}
 
 \pdfinfo{/TemplateVersion (2026.1)}
 
@@ -35,8 +37,13 @@ Personalized image generation with multiple subjects suffers from \emph{interact
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\columnwidth]{figures/hard_040121.png}
-\caption{Interaction-induced identity collapse on an 8-entity FLUX.2-klein-9B task. One-shot generation frequently drops or merges subjects; best-of-8 selection helps marginally; MIDC's calibrated routing on the decomposed verifier recovers identities. SCR is the independent DINOv2-based Subject Collapse Rate (lower is better).}
+\setlength{\tabcolsep}{1pt}
+\begin{tabular}{cc}
+\footnotesize one-shot (collapsed) & \footnotesize MIDC (ours) \\
+\includegraphics[width=0.47\columnwidth]{figures/oneshot_hard_040121.png} &
+\includegraphics[width=0.47\columnwidth]{figures/ours_hard_040121.png} \\
+\end{tabular}
+\caption{Interaction-induced identity collapse on an 8-entity FLUX.2-klein-9B task. One-shot generation drops and merges subjects (left); MIDC's calibrated routing on the decomposed verifier recovers them (right). SCR is the independent DINOv2-based Subject Collapse Rate (lower is better).}
 \label{fig:teaser}
 \end{figure}
 
@@ -80,7 +87,44 @@ Our contributions:
 
 \section{Method}
 
-MIDC is a training-free, inference-time correction loop. Given a prompt, a set of subject reference images, and a black-box generator $G$, MIDC produces a corrected image by iteratively diagnosing facet deficits, targeting the weakest subject, applying a corrective action, and accepting the result only if it strictly improves the targeted facet without collateral damage. Figure~\ref{fig:teaser} illustrates the pipeline.
+MIDC is a training-free, inference-time correction loop. Given a prompt, a set of subject reference images, and a black-box generator $G$, MIDC produces a corrected image by iteratively diagnosing facet deficits, targeting the weakest subject, applying a corrective action, and accepting the result only if it strictly improves the targeted facet without collateral damage. Figure~\ref{fig:pipeline} illustrates the pipeline.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=4mm and 5mm,
+  box/.style={draw, rounded corners=2pt, align=center, font=\footnotesize, minimum height=8mm, inner sep=3pt},
+  proc/.style={box, fill=black!8},
+  decision/.style={box, fill=black!15},
+  io/.style={box, fill=black!3},
+  arr/.style={-Stealth, thick, black!70},
+  lbl/.style={font=\scriptsize, black!60}
+]
+\node[io] (prompt) {prompt + refs};
+\node[proc, right=of prompt] (gen) {Generator\\ $G$};
+\node[proc, right=of gen] (ver) {Decomposed\\ Verifier $V$};
+\node[decision, below=8mm of ver] (route) {Calibrated\\ Routing\\ $\arg\max_d \delta_d$};
+\node[decision, left=of route] (dual) {Dual-Signal\\ Diagnosis\\ $(d^\star, i^\star)$};
+\node[proc, left=of dual] (act) {Action\\ Portfolio};
+\node[proc, above=of act] (prop) {Propose\\ $K$ candidates};
+\node[decision, right=of prop] (accept) {Guarded\\ Accept?};
+\node[io, right=of accept] (out) {corrected\\ image};
+
+\draw[arr] (prompt) -- (gen);
+\draw[arr] (gen) -- (ver);
+\draw[arr] (ver) -- (route);
+\draw[arr] (route) -- (dual);
+\draw[arr] (dual) -- (act);
+\draw[arr] (act) -- (prop);
+\draw[arr] (prop) -- (accept);
+\draw[arr] (accept) -- node[above, lbl]{accept} (out);
+\draw[arr] (accept.north) to[bend left=25] node[above, lbl]{reject} (gen.north);
+\draw[arr, dashed] (out.south) to[bend right=35] node[below, lbl]{iterate $\times K$ steps} (ver.south);
+\end{tikzpicture}
+\caption{MIDC pipeline. A decomposed verifier scores existence/appearance/interaction; calibrated routing selects the most deficient facet ($d^\star$); dual-signal diagnosis localizes the weak subject ($i^\star$); an action portfolio proposes candidates; guarded acceptance keeps a revision only if it strictly improves the targeted facet without collateral damage. The loop iterates $K$ steps.}
+\label{fig:pipeline}
+\end{figure}
+
 
 \subsection{Decomposed Verifier}
 \label{sec:verifier}
@@ -223,14 +267,35 @@ best\_of\_8 & 0.607 [0.578, 0.637] & 0.645 [0.616, 0.673] \\
 \midrule
 \multicolumn{3}{l}{\textit{DINO (higher better)}} \\
 \midrule
-one\_shot & 0.346 [0.329, 0.363] & 0.346 [0.329, 0.363] \\
-best\_of\_8 & 0.369 [0.349, 0.390] & 0.369 [0.349, 0.390] \\
-\textbf{MIDC (ours)} & \textbf{0.379 [0.358, 0.398]} & \textbf{0.379 [0.358, 0.398]} \\
+one\_shot & 0.393 [0.373, 0.412] & 0.346 [0.329, 0.363] \\
+best\_of\_8 & 0.408 [0.387, 0.428] & 0.369 [0.349, 0.390] \\
+\textbf{MIDC (ours)} & \textbf{0.428 [0.408, 0.448]} & \textbf{0.379 [0.358, 0.398]} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Two observations stand out. First, \textbf{collapse worsens with subject count}: one\_shot SCR rises from $0.615$ (6 entities) to $0.671$ (8 entities). Second, \textbf{MIDC's advantage widens}: the SCR gap to one\_shot grows from $-0.035$ ($-5.7\%$) at 6 entities to $-0.041$ ($-6.1\%$) at 8 entities, and the DINO 95\% CI of MIDC vs.\ one\_shot does \emph{not overlap} at 8 entities---the strongest single significance result in the scaling story. Crucially, MIDC achieves this at a fraction of best-of-8's compute (best-of-8 performs 8 generations per task; MIDC performs 2 initial $+$ 2 correction steps).
+
+\begin{figure}[t]
+\centering
+\setlength{\tabcolsep}{1pt}
+\renewcommand{\arraystretch}{0.8}
+\begin{tabular}{ccc}
+\footnotesize one-shot & \footnotesize best-of-8 & \footnotesize MIDC (ours) \\
+\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_040121.png} &
+\includegraphics[width=0.31\columnwidth]{figures/bon_hard_040121.png} &
+\includegraphics[width=0.31\columnwidth]{figures/ours_hard_040121.png} \\
+\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_040281.png} &
+\includegraphics[width=0.31\columnwidth]{figures/bon_hard_040281.png} &
+\includegraphics[width=0.31\columnwidth]{figures/ours_hard_040281.png} \\
+\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_040761.png} &
+\includegraphics[width=0.31\columnwidth]{figures/bon_hard_040761.png} &
+\includegraphics[width=0.31\columnwidth]{figures/ours_hard_040761.png} \\
+\end{tabular}
+\caption{Qualitative comparison on FLUX.2-klein-9B, 8-entity tasks. Columns: one-shot, best-of-8 (compute-matched), MIDC. Rows: three hard tasks. One-shot frequently drops or merges subjects; best-of-8 helps marginally; MIDC's calibrated routing recovers subject identities. (Full-resolution images in the supplement.)}
+\label{fig:results}
+\end{figure}
+
 
 \subsection{Ablation}
 \label{sec:ablation}
