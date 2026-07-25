@@ -7,41 +7,33 @@ __pycache__/
 *token*
 *credentials*
 
-# Repository-local environments, model weights, caches, and generated outputs.
+# === Repo structure: 3 folders at root ===
+# submission/  -> MIDC source (paper + code + results), git-tracked, submit-ready
+# companion/   -> MIBE companion-paper data, gitignored (under review separately)
+# meta/        -> working docs, refs, human-eval tarballs, external repos, gitignored
+
+# --- companion/: MIBE data, not part of MIDC submission ---
+companion/
+
+# --- meta: working material, not part of MIDC submission ---
+meta/
+
+# --- within submission/: caches, generated outputs, human-eval artifacts ---
 .venvs/
-models/
-external/
-.hf_cache/
 *.log
-round1/.cache/
-round1/results/
-round1_1/trials/
-round1_1/*.log
-round2/.cache/
-round2/results/
-# round2/results_r2/ is COMMITTED (raw per-task records for Table 1, ~4.3M)
-# MIBE companion-paper data (lives in this repo for local convenience but is
-# gitignored; under review separately, will be released with the MIBE paper).
-# MIDC experiment scripts reference it via $DATA_SRC env var.
-MIBE_Core/
-MIBE Rebuttal/
-prompt/
-ABSTRACT_MIBE.md
-
-# submission/ is a clean export built by build_submission.py (gitignored,
-# regenerable). Zip it to upload to OpenReview.
-submission/
-
-# human-eval generated artifacts (regenerable from results; key is sensitive)
-round2/human_eval/pairs/
-round2/human_eval/manifest.js
-round2/human_eval/ballot.csv
-round2/human_eval.zip
-round2/human_eval_key.json
-# UMO vs one-shot human-eval package (regenerable; 58MB tarball for distribution)
-round2/human_eval_umo_vs_oneshot/
-round2/human_eval_umo_vs_oneshot.tar.gz
-round2/human_eval_umo_vs_oneshot_forlabelers/
-round2/human_eval_umo_vs_oneshot_forlabelers.tar.gz
-refs_papers/
-eta_human_review/
+**/.cache/
+submission/round1/results/
+submission/round1_1/trials/
+submission/round1_1/*.log
+submission/round2/.cache/
+submission/round2/results/
+submission/round2/human_eval/pairs/
+submission/round2/human_eval/manifest.js
+submission/round2/human_eval/ballot.csv
+submission/round2/human_eval.zip
+submission/round2/human_eval_key.json
+submission/round2/human_eval_umo_vs_oneshot/
+submission/round2/human_eval_umo_vs_oneshot.tar.gz
+submission/round2/human_eval_umo_vs_oneshot_forlabelers/
+submission/round2/human_eval_umo_vs_oneshot_forlabelers.tar.gz
+# round2/results_r2/ and round2/results_flux2/ ARE committed (raw per-task records)
