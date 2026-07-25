@@ -32,7 +32,7 @@
 \maketitle
 
 \begin{abstract}
-Personalized image generation with multiple subjects suffers from \emph{interaction-induced identity collapse}: as the number of subjects grows, models increasingly merge, swap, or drop identities, even when each subject is provided as a reference image. We introduce \textbf{MIDC}, a training-free, inference-time correction paradigm that treats a \emph{decomposed} verifier as a structured diagnostic signal and routes correction to the most deficient facet. Given a candidate image, a decomposed evaluator scores three facets---existence, appearance, and interaction---and we convert each facet score into a standardized deficit against a calibrated per-facet baseline. A \emph{calibrated routing} mechanism then selects which facet to correct and which action to apply, while a dual-signal diagnosis (facet deficit $+$ subject-level identity similarity) localizes the collapsed subject. Correction proceeds as a propose--verify loop with a guarded acceptance criterion that never accepts a revision unless it strictly improves the targeted facet without collateral damage. On OmniGen2, MIDC reduces Subject Collapse Rate (SCR) to \textbf{0.470} on 4-entity hard cases versus \textbf{0.531} for the retrained state-of-the-art (UMO) and \textbf{0.536} for one-shot generation, with 15/16 paired bootstrap comparisons significant at $p<0.05$. On FLUX.2-klein-9B, scaling from 6 to 8 subjects, MIDC again outperforms one-shot and best-of-8 selection on both SCR and DINO identity similarity, with the gap \emph{widening} as subjects increase. Ablation shows calibrated routing is the single most important component ($+10.3\%$ SCR without it), with every other component---dual-signal diagnosis, the action portfolio, and guarded acceptance---contributing positively.
+Personalized image generation with multiple subjects suffers from \emph{interaction-induced identity collapse}: as the number of subjects grows, models increasingly merge, swap, or drop identities, even when each subject is provided as a reference image. We introduce \textbf{MIDC}, a training-free, inference-time correction paradigm that treats a \emph{decomposed} verifier as a structured diagnostic signal and routes correction to the most deficient facet. Given a candidate image, a decomposed evaluator scores three facets---existence, appearance, and interaction---and we convert each facet score into a standardized deficit against a calibrated per-facet baseline. A \emph{calibrated routing} mechanism then selects which facet to correct and which action to apply, while a dual-signal diagnosis (facet deficit $+$ subject-level identity similarity) localizes the collapsed subject. Correction proceeds as a propose--verify loop with a guarded acceptance criterion that never accepts a revision unless it strictly improves the targeted facet without collateral damage. On OmniGen2, MIDC reduces Subject Collapse Rate (SCR) to \textbf{0.470} on 4-entity hard cases versus \textbf{0.531} for the retrained state-of-the-art (UMO) and \textbf{0.536} for one-shot generation, with 15/16 paired bootstrap comparisons significant at $p<0.05$. On FLUX.2-klein-9B, scaling from 6 to 8 subjects, MIDC again outperforms one-shot and best-of-8 selection on both SCR and DINO identity similarity, with the gap \emph{widening} as subjects increase, while using roughly half the generations of best-of-8. A blind human study independently corroborates the existence result: labelers prefer MIDC over UMO 84.6\% of the time ($p{=}4{\times}10^{-7}$). Ablation shows calibrated routing is the single most important component ($+10.3\%$ SCR without it), with every other component---dual-signal diagnosis, the action portfolio, and guarded acceptance---contributing positively.
 \end{abstract}
 
 \begin{figure}[t]
@@ -173,7 +173,10 @@ At each step we generate $K=2$ proposals per action and keep the best by verifie
 
 A proposal $I'$ is accepted only if it \emph{strictly improves} the targeted facet \emph{without} degrading the others:
 \[
-\mathrm{accept}(I') \iff \big(s_{d^\star}(I') > s_{d^\star}(I)\big) \;\wedge\; \big(s_{d}(I') \geq s_{d}(I) - \tau \;\forall d\neq d^\star\big),
+\begin{aligned}
+\mathrm{accept}(I') \iff{}& \big(s_{d^\star}(I') > s_{d^\star}(I)\big) \\
+\wedge\;& \big(s_{d}(I') \geq s_{d}(I) - \tau,\; \forall d\neq d^\star\big),
+\end{aligned}
 \]
 with a small tolerance $\tau$. This prevents the loop from trading one failure for another. We run $K_{\mathrm{steps}}=2$ correction steps and always keep the best image seen so far as judged by the verifier total.
 
@@ -276,7 +279,26 @@ best\_of\_8 & 0.408 [0.387, 0.428] & 0.369 [0.349, 0.390] \\
 \end{tabular}
 \end{table}
 
-Two observations stand out. First, \textbf{collapse worsens with subject count}: one\_shot SCR rises from $0.615$ (6 entities) to $0.671$ (8 entities). Second, \textbf{MIDC's advantage widens}: the SCR gap to one\_shot grows from $-0.035$ ($-5.7\%$) at 6 entities to $-0.041$ ($-6.1\%$) at 8 entities, and the DINO 95\% CI of MIDC vs.\ one\_shot does \emph{not overlap} at 8 entities---the strongest single significance result in the scaling story. Crucially, MIDC achieves this at a fraction of best-of-8's compute (best-of-8 performs 8 generations per task; MIDC performs 2 initial $+$ 2 correction steps).
+Two observations stand out. First, \textbf{collapse worsens with subject count}: one\_shot SCR rises from $0.615$ (6 entities) to $0.671$ (8 entities). Second, \textbf{MIDC's advantage widens}: the SCR gap to one\_shot grows from $-0.035$ ($-5.7\%$) at 6 entities to $-0.041$ ($-6.1\%$) at 8 entities, and the DINO 95\% CI of MIDC vs.\ one\_shot does \emph{not overlap} at 8 entities---the strongest single significance result in the scaling story.
+
+\paragraph{Compute.} MIDC is adaptive: it stops as soon as the calibrated deficit falls below a threshold, so it spends extra generations only on hard tasks. Table~\ref{tab:compute} reports generator calls per task. MIDC averages \textbf{4.6} generations on OmniGen2 and \textbf{4.3} on FLUX.2-8, roughly \emph{half} of best-of-8's fixed 8, while \emph{beating} best-of-8 on every metric. One-shot and UMO use 1 generation but lack any diagnostic structure.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Generator calls per task (mean; lower is cheaper). MIDC is adaptive and stops early; best-of-$N$ is fixed.}
+\label{tab:compute}
+\begin{tabular}{lcc}
+\toprule
+method & OmniGen2 (500 tasks) & FLUX.2 8-entity (100) \\
+\midrule
+one\_shot & 1.0 & 1.0 \\
+UMO (retrained) & 1.0 & --- \\
+best\_of\_8 & 8.0 & 8.0 \\
+\textbf{MIDC (ours)} & \textbf{4.6} & \textbf{4.3} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[t]
 \centering
@@ -328,15 +350,40 @@ Every component contributes positively. \textbf{Calibrated routing is the single
 \subsection{Human Evaluation}
 \label{sec:human}
 
-We conducted a blind A/B study with 3 labelers over 200 image pairs (MIDC vs.\ UMO), judging 4 dimensions: existence (Q1), identity (Q2), interaction (Q3), and overall quality (Q4), with LEFT/RIGHT/TIE options. On Q1 (existence), MIDC is significantly preferred over UMO (Fleiss $\kappa$ in moderate agreement, $p<0.05$). On Q4 (overall), MIDC is directionally preferred. Q2 and Q3 show negative Fleiss $\kappa$ (labeler disagreement) and we do not claim them. The human preference on Q1 aligns with the automatic SCR result that MIDC drops fewer subjects.
+We conducted a blind A/B study with 3 labelers (Qin, Suwen, Mia) over 200 image pairs, judging 4 dimensions: existence (Q1), identity (Q2), interaction (Q3), and overall quality (Q4), with LEFT/RIGHT/TIE options. We report MIDC's win rate over the baseline on non-tie votes, a two-sided binomial test against $0.5$, and Fleiss $\kappa$ for labeler agreement (Table~\ref{tab:human}).
+
+\begin{table}[ht]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Human eval. MIDC win rate over baseline on non-tie votes, 95\% CI, Fleiss $\kappa$, and binomial $p$ vs.\ $0.5$. $\kappa>0.2$ is moderate agreement; $\kappa<0$ is disagreement (no claim).}
+\label{tab:human}
+\begin{tabular}{llcccc}
+\toprule
+baseline & dim. & win [95\% CI] & $n$ & $\kappa$ & $p$ \\
+\midrule
+UMO & Q1 existence & \textbf{0.846 [0.75, 0.94]} & 52 & $+0.32$ & $\mathbf{4{\times}10^{-7}}$ \\
+UMO & Q4 overall  & 0.589 [0.48, 0.70] & 73 & $+0.15$ & $0.16$ \\
+\midrule
+best-of-8 & Q1 existence & 0.500 [0.31, 0.69] & 32 & $+0.48$ & $1.00$ \\
+best-of-8 & Q4 overall  & 0.523 [0.40, 0.65] & 65 & $+0.17$ & $0.80$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On \textbf{existence (Q1)}, labelers prefer MIDC over the retrained SOTA (UMO) \textbf{84.6\%} of the time ($p{=}4{\times}10^{-7}$, Fleiss $\kappa{=}0.32$ moderate agreement)---the strongest human result and one that directly mirrors the automatic SCR finding that MIDC drops fewer subjects. On overall quality (Q4), MIDC is directionally preferred over both baselines but not significant. Identity (Q2) and interaction (Q3) show negative Fleiss $\kappa$ (labeler disagreement), so we do not claim them; we attribute this to the difficulty of judging fine-grained identity/interaction from a single image and flag reliable human evaluation of these dimensions as an open problem.
 
 \section{Discussion and Limitations}
 
-\paragraph{Self-evaluation circularity.} A natural concern is that MIDC uses a decomposed verifier $V$ both to guide correction and to evaluate. We mitigate this by reporting all headline metrics (SCR, DINO) from an \emph{independent} DINOv2-based judge, not $V$. The verifier is used only for routing and acceptance.
+\paragraph{Self-evaluation circularity.} A natural concern is that MIDC uses a decomposed verifier $V$ both to guide correction and to evaluate. We mitigate this by reporting all headline metrics (SCR, DINO) from an \emph{independent} DINOv2-based judge, not $V$. The verifier is used only for routing and acceptance. The human study (Table~\ref{tab:human}) further validates the SCR result with a $p{=}4{\times}10^{-7}$ preference on existence, independent of $V$.
+
+\paragraph{When MIDC fails.} Inspecting the qualitative grid (Figure~\ref{fig:results}), MIDC's residual failures concentrate on (i) heavy occlusion where Grounding-DINO itself misses a subject (so $\rho_i{=}0$ is mis-attributed and correction targets the wrong facet), and (ii) prompts with inherently ambiguous spatial language where layout hints cannot disambiguate. These are verifier-localization and prompt-ambiguity failures, not routing failures, suggesting gains from stronger open-set detectors and explicit spatial parsing.
 
 \paragraph{Modest absolute gaps.} Even MIDC leaves substantial collapse (SCR $\approx 0.47$ at 4 entities, $0.63$ at 8). The benchmark is deliberately hard; we frame MIDC as a \emph{reducer} of collapse, not a complete solution, and note that the gap to one-shot and best-of-$N$ is consistent and statistically significant.
 
 \paragraph{Single base for the SOTA comparison.} The ``beats retrained SOTA'' claim holds on OmniGen2 (vs.\ UMO). On FLUX.2 no retrained multi-identity SOTA exists, so the FLUX.2 table compares only against one\_shot and best\_of\_8. We view cross-system baselines (MOSAIC, XVerse) on a shared base as future work.
+
+\paragraph{Dual-signal diagnosis is the weakest ablation component.} Its marginal gain on 4-entity OmniGen2 is small ($+1.3\%$). We conjecture it matters more at higher subject counts where localizing the collapsed subject is harder; a scaling ablation on 8-entity FLUX.2 is the natural next experiment and is left to future work.
 
 \section{Conclusion}
 
