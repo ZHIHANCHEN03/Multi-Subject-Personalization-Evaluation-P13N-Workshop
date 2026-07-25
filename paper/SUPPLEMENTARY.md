@@ -85,8 +85,11 @@ adapter with the exact configuration used by our runner (`r=512`,
 `unexpected_keys = 0` — all 304 UMO LoRA keys (288 main transformer-block keys +
 16 context-refiner keys) match the adapter's parameter names and load
 successfully. The `missing_keys` are only the transformer-block LoRA weights that
-UMO did not train (which remain at the gaussian init, i.e. near-identity) — this
-is the expected behavior, not a failure. Script: `misc/umo_keycheck.py`.
+UMO did not train. PEFT initializes the $B$ matrix of each LoRA layer to zero, so
+an unloaded adapter contributes \emph{exactly} zero (a precise identity), not a
+near-identity---this is the expected behavior, not a failure. We also confirmed
+no orphaned $A$ matrices (a loaded $B$ whose paired $A$ is missing) that would
+indicate a partial-load bug. Script: `misc/umo_keycheck.py`.
 
 **Pixel-diff check.** As a stronger, end-to-end test, we generate the same task
 with the same seed and `image_guidance_scale=2.0` using (a) base OmniGen2 (no

@@ -1,0 +1,164 @@
+{
+  "6_gating_pooled": {
+    "triggered": {
+      "n": 100,
+      "pct": 33.3,
+      "oneshot": 0.653,
+      "bon": 0.657,
+      "midc": 0.547
+    },
+    "noop": {
+      "n": 200,
+      "pct": 66.7,
+      "oneshot": 0.596,
+      "bon": 0.583,
+      "midc": 0.597
+    },
+    "all": {
+      "n": 300,
+      "oneshot": 0.615,
+      "bon": 0.607,
+      "midc": 0.58
+    }
+  },
+  "6_TRIGGERED_MIDC_vs_oneshot": {
+    "mean_diff": -0.1067,
+    "ci": [
+      -0.14,
+      -0.0733
+    ],
+    "p": 0.0,
+    "n": 100
+  },
+  "6_TRIGGERED_MIDC_vs_bon": {
+    "mean_diff": -0.11,
+    "ci": [
+      -0.15,
+      -0.0717
+    ],
+    "p": 0.0,
+    "n": 100
+  },
+  "6_TRIGGERED_bon_vs_oneshot": {
+    "mean_diff": 0.0033,
+    "ci": [
+      -0.0283,
+      0.035
+    ],
+    "p": 0.852,
+    "n": 100
+  },
+  "6_NO-OP_MIDC_vs_oneshot": {
+    "mean_diff": 0.0008,
+    "ci": [
+      -0.0142,
+      0.0158
+    ],
+    "p": 0.8764,
+    "n": 200
+  },
+  "6_NO-OP_MIDC_vs_bon": {
+    "mean_diff": 0.0142,
+    "ci": [
+      -0.0075,
+      0.035
+    ],
+    "p": 0.1836,
+    "n": 200
+  },
+  "6_NO-OP_bon_vs_oneshot": {
+    "mean_diff": -0.0133,
+    "ci": [
+      -0.0358,
+      0.0092
+    ],
+    "p": 0.235,
+    "n": 200
+  },
+  "6_bestof2_pooled": {
+    "midc_noop": 0.597,
+    "oneshot": 0.596,
+    "bon": 0.583
+  },
+  "8_gating_pooled": {
+    "triggered": {
+      "n": 84,
+      "pct": 28.0,
+      "oneshot": 0.688,
+      "bon": 0.653,
+      "midc": 0.524
+    },
+    "noop": {
+      "n": 216,
+      "pct": 72.0,
+      "oneshot": 0.665,
+      "bon": 0.641,
+      "midc": 0.671
+    },
+    "all": {
+      "n": 300,
+      "oneshot": 0.671,
+      "bon": 0.645,
+      "midc": 0.63
+    }
+  },
+  "8_TRIGGERED_MIDC_vs_oneshot": {
+    "mean_diff": -0.1637,
+    "ci": [
+      -0.2068,
+      -0.122
+    ],
+    "p": 0.0,
+    "n": 84
+  },
+  "8_TRIGGERED_MIDC_vs_bon": {
+    "mean_diff": -0.1295,
+    "ci": [
+      -0.1726,
+      -0.0848
+    ],
+    "p": 0.0,
+    "n": 84
+  },
+  "8_TRIGGERED_bon_vs_oneshot": {
+    "mean_diff": -0.0342,
+    "ci": [
+      -0.067,
+      -0.0015
+    ],
+    "p": 0.0396,
+    "n": 84
+  },
+  "8_NO-OP_MIDC_vs_oneshot": {
+    "mean_diff": 0.0064,
+    "ci": [
+      -0.0122,
+      0.0249
+    ],
+    "p": 0.53,
+    "n": 216
+  },
+  "8_NO-OP_MIDC_vs_bon": {
+    "mean_diff": 0.0301,
+    "ci": [
+      0.011,
+      0.0492
+    ],
+    "p": 0.0026,
+    "n": 216
+  },
+  "8_NO-OP_bon_vs_oneshot": {
+    "mean_diff": -0.0237,
+    "ci": [
+      -0.044,
+      -0.0035
+    ],
+    "p": 0.0264,
+    "n": 216
+  },
+  "8_bestof2_pooled": {
+    "midc_noop": 0.671,
+    "oneshot": 0.665,
+    "bon": 0.641
+  }
+}
