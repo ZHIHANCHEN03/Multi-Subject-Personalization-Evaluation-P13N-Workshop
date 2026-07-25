@@ -80,7 +80,7 @@ Source records: `round2/results_r2/merged/`, `round2/results_flux2/`, `round2/re
 - `paper/` contains no secrets, no absolute local paths, no tokens.
 - `.gitignore` excludes `.env`, `*token*`, `*credentials*`, `.venvs/`, `models/`, `external/`, logs, caches, and generated results.
 - The `round2/*.sh` scripts contain `/workspace/` server-path defaults (overridable via env vars); these are reproducibility defaults, not secrets.
-- `MIBE_Core/` (the separate MIBE paper) is unrelated to this MIDC submission.
+- `MIBE_Core/` and `prompt/train_60k_v13_2.jsonl` (the separate MIBE paper's data) have been moved to a sibling `../MIBE_companion_data/` folder; they are unrelated to this MIDC submission and not tracked here.
 
 ## Remaining for camera-ready (not submission)
 
