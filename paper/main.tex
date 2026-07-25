@@ -39,11 +39,11 @@ Personalized image generation with multiple subjects suffers from \emph{interact
 \centering
 \setlength{\tabcolsep}{1pt}
 \begin{tabular}{cc}
-\footnotesize one-shot (collapsed) & \footnotesize MIDC (ours) \\
-\includegraphics[width=0.47\columnwidth]{figures/oneshot_hard_040121.png} &
-\includegraphics[width=0.47\columnwidth]{figures/ours_hard_040121.png} \\
+\footnotesize one-shot (SCR $0.67$) & \footnotesize MIDC (SCR $0.21$) \\
+\includegraphics[width=0.47\columnwidth]{figures/oneshot_hard_048829.png} &
+\includegraphics[width=0.47\columnwidth]{figures/ours_hard_048829.png} \\
 \end{tabular}
-\caption{Interaction-induced identity collapse on an 8-entity FLUX.2-klein-9B task. One-shot generation drops and merges subjects (left); MIDC's calibrated routing on the decomposed verifier recovers them (right). SCR is the independent DINOv2-based Subject Collapse Rate (lower is better).}
+\caption{Interaction-induced identity collapse on an 8-entity FLUX.2-klein-9B task. One-shot generation drops 3 of 8 subjects and merges hands at contact (left, SCR $0.67$); MIDC's calibrated routing on the decomposed verifier retains more subjects with cleaner interactions (right, SCR $0.21$). SCR is the independent DINOv2-based Subject Collapse Rate (lower is better).}
 \label{fig:teaser}
 \end{figure}
 
@@ -83,7 +83,7 @@ Our contributions:
 
 \paragraph{Training-free test-time methods.} Best-of-$N$ selection~\citep{snell2024testtime,cobbe2021gsm8k} and self-refinement~\citep{madaan2023selfrefine} spend extra inference compute but use a scalar reward. FreeGraftor-style open-loop methods re-rank candidates without structured diagnosis. MIDC differs by using a \emph{decomposed} verifier to route correction to a specific facet and subject, yielding larger gains per unit of compute.
 
-\paragraph{Decomposed evaluation.} Benchmarks such as DreamBench~\citep{peng2024dreambench}, DreamBench++~\citep{peng2024dreambench++}, and T2I-CompBench~\citep{huang2023t2i} evaluate text-to-image alignment along multiple axes. We build on a decomposed multi-subject evaluator (MIE) that scores existence, appearance, and interaction separately, and use it as a \emph{verifier} for correction rather than only for evaluation. To avoid circularity, all reported headline metrics use an \emph{independent} DINOv2-based Subject Collapse Rate.
+\paragraph{Decomposed evaluation.} Benchmarks such as DreamBench~\citep{ruiz2023dreambooth}, DreamBench++~\citep{peng2024dreambench++}, and T2I-CompBench~\citep{huang2023t2i} evaluate text-to-image alignment along multiple axes. We build on a decomposed multi-subject evaluator (MIE) that scores existence, appearance, and interaction separately, and use it as a \emph{verifier} for correction rather than only for evaluation. To avoid circularity, all reported headline metrics use an \emph{independent} DINOv2-based Subject Collapse Rate.
 
 \section{Method}
 
@@ -306,17 +306,17 @@ best\_of\_8 & 8.0 & 8.0 \\
 \renewcommand{\arraystretch}{0.8}
 \begin{tabular}{ccc}
 \footnotesize one-shot & \footnotesize best-of-8 & \footnotesize MIDC (ours) \\
-\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_040121.png} &
-\includegraphics[width=0.31\columnwidth]{figures/bon_hard_040121.png} &
-\includegraphics[width=0.31\columnwidth]{figures/ours_hard_040121.png} \\
-\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_040281.png} &
-\includegraphics[width=0.31\columnwidth]{figures/bon_hard_040281.png} &
-\includegraphics[width=0.31\columnwidth]{figures/ours_hard_040281.png} \\
-\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_040761.png} &
-\includegraphics[width=0.31\columnwidth]{figures/bon_hard_040761.png} &
-\includegraphics[width=0.31\columnwidth]{figures/ours_hard_040761.png} \\
+\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_048829.png} &
+\includegraphics[width=0.31\columnwidth]{figures/bon_hard_048829.png} &
+\includegraphics[width=0.31\columnwidth]{figures/ours_hard_048829.png} \\
+\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_042313.png} &
+\includegraphics[width=0.31\columnwidth]{figures/bon_hard_042313.png} &
+\includegraphics[width=0.31\columnwidth]{figures/ours_hard_042313.png} \\
+\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_057505.png} &
+\includegraphics[width=0.31\columnwidth]{figures/bon_hard_057505.png} &
+\includegraphics[width=0.31\columnwidth]{figures/ours_hard_057505.png} \\
 \end{tabular}
-\caption{Qualitative comparison on FLUX.2-klein-9B, 8-entity tasks. Columns: one-shot, best-of-8 (compute-matched), MIDC. Rows: three hard tasks. One-shot frequently drops or merges subjects; best-of-8 helps marginally; MIDC's calibrated routing recovers subject identities. (Full-resolution images in the supplement.)}
+\caption{Qualitative comparison on FLUX.2-klein-9B, 8-entity tasks. Columns: one-shot, best-of-8 (compute-matched), MIDC. Rows: three hard tasks with monotonic SCR improvement (top: $0.67{\to}0.50{\to}0.21$; mid: $0.79{\to}0.75{\to}0.42$; bottom: $0.75{\to}0.50{\to}0.42$). One-shot frequently drops or merges subjects; best-of-8 helps marginally; MIDC retains more subjects and reduces collapse. Residual merging artifacts remain (e.g., extra limbs at contact), consistent with the non-zero SCR.}
 \label{fig:results}
 \end{figure}
 

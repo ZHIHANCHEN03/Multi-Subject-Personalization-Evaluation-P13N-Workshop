@@ -16,7 +16,10 @@ paper/
 ├── refs.bib        # References (all cited keys resolved)
 ├── aaai2026.sty    # AAAI 2026 official style (from AAAI author kit)
 ├── aaai2026.bst    # AAAI 2026 bibliography style
-├── figures/        # 9 qualitative images (oneshot/bon/ours × 3 tasks), all referenced
+├── figures/        # 9 qualitative images, all referenced by main.tex
+│   ├── oneshot_hard_048829.png / bon_hard_048829.png / ours_hard_048829.png   # teaser + grid row 1 (best SCR contrast: 0.67→0.50→0.21)
+│   ├── oneshot_hard_042313.png / bon_hard_042313.png / ours_hard_042313.png   # grid row 2 (0.79→0.75→0.42)
+│   └── oneshot_hard_057505.png / bon_hard_057505.png / ours_hard_057505.png   # grid row 3 (0.75→0.50→0.42)
 └── README.md       # This file
 ```
 
@@ -35,7 +38,7 @@ Requires a TeX distribution with `pdflatex`/`bibtex` (e.g., TeX Live). The AAAI 
 
 - **Title**: MIDC: Calibrated Test-Time Correction for Multi-Subject Identity Collapse
 - **Abstract**: routing-led narrative; 3-seed headline numbers; human-eval corroboration; compute efficiency
-- **Figure 1 (teaser)**: 2-panel one-shot (collapsed) vs MIDC (recovered), 8-entity FLUX.2
+- **Figure 1 (teaser)**: 2-panel one-shot (collapsed, SCR 0.67) vs MIDC (recovered, SCR 0.21), 8-entity FLUX.2 task hard_048829 (best SCR contrast in the split)
 - §1 Introduction — interaction-induced identity collapse; 4 contributions
 - §2 Related Work — subject-driven, multi-identity, training-free, decomposed eval
 - §3 Method — decomposed verifier, calibrated deficit routing, dual-signal diagnosis, action portfolio, guarded acceptance, algorithm
@@ -62,6 +65,13 @@ Every number in Tables 1–5 was recomputed from the committed `records.jsonl` f
 - **Table 3** (ablation, 2 seeds, n=100): 6 variants; calibrated routing +10.3% is the largest delta.
 - **Table 4** (compute): generator calls per task — one_shot 1.0, UMO 1.0, best_of_8 8.0, MIDC 4.6 (OmniGen2) / 4.3 (FLUX.2 8-entity). Recomputed from `gen_calls` field.
 - **Table 5** (human eval): from `round2/human_eval/HUMAN_EVAL/aggregate_result_3labeler.json`. MIDC vs UMO Q1: 84.6% win [0.75,0.94], n=52, Fleiss κ=0.32, binomial p=4e-7. Q4: 58.9%, n=73, p=0.16 (directional). Q2/Q3: negative κ (no claim).
+
+**References audited (all 25 cited entries verified real, correct metadata):**
+- Fixed `wu2025omnigen2`: arXiv ID 2506.18871 (was wrong 2501.07569), title "OmniGen2: Exploration to Advanced Multimodal Generation", first author Chenyuan Wu.
+- Fixed `chen2025xverse`: full 7-author list (was "Chen, Hao and others" — wrong first author).
+- Removed fabricated `peng2024dreambench` entry (wrong author list); "DreamBench" in text now cites `ruiz2023dreambooth` (the DreamBench benchmark lives in the DreamBooth paper); "DreamBench++" cites `peng2024dreambench++` (verified ICLR 2025, correct authors).
+- Verified real: `she2025mosaic` (ICLR 2026), `wang2025psr` (CVPR 2026), `liu2023grounding` (ECCV 2024), `yang2024qwen2`, `hu2021lora`, `unsloth2024`, `madaan2023selfrefine`, `snell2024testtime`, `cobbe2021gsm8k`, `oquab2023dinov2`, `peng2024dreambench++`, and all subject-driven generation refs.
+- 25 unused bib entries left in `refs.bib` (harmless; bibtex only includes cited keys) — can be pruned at camera-ready.
 
 Source records: `round2/results_r2/merged/`, `round2/results_flux2/`, `round2/results_ablation/`, `round2/human_eval/HUMAN_EVAL/` (all committed to repo).
 
