@@ -1,4 +1,0 @@
-ratio_type,groups,preference_consistent_groups,preference_consistency_rate,prompt_ilogical_any_rate
-balanced,1340,1205,0.8992537313432836,0.0007462686567164179
-human_heavy,1340,1283,0.9574626865671642,0.020149253731343283
-object_heavy,1340,1202,0.8970149253731343,0.05223880597014925

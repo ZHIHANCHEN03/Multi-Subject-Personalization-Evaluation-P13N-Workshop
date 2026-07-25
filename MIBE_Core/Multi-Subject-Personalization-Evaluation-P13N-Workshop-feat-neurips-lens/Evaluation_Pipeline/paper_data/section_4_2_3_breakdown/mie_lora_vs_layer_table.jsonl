@@ -1,3 +1,0 @@
-{"size": "08b", "pairwise_accuracy_delta_lora_minus_layer": -0.0013550135501354532, "pairwise_accuracy_v10_delta": 0.002126151665485465, "pairwise_accuracy_v13_delta": -0.003510311540149136, "macro_f1_delta_lora_minus_layer": 0.1279673322700866}
-{"size": "2b", "pairwise_accuracy_delta_lora_minus_layer": 0.06070460704607039, "pairwise_accuracy_v10_delta": 0.004252303330971041, "pairwise_accuracy_v13_delta": 0.0956559894690654, "macro_f1_delta_lora_minus_layer": 0.11577167685963907}
-{"size": "4b", "pairwise_accuracy_delta_lora_minus_layer": 0.04634146341463419, "pairwise_accuracy_v10_delta": -0.0007087172218285254, "pairwise_accuracy_v13_delta": 0.07547169811320753, "macro_f1_delta_lora_minus_layer": 0.04371408666421417}
