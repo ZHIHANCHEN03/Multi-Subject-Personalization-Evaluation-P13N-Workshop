@@ -38,7 +38,7 @@ paper/                       # LaTeX source, figures, refs.bib, ReproducibilityC
 
 ## 3. MIE Verifier Checkpoint
 
-The MIE verifier is a LoRA-fine-tuned Qwen2-VL-2B model. The checkpoint
+The MIE verifier is a LoRA-fine-tuned Qwen3.5-4B model. The checkpoint
 (`mie_verifier_lora.safetensors`, ~50 MB) is **not** bundled in the supplementary
 archive to keep the submission size within the AAAI limit, but it will be released
 publicly upon acceptance via the companion MIBE paper's release. For reviewer
@@ -61,7 +61,7 @@ All base models are publicly available and used under their respective licenses:
 | FLUX.2-klein-9B | HuggingFace `black-forest-labs/FLUX.2-klein-9B` | FLUX.2 Non-Commercial |
 | UMO LoRA [cheng2025umo] | project release `UMO_OmniGen2.safetensors` | MIT |
 | DINOv2 [oquab2023dinov2] | HuggingFace `facebook/dinov2-large` | Apache 2.0 |
-| Qwen2-VL-2B | HuggingFace `Qwen/Qwen2-VL-2B` | Tongyi Qianwen |
+| Qwen3.5-4B | Unsloth `unsloth_Qwen3.5-4B` | Tongyi Qianwen |
 
 ## 5. Computing Infrastructure
 

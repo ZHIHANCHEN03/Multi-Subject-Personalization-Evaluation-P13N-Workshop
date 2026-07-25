@@ -61,7 +61,7 @@ We introduce \textbf{MIDC} (Multi-subject Interaction Diagnosis and Correction),
 \item \textbf{Propose--verify with guarded acceptance.} Each step applies an action from a small portfolio (targeted reference reordering, layout hint, facet-specific prompt rewrite) and is accepted only if the verifier's overall score does not regress and the collapsed subject's identity similarity improves---preventing the correction loop from drifting.
 \end{itemize}
 
-Crucially, MIDC is \emph{training-free} and \emph{model-agnostic}: it treats the generator as a black box and only requires a decomposed scorer. We instantiate it on two base models---OmniGen2~\citep{wu2025omnigen2} and FLUX.2-klein-9B~\citep{blackforest2025flux2}---using a Qwen2-based decomposed evaluator (MIE) as the verifier, and use an \emph{independent} DINOv2-based Subject Collapse Rate as the judge to avoid self-evaluation circularity.
+Crucially, MIDC is \emph{training-free} and \emph{model-agnostic}: it treats the generator as a black box and only requires a decomposed scorer. We instantiate it on two base models---OmniGen2~\citep{wu2025omnigen2} and FLUX.2-klein-9B~\citep{blackforest2025flux2}---using a Qwen3.5-4B-based decomposed evaluator (MIE) as the verifier, and use an \emph{independent} DINOv2-based Subject Collapse Rate as the judge to avoid self-evaluation circularity.
 
 Our contributions:
 \begin{enumerate}
@@ -130,7 +130,7 @@ Let a candidate image $I$ be scored by a decomposed evaluator $V$ along three fa
 \[
 \mathbf{s} = V(I, \text{prompt}, \text{refs}) = \{s_{\mathrm{ex}}, s_{\mathrm{ap}}, s_{\mathrm{int}}\},
 \]
-where $s_{\mathrm{ex}}$ measures subject existence (are all subjects present?), $s_{\mathrm{ap}}$ measures appearance fidelity (does each present subject match its reference?), and $s_{\mathrm{int}}$ measures interaction correctness (are subjects arranged as the prompt asks?). We instantiate $V$ with a Qwen2-based~\citep{yang2024qwen2} multi-subject evaluator fine-tuned via LoRA~\citep{hu2021lora,unsloth2024} to emit per-facet scores.
+where $s_{\mathrm{ex}}$ measures subject existence (are all subjects present?), $s_{\mathrm{ap}}$ measures appearance fidelity (does each present subject match its reference?), and $s_{\mathrm{int}}$ measures interaction correctness (are subjects arranged as the prompt asks?). We instantiate $V$ with a Qwen3.5-4B-based~\citep{yang2024qwen2} multi-subject evaluator fine-tuned via LoRA~\citep{hu2021lora,unsloth2024} to emit per-facet scores.
 
 \subsection{Calibrated Deficit Routing}
 \label{sec:routing}
@@ -201,7 +201,7 @@ where $V_{\mathrm{total}}$ is the verifier's aggregate score and $\mathrm{sim}_{
 
 \paragraph{Models.} We instantiate MIDC on two base generators: (i) \textbf{OmniGen2}~\citep{wu2025omnigen2}, a native multi-reference model (up to 5 references), and (ii) \textbf{FLUX.2-klein-9B}~\citep{blackforest2025flux2}, a 9B step-distilled model supporting up to 8 reference images. MIDC treats both as black boxes.
 
-\paragraph{Verifier.} The decomposed verifier $V$ is a Qwen2-4B model~\citep{yang2024qwen2} fine-tuned via LoRA~\citep{hu2021lora,unsloth2024} to emit existence/appearance/interaction scores. Calibration statistics $\{\mathrm{median}_d^{(n)}, \mathrm{scale}_d^{(n)}\}$ are frozen from a one-shot calibration set disjoint from all evaluation splits.
+\paragraph{Verifier.} The decomposed verifier $V$ is a Qwen3.5-4B model~\citep{yang2024qwen2} fine-tuned via LoRA~\citep{hu2021lora,unsloth2024} to emit existence/appearance/interaction scores. Calibration statistics $\{\mathrm{median}_d^{(n)}, \mathrm{scale}_d^{(n)}\}$ are frozen from a one-shot calibration set disjoint from all evaluation splits.
 
 \paragraph{Benchmarks.} We use the MIB-Gold hard splits from MIBE~\citep{anon2025mibe}: (i) a 500-task OmniGen2 split (250 hard 4-entity $+$ 250 easy 2-entity) and (ii) FLUX.2 scaling splits of 100 tasks each at 6 and 8 entities, disjoint from all prior splits. Tasks emphasize interaction and occlusion.
 
@@ -401,7 +401,7 @@ On \textbf{existence (Q1)}, labelers prefer MIDC over the retrained SOTA (UMO) \
 
 \section{Discussion and Limitations}
 
-\paragraph{``Training-free'' is relative to the generator.} MIDC touches no generator weights, but its decomposed verifier (MIE) is a Qwen2-VL-2B model with a LoRA fine-tuned on 60K pairs of the same task family. Strictly, we move training from the generator to the verifier. We follow the convention that best-of-$N$ with a reward model is also called ``training-free,'' but note our verifier is not an off-the-shelf CLIP-style scorer. The real selling point is \emph{decoupling}: the verifier trains once and transfers across generators---we use the \emph{same} MIE verifier on both OmniGen2 and FLUX.2-klein-9B without retraining---whereas a retrained generator (UMO) is bound to one base. Whether fine-tuning directly on our interaction-hard split would close the gap is the open question our diagnosis predicts and the natural next experiment.
+\paragraph{``Training-free'' is relative to the generator.} MIDC touches no generator weights, but its decomposed verifier (MIE) is a Qwen3.5-4B model with a LoRA fine-tuned on 60K pairs of the same task family. Strictly, we move training from the generator to the verifier. We follow the convention that best-of-$N$ with a reward model is also called ``training-free,'' but note our verifier is not an off-the-shelf CLIP-style scorer. The real selling point is \emph{decoupling}: the verifier trains once and transfers across generators---we use the \emph{same} MIE verifier on both OmniGen2 and FLUX.2-klein-9B without retraining---whereas a retrained generator (UMO) is bound to one base. Whether fine-tuning directly on our interaction-hard split would close the gap is the open question our diagnosis predicts and the natural next experiment.
 
 \paragraph{Self-evaluation circularity.} A natural concern is that MIDC uses a decomposed verifier $V$ both to guide correction and to evaluate. We mitigate this by reporting all headline metrics (SCR, DINO) from an \emph{independent} DINOv2-based judge, not $V$. The verifier is used only for routing and acceptance. The human study (Table~\ref{tab:human}) further validates the SCR result with a $p{=}4{\times}10^{-7}$ preference on existence, independent of $V$.
 
