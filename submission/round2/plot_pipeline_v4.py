@@ -78,7 +78,7 @@ def main() -> None:
         (0.135, 0.207), 0.720, 0.575,
         boxstyle="round,pad=0.0,rounding_size=0.022",
         linewidth=0.9, edgecolor="#9a9a9a", facecolor=CONTAINER, zorder=1))
-    ax.text(0.872, 0.495, "$K\\times$", ha="left", va="center",
+    ax.text(0.872, 0.495, "$\\times K$", ha="left", va="center",
             fontsize=6.6, color=INK, zorder=6)
 
     # ---- inputs -------------------------------------------------------------
@@ -93,8 +93,8 @@ def main() -> None:
     y1 = 0.300
     blk(ax, xl, y1, 0.300, hb, "decomposed\nverifier $V$", ORANGE)
     blk(ax, xr, y1, 0.300, hb, "DINOv2 $+$\nGrounding-DINO", ORANGE)
-    arw(ax, (0.437, 0.140 + hb / 2), (xl, y1 - hb / 2), rad=-0.22)
-    arw(ax, (0.437, 0.140 + hb / 2), (xr, y1 - hb / 2), rad=0.22)
+    arw(ax, (0.378, 0.140 + hb / 2), (xl, y1 - hb / 2), rad=-0.10)
+    arw(ax, (0.496, 0.140 + hb / 2), (xr, y1 - hb / 2), rad=0.10)
 
     # ---- decisions ----------------------------------------------------------
     y2 = 0.455

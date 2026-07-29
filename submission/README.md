@@ -30,8 +30,8 @@ guarded acceptance. See [`paper/main.tex`](paper/main.tex) for the full method.
 | [`round1_1/`](round1_1/) | Ablation sweep configs (`sweep.py`) |
 | [`round2/`](round2/) | Round-2/3 experiment scripts, manifests, and results — see [`round2/README.md`](round2/README.md) |
 | [`round2/results_r2/`](round2/results_r2/) | **Raw per-task records** (`records.jsonl`) for the 500-task OmniGen2 main experiment (all methods, 3 seeds) — the basis for Table 1 |
-| [`round2/results_flux2/`](round2/results_flux2/) | Raw records for the FLUX.2-klein-9B 6/8-entity scaling study — the basis for Table 2 and the gating analysis (§4.5, Figure 4) |
-| [`round2/verify_paper_numbers.py`](round2/verify_paper_numbers.py) | Recomputes every value in Tables 1–5 and Figure 4 from the committed records and diffs them against `paper/main.tex`; exits non-zero on any disagreement |
+| [`round2/results_flux2/`](round2/results_flux2/) | Raw records for the FLUX.2-klein-9B 6/8-entity scaling study — the basis for Table 2 and the gating analysis (§4.5, Figure 5) |
+| [`round2/verify_paper_numbers.py`](round2/verify_paper_numbers.py) | Recomputes every value in Tables 1, 2, 3, 5, the §4.3 generator calls, and the §4.5 gating split from the committed records and diffs them against `paper/main.tex`; exits non-zero on any disagreement. Table 4 (paired bootstrap) is reproduced by [`round2/analyze.py`](round2/analyze.py) |
 | [`ABSTRACT.md`](ABSTRACT.md) | Final title + abstract (synced with `paper/main.tex`) — **must be mirrored to OpenReview before 7/28** |
 | `../meta/PLAN.md` | Project plan and claim boundaries (working doc, outside `submission/`) |
 
@@ -78,7 +78,7 @@ regenerate with `python3 round2/verify_paper_numbers.py`.
 
 MIDC triggers on only 28% of 8-entity tasks (the harder ones) and cuts SCR by
 23.8% on that subset (0.688 → 0.524), while cleanly declining to act on the
-remaining 72% (no measurable regression vs one-shot) — see §4.5 and Figure 4
+remaining 72% (no measurable regression vs one-shot) — see §4.5 and Figure 5
 of the paper.
 
 ## Notes

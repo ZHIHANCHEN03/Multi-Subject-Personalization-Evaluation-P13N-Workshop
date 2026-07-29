@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""FLUX.2 comparison figures (paper Figure 1 teaser and Figure 4 grid).
+"""FLUX.2 comparison figure (paper Figure 4 grid).
+
+NOTE: the Figure 1 teaser is no longer built here -- as of 2026-07-28 it is an
+OmniGen2 one-shot/UMO/MIDC panel (hard_043091) built by plot_teaser_omnigen.py,
+because the old teaser duplicated this grid's top row (hard_048829). Do not
+re-enable build_teaser here: it would overwrite the new teaser.pdf.
 
 Annotation grammar matches Figure 3: a per-subject strip under each image, one
 cell per subject, red when that subject's DINOv2 similarity falls below the 0.5
@@ -43,10 +48,9 @@ THRESH = 0.5
 TEASER_W_IN = 0.92 * 3.3
 GRID_W_IN = 0.90 * 3.3
 
-# (task, seed): both chosen so a *single* seed is monotonic across methods, so
-# the panels of a row differ only in method.
-TEASER = ("hard_048829", 1)
-GRID = [("hard_048829", 1), ("hard_047461", 2)]
+# (task, seed): each row chosen so a *single* seed is monotonic across methods,
+# so the panels of a row differ only in method.
+GRID = [("hard_048829", 1), ("hard_047461", 2), ("hard_057505", 1)]
 
 INK, GREY = "#1a1a1a", "#8a8a8a"
 FAIL, PASS, HILITE = "#c0392b", "#2e7d32", "#1f4e79"
@@ -130,13 +134,16 @@ def draw_panel(c, x, y, pw, ph, task, seed, method, name, *,
     nbad = sum(s < THRESH for s in sims)
     strip_y = y - strip_gap - strip_h
 
-    if ours:
-        pad = 0.075
-        bot = (strip_y - note_gap - dy_note - 0.14) if note else (strip_y - 0.06)
-        top = y + ph + (dy_name + 0.20 if show_name else dy_scr + 0.19)
-        c.round_rect(x - pad, bot, pw + 2 * pad, top - bot,
-                     facecolor="#eef3f9", edgecolor=HILITE, linewidth=0.9,
-                     zorder=-5)
+    # every panel gets the same frame, so the columns are structurally
+    # identical and only the colour marks ours; an earlier version boxed only
+    # ours and the asymmetry read as misalignment.
+    pad = 0.075
+    bot = (strip_y - note_gap - dy_note - 0.14) if note else (strip_y - 0.075)
+    top = y + ph + (dy_name + 0.20 if show_name else dy_scr + 0.19)
+    c.round_rect(x - pad, bot, pw + 2 * pad, top - bot,
+                 facecolor="#eef3f9" if ours else "#ffffff",
+                 edgecolor=HILITE if ours else "#cfcfcf",
+                 linewidth=0.9 if ours else 0.6, zorder=-5)
 
     if show_name:
         c.text(x + pw / 2, y + ph + dy_name, name, pt_name, ha="center", va="center",
@@ -180,15 +187,16 @@ def build_teaser():
     task, seed = TEASER
     pw = 3.98
     ph = pw / aspect(task)
-    gap, mar = 0.34, 0.06
+    gap, mar = 0.34, 0.19
     strip_h, strip_gap, note_gap = 0.30, 0.07, 0.05
-    top_pad, bot_pad = 0.79, 0.40
+    top_pad, bot_pad = 0.79, 0.62
     W = 2 * pw + gap + 2 * mar
     H = ph + top_pad + strip_gap + strip_h + note_gap + bot_pad
     c = Canvas(W, H, TEASER_W_IN)
 
     y = bot_pad + note_gap + strip_h + strip_gap
     out = []
+    LEGEND_Y = 0.145
     for j, (m, name, ours) in enumerate([("oneshot", "one-shot", False),
                                          ("ours", "MIDC (ours)", True)]):
         out.append(draw_panel(c, mar + j * (pw + gap), y, pw, ph, task, seed, m,
@@ -196,23 +204,31 @@ def build_teaser():
                               strip_h=strip_h, strip_gap=strip_gap,
                               note_gap=note_gap, pt_cell=5.8,
                               dy_name=0.57, dy_scr=0.21, dy_note=0.17))
+    c.text(W / 2, LEGEND_Y,
+           "red $=$ identity similarity below $0.5$ (collapsed)   ·   green $=$ retained",
+           5.8, ha="center", va="center", color=GREY, style="italic")
     c.save("teaser")
     return out, c.printed_h
 
 
 def build_grid():
     pw = 2.82
-    gap, mar_l, mar_r = 0.14, 0.34, 0.06
+    gap, mar_l, mar_r = 0.14, 0.42, 0.19
     strip_h, strip_gap = 0.16, 0.055
-    top_pad, row_gap, bot_pad = 0.82, 0.46, 0.10
+    top_pad, row_gap, bot_pad = 0.82, 0.46, 0.42
     hs = [pw / aspect(t) for t, _ in GRID]
     W = 3 * pw + 2 * gap + mar_l + mar_r
-    H = sum(hs) + top_pad + 2 * (strip_gap + strip_h) + row_gap + bot_pad
+    strip_row = strip_gap + strip_h
+    H = sum(hs) + top_pad + len(hs) * strip_row + (len(hs) - 1) * row_gap + bot_pad
     c = Canvas(W, H, GRID_W_IN)
 
-    y2 = bot_pad + strip_gap + strip_h
-    y1 = y2 + hs[1] + row_gap + strip_gap + strip_h
-    ys = [y1, y2]
+    # row bottoms, from the bottom row up: each row = strip + image + gap
+    y = bot_pad + strip_row
+    bottoms = {len(hs) - 1: y}
+    for ri in range(len(hs) - 2, -1, -1):
+        y = y + hs[ri + 1] + row_gap + strip_row
+        bottoms[ri] = y
+    ys = [bottoms[ri] for ri in range(len(hs))]
     methods = [("oneshot", "one-shot"), ("bon", "best-of-8"), ("ours", "MIDC (ours)")]
     out = []
     for ri, (task, seed) in enumerate(GRID):
@@ -225,14 +241,16 @@ def build_grid():
                                   dy_name=0.589, dy_scr=0.214))
         c.text(mar_l - 0.15, ys[ri] + hs[ri] / 2, task.replace("hard_", "task "),
                6.0, ha="center", va="center", color=GREY, rotation=90)
+    c.text(W / 2, 0.16,
+           "red $=$ identity similarity below $0.5$ (collapsed)   ·   green $=$ retained",
+           5.8, ha="center", va="center", color=GREY, style="italic")
     c.save("results_grid")
     return out, c.printed_h
 
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    for label, fn, wid in (("teaser", build_teaser, TEASER_W_IN),
-                           ("results_grid", build_grid, GRID_W_IN)):
+    for label, fn, wid in (("results_grid", build_grid, GRID_W_IN),):
         res, hh = fn()
         print(f"{label}: prints at {wid:.2f} x {hh:.2f} in")
         for nbad, scr, sims in res:
