@@ -1,111 +1,114 @@
-# Supplementary Materials — Availability
+# Supplementary materials — MIDC
 
-This document lists the artifacts accompanying the MIDC submission and how reviewers can access them.
+What accompanies the submission and how a reviewer can check each reported number.
+Everything referenced here is in the supplementary archive; no claim in the paper
+depends on material that is not.
 
-## 1. Code
+## 1. Reproducing every number in the paper
 
-The full implementation of MIDC (MIE-guided Inference-time Diagnosis and Correction), the
-calibrated routing loop, the guarded acceptance criterion, all baselines
-(`one_shot`, `best_of_n`, `UMO`), the FLUX.2-klein adapter, the multi-seed sharded
-runner, the merge/analysis scripts, and the statistical tests (paired bootstrap,
-win/tie/loss) is included in the anonymized supplementary code archive and will be
-released publicly upon acceptance under an MIT license.
+One script recomputes Tables 1–4 and the gating figure from the committed per-task
+records and diffs the result against the values in `main.tex`. No GPU, no model
+weights, no network:
 
-Top-level layout of the repo:
-
-```
-round1/                      # core library: common.py, external_generators.py, MIE verifier, MIDC loop
-round2/                      # experiment runners (Round 2 = OmniGen2 main, Round 3 = FLUX.2 scaling)
-  p2_oneshot.py  p3_bestofn.py  p4_umo.py  p5_midc.py
-  run_shard.sh   merge_shards.py   analyze.py
-  run_flux2_scaling.sh  calibrate_flux2.sh  score_mie_precomputed.py
-  results_r2/                # raw per-task records.jsonl (committed)
-round2/README_round3.md      # Round 3 (FLUX.2 scaling) documentation
-paper/                       # LaTeX source, figures, refs.bib, ReproducibilityChecklist
+```bash
+cd round2
+python3 verify_paper_numbers.py          # exits non-zero on any mismatch
 ```
 
-## 2. Data
+It currently reports *all paper numbers reproduce from the committed records*. This
+is the fastest way to audit the submission, and it is why the raw records are
+included rather than summary tables alone.
 
-- **MIB-Gold hard splits** (the 500-task OmniGen2 split and the 6/8-entity FLUX.2 splits)
-  are derived from MIBE [anon2025mibe], which is currently under review. The task
-  manifests (prompts + reference image paths + entity metadata) are included in the
-  supplementary archive under `round2/manifests/`. The underlying reference images
-  will be released under a CC-BY-4.0 license upon publication of MIBE.
-- **Raw per-task results** for every reported number in Table 1, Table 2, and the
-  gating analysis (Table 3) are committed under `round2/results_r2/` as
-  `records.jsonl` files, one per (method, seed, shard). These are the exact artifacts
-  used by `round2/analyze.py` to produce the tables.
+The three late additions are checkable the same way, from their own record files:
 
-## 3. MIE Verifier Checkpoint
+| Claim | Recompute from |
+|---|---|
+| Sharpness-matched blur control (SCR $+0.013$, DINO $-0.008$, $n{=}150$) | `round2/results_blur_cf/blur_cf.jsonl` |
+| CLIP-T / CLIP-I ($n{=}500$ per method, seed 0) | `round2/results_clip/clip_*_s0.jsonl` |
+| Human-eval robustness ($82.9\%$ at $\ge2$ labelers, $87.0\%$ unanimous) | `round2/human_eval/HUMAN_EVAL/` + `aggregate_human_eval.py` |
 
-The MIE verifier is a LoRA-fine-tuned Qwen3.5-4B model. The checkpoint
-(`mie_verifier_lora.safetensors`, ~50 MB) is **not** bundled in the supplementary
-archive to keep the submission size within the AAAI limit, but it will be released
-publicly upon acceptance via the companion MIBE paper's release. For reviewer
-convenience during the review period, the checkpoint is available upon request to
-the area chair (the release is gated only to preserve double-blind review; the
-checkpoint itself contains no identifying information).
+## 2. Code
 
-The verifier can be reproduced from scratch by running
-`round1/train_mie_verifier.py` on the MIBE Silver Set (60K pairs); training takes
-~2 hours on a single A100. Full training hyperparameters are listed in
-`round1/train_mie_verifier.py` and in the Reproducibility Checklist.
+```
+round1/                     core library and the MIDC loop
+  common.py                 task loading, DinoScorer (Grounding-DINO + DINOv2), SCR,
+                            the dataset driver, the MIE subprocess client
+  p1_ours_v2.py             MIDC: calibrated routing, dual-signal diagnosis,
+                            action portfolio, guarded acceptance
+  p2_oneshot.py             one_shot baseline
+  p3_bestofn.py             best_of_n baseline
+  p4_umo.py                 UMO baseline (released LoRA, its official config)
+  actions.py                CalibratedRouter / RawRouter, prompt rewrite, refset ops
+  generators.py             OmniGen2 and FLUX.2 adapters
+  external_generators.py    UMO and FreeGraftor wrappers
+  mie_server.py             persistent MIE verifier, separate venv (see §4)
+  calibrate_mie.py          freezes the per-facet calibration statistics
+  requirements.txt          generation-side dependencies
 
-## 4. Pre-trained Base Models
+round2/                     experiments and analysis
+  run_round2_main.sh        500-task x 3-seed sharded run
+  run_shard.sh              one shard of the four methods on one GPU
+  run_flux2_scaling.sh      FLUX.2 6/8-subject scaling
+  run_ablation.sh           the six ablation variants
+  merge_shards.py           merge per-shard records
+  analyze.py                means, bootstrap CIs, paired significance
+  verify_paper_numbers.py   recompute every table, diff against main.tex
+  b1_reanalysis.py          the gating (triggered vs no-op) analysis
+  blur_counterfactual.py    the sharpness-matched control of Sec. 4.2
+  score_clip.py             CLIP-T / CLIP-I scoring
+  aggregate_human_eval.py   human-eval win rates, CIs, Fleiss kappa
+  export_human_eval.py      builds the blinded A/B pairs and the key
+  analyze_umo_vs_oneshot.py the UMO-vs-one_shot ballot analysis
+  score_precomputed.py      score externally generated images by task_id
+  plot_pipeline.py          Figure 2
+  plot_umo_qualitative.py   Figure 3
+  plot_gating.py            Figure 5
+```
 
-All base models are publicly available and used under their respective licenses:
+Every generated figure is built from the records by a `plot_*.py` script, so no
+figure carries a number that is not in the data.
 
-| Model | Source | License |
-|---|---|---|
-| OmniGen2 [wu2025omnigen2] | HuggingFace `OmniGen2/OmniGen2` | Apache 2.0 |
-| FLUX.2-klein-9B | HuggingFace `black-forest-labs/FLUX.2-klein-9B` | FLUX.2 Non-Commercial |
-| UMO LoRA [cheng2025umo] | project release `UMO_OmniGen2.safetensors` | MIT |
-| DINOv2 [oquab2023dinov2] | HuggingFace `facebook/dinov2-large` | Apache 2.0 |
-| Qwen3.5-4B | Unsloth `unsloth_Qwen3.5-4B` | Tongyi Qianwen |
+## 3. Data
 
-## 5. Computing Infrastructure
+- **Task manifests** — prompts, reference filenames and entity metadata for each
+  split, under `round2/results_r2/manifests/` (500-task OmniGen2) and
+  `round2/results_flux2/manifests/` (6/8-entity). These are the exact runner inputs.
+- **Raw per-task records** — `records.jsonl` under `round2/results_r2/merged/`
+  (4 methods x 3 seeds), `round2/results_flux2/` (3 methods x 2 entity counts x
+  3 seeds) and `round2/results_ablation/` (6 variants x 2 seeds). One line per task
+  carrying `scr`, `dino_sims`, `dino_mean`, `gen_calls`, `accepted_steps` and the
+  full `step_log` of routing decisions, which is what makes the gating analysis and
+  Figure 2 auditable.
+- **Human evaluation** — `round2/human_eval/HUMAN_EVAL/` holds the three labelers'
+  raw ballots, the blinding key (`key.json`, required to decode LEFT/RIGHT) and the
+  aggregate; `round2/human_eval/UMO_VS_ONESHOT/` holds the second study. Including
+  the key is what makes Table 4 independently checkable rather than a quoted
+  summary.
+- **Reference images** — from MIB-Gold [anon2025mibe], under review separately. The
+  manifests carry the filenames; the images are released with that benchmark.
 
-All experiments were run on a single A100 80GB GPU (OmniGen2 main experiments) and
-4× A100 80GB GPUs (FLUX.2 scaling, 6/8-entity splits). Software: Python 3.10,
-PyTorch 2.3, diffusers 0.30, peft 0.11, transformers 4.44, safetensors 0.4.
-OS: Ubuntu 22.04. Full version pins are in `requirements.txt`.
+## 4. Environments
 
-## 6. UMO LoRA Loading Verification
+MIE needs Unsloth with a Qwen vision stack whose `torch`/`transformers` pins
+conflict with OmniGen2 and FLUX.2, so the verifier runs in its own virtualenv and is
+driven over a JSON-lines pipe (`round1/mie_server.py`). Two consequences worth
+knowing when re-running it: `unsloth` must be imported before `transformers`, and
+stdout is the protocol channel, so all diagnostics go to stderr.
+`round1/requirements.txt` lists the generation side. Hardware and library versions
+for every reported run are in Sec. 4.1 of the paper.
 
-Because UMO [cheng2025umo] is applied to OmniGen2 via a context-refiner LoRA, a
-natural concern is whether the LoRA actually loads and takes effect, or silently
-degrades to base OmniGen2 (which would invalidate the UMO baseline). We verified
-correct loading with two independent checks:
+## 5. MIE verifier checkpoint
 
-**Key-match check.** We instantiate the OmniGen2 transformer, inject a PEFT LoRA
-adapter with the exact configuration used by our runner (`r=512`,
-`target_modules=["to_k","to_q","to_v","to_out.0"]`,
-`init_lora_weights="gaussian"`), and load
-`UMO_OmniGen2.safetensors` via `load_state_dict(strict=False)`. Result:
-`unexpected_keys = 0` — all 304 UMO LoRA keys (288 main transformer-block keys +
-16 context-refiner keys) match the adapter's parameter names and load
-successfully. The `missing_keys` are only the transformer-block LoRA weights that
-UMO did not train. PEFT initializes the $B$ matrix of each LoRA layer to zero, so
-an unloaded adapter contributes \emph{exactly} zero (a precise identity), not a
-near-identity---this is the expected behavior, not a failure. We also confirmed
-no orphaned $A$ matrices (a loaded $B$ whose paired $A$ is missing) that would
-indicate a partial-load bug. Script: `misc/umo_keycheck.py`.
+The decomposed verifier is a Qwen3.5-4B LoRA from MIBE [anon2025mibe]. It is used
+only for in-loop routing and acceptance: **no reported metric depends on it.** SCR,
+DINO, CLIP-I and CLIP-T are computed entirely by code included here, and the human
+studies do not involve it. Reviewers can therefore reproduce every number in the
+paper without the checkpoint; it is needed only to re-run the correction loop, and
+is released with MIBE.
 
-**Pixel-diff check.** As a stronger, end-to-end test, we generate the same task
-with the same seed and `image_guidance_scale=2.0` using (a) base OmniGen2 (no
-LoRA) and (b) UMO (LoRA fused via `fuse_lora` then `unload_lora`). The mean
-absolute pixel difference between the two outputs is **10.44** (on 0–255 scale,
-512×512, 5 inference steps), far above the ~0.5 threshold for "no effect" and the
-~2.0 threshold for "minor effect." This confirms the UMO LoRA has a substantial,
-observable effect on generation — UMO is a genuine retrained model, not a silent
-no-op over base OmniGen2. Script: `misc/umo_pixeldiff_fast.py`.
+## 6. Deliberately not included
 
-Together these two checks rule out the "silent failure" hypothesis: the UMO
-baseline numbers in Table 1 reflect the real UMO model.
-
-## 7. Reproducibility Statement
-
-Every reported number is the mean over 3 random seeds (0, 1, 2). Per-task raw
-records, paired bootstrap CIs, and win/tie/loss counts are all derivable from the
-committed `records.jsonl` files via `round2/analyze.py`. Estimated wall-clock cost
-to reproduce all tables: ~120 A100-hours.
+- **Generated images** (~8 GB across all cells). The records carry every per-subject
+  similarity and score computed from them, which is what the tables require.
+- **The MIE checkpoint**, per §5.
+- **Reference images**, per §3.

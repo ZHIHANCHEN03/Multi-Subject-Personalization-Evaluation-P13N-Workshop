@@ -1,0 +1,187 @@
+subset,task_id,gemini_consensus,human_consensus,mie_pref_model,mie_sides_with
+seen,60023,mosaic,nano_banana,nano_banana,human
+seen,60032,mosaic,nano_banana,nano_banana,human
+seen,60072,mosaic,nano_banana,nano_banana,human
+seen,60080,mosaic,nano_banana,nano_banana,human
+seen,60084,mosaic,nano_banana,nano_banana,human
+seen,60416,mosaic,nano_banana,nano_banana,human
+seen,60502,mosaic,nano_banana,nano_banana,human
+seen,60612,nano_banana,mosaic,nano_banana,gemini
+seen,60668,nano_banana,mosaic,nano_banana,gemini
+seen,60812,mosaic,nano_banana,mosaic,gemini
+seen,61062,mosaic,nano_banana,nano_banana,human
+seen,61064,nano_banana,mosaic,mosaic,human
+seen,61076,nano_banana,mosaic,nano_banana,gemini
+seen,61084,nano_banana,mosaic,nano_banana,gemini
+seen,61219,mosaic,nano_banana,mosaic,gemini
+seen,61252,mosaic,nano_banana,mosaic,gemini
+seen,61284,nano_banana,mosaic,nano_banana,gemini
+seen,61302,mosaic,nano_banana,nano_banana,human
+unseen-pair01 (flux2 vs gpt15),59,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),586,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),883,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),1039,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),1858,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),2507,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),2961,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),3031,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),4127,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),5142,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),5311,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),6258,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),6391,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),7026,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),7028,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),7170,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),7240,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),7424,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),8104,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),8137,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),8321,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),8440,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),8572,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),8948,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),10012,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),10124,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),11156,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),11184,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),11852,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),11893,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),12156,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),12294,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),12517,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),12520,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),12561,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),14080,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),14608,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),15156,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),15377,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),15380,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),15388,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),15916,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),15929,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),16205,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),16206,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),16414,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),16416,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),16602,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),16603,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),16700,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),16784,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),16819,gpt15,flux2,flux2,human
+unseen-pair01 (flux2 vs gpt15),17151,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),17323,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),17449,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),18006,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),19966,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),20632,gpt15,flux2,flux2,human
+unseen-pair01 (flux2 vs gpt15),20787,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),20843,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),20844,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),21023,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),21633,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),22314,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),22315,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),22917,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),22918,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),22919,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),22920,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),24202,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),24433,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),24434,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),24435,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),24551,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),25143,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),25989,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),26324,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),26817,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),26996,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),28038,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),29128,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),29325,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),29326,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),29327,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),30346,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),30353,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),30460,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),31055,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),31084,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),31829,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),31832,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),32061,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),32063,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),32064,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),33486,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),33886,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),33887,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),33923,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),34102,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),34338,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),34535,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),34671,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),34672,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),34887,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),34969,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),38259,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),39164,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),39224,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),39390,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),39899,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),40518,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),40519,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),40520,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),40596,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),40751,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),41053,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),41055,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),42254,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),43051,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),43052,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),44077,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),44080,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),44268,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),44672,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),44727,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),45142,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),45143,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),45456,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),45622,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),46996,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),47266,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),47324,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),47344,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),47556,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),47760,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),47816,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),48190,gpt15,flux2,flux2,human
+unseen-pair01 (flux2 vs gpt15),49412,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),49492,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),50636,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),50852,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),52030,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),53970,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),55117,gpt15,flux2,flux2,human
+unseen-pair01 (flux2 vs gpt15),55120,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),55890,gpt15,flux2,gpt15,gemini
+unseen-pair01 (flux2 vs gpt15),56581,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),56640,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),56936,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),57295,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),57814,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),58032,flux2,gpt15,gpt15,human
+unseen-pair01 (flux2 vs gpt15),58854,flux2,gpt15,flux2,gemini
+unseen-pair01 (flux2 vs gpt15),59428,flux2,gpt15,flux2,gemini
+unseen-pair02 (glm vs seedream),196,glm,seedream,seedream,human
+unseen-pair02 (glm vs seedream),2720,glm,seedream,seedream,human
+unseen-pair02 (glm vs seedream),12208,glm,seedream,seedream,human
+unseen-pair02 (glm vs seedream),13796,seedream,glm,seedream,gemini
+unseen-pair02 (glm vs seedream),17275,glm,seedream,seedream,human
+unseen-pair02 (glm vs seedream),22204,seedream,glm,seedream,gemini
+unseen-pair02 (glm vs seedream),24164,seedream,glm,seedream,gemini
+unseen-pair02 (glm vs seedream),24552,glm,seedream,glm,gemini
+unseen-pair02 (glm vs seedream),24636,seedream,glm,seedream,gemini
+unseen-pair02 (glm vs seedream),24872,seedream,glm,seedream,gemini
+unseen-pair02 (glm vs seedream),25008,glm,seedream,glm,gemini
+unseen-pair02 (glm vs seedream),38611,glm,seedream,seedream,human
+unseen-pair02 (glm vs seedream),39392,glm,seedream,seedream,human
+unseen-pair02 (glm vs seedream),58032,glm,seedream,seedream,human

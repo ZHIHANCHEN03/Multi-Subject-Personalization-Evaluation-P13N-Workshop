@@ -1,0 +1,500 @@
+{"task_id": "hard_040028", "clip_t": 0.2878971993923187, "clip_i_per_subject": [0.80457, 0.71254], "clip_i": 0.75856, "n_refs": 2}
+{"task_id": "hard_040032", "clip_t": 0.2664935290813446, "clip_i_per_subject": [0.70725, 0.71614], "clip_i": 0.71169, "n_refs": 2}
+{"task_id": "hard_040035", "clip_t": 0.3629932403564453, "clip_i_per_subject": [0.57203, 0.68105, 0.67374, 0.61138], "clip_i": 0.63455, "n_refs": 4}
+{"task_id": "hard_040096", "clip_t": 0.310543954372406, "clip_i_per_subject": [0.54286, 0.58401], "clip_i": 0.56344, "n_refs": 2}
+{"task_id": "hard_040111", "clip_t": 0.32824963331222534, "clip_i_per_subject": [0.61001, 0.59246, 0.71885, 0.80128], "clip_i": 0.68065, "n_refs": 4}
+{"task_id": "hard_040152", "clip_t": 0.2638048529624939, "clip_i_per_subject": [0.71707, 0.6704], "clip_i": 0.69374, "n_refs": 2}
+{"task_id": "hard_040167", "clip_t": 0.3095715045928955, "clip_i_per_subject": [0.518, 0.70586, 0.54936, 0.55496], "clip_i": 0.58204, "n_refs": 4}
+{"task_id": "hard_040295", "clip_t": 0.38579046726226807, "clip_i_per_subject": [0.70511, 0.64722, 0.5303, 0.49962], "clip_i": 0.59556, "n_refs": 4}
+{"task_id": "hard_040327", "clip_t": 0.2838565707206726, "clip_i_per_subject": [0.75423, 0.48162, 0.61854, 0.64463], "clip_i": 0.62475, "n_refs": 4}
+{"task_id": "hard_040328", "clip_t": 0.33511191606521606, "clip_i_per_subject": [0.7079, 0.7628], "clip_i": 0.73535, "n_refs": 2}
+{"task_id": "hard_040360", "clip_t": 0.29199421405792236, "clip_i_per_subject": [0.73569, 0.78959], "clip_i": 0.76264, "n_refs": 2}
+{"task_id": "hard_040363", "clip_t": 0.32590365409851074, "clip_i_per_subject": [0.63599, 0.6293, 0.58109, 0.5364], "clip_i": 0.5957, "n_refs": 4}
+{"task_id": "hard_040375", "clip_t": 0.31537073850631714, "clip_i_per_subject": [0.41024, 0.51935, 0.6703, 0.6308], "clip_i": 0.55767, "n_refs": 4}
+{"task_id": "hard_040388", "clip_t": 0.22624222934246063, "clip_i_per_subject": [0.6818, 0.65059], "clip_i": 0.6662, "n_refs": 2}
+{"task_id": "hard_040399", "clip_t": 0.38872963190078735, "clip_i_per_subject": [0.69822, 0.59955, 0.73313, 0.57119], "clip_i": 0.65052, "n_refs": 4}
+{"task_id": "hard_040424", "clip_t": 0.30293959379196167, "clip_i_per_subject": [0.76256, 0.6548], "clip_i": 0.70868, "n_refs": 2}
+{"task_id": "hard_040432", "clip_t": 0.30654069781303406, "clip_i_per_subject": [0.67419, 0.75255], "clip_i": 0.71337, "n_refs": 2}
+{"task_id": "hard_040440", "clip_t": 0.3012648820877075, "clip_i_per_subject": [0.56785, 0.56092], "clip_i": 0.56439, "n_refs": 2}
+{"task_id": "hard_040480", "clip_t": 0.2486691176891327, "clip_i_per_subject": [0.72905, 0.79543], "clip_i": 0.76224, "n_refs": 2}
+{"task_id": "hard_040492", "clip_t": 0.21876239776611328, "clip_i_per_subject": [0.65531, 0.69105], "clip_i": 0.67318, "n_refs": 2}
+{"task_id": "hard_040539", "clip_t": 0.34980902075767517, "clip_i_per_subject": [0.64814, 0.74348, 0.60802, 0.51539], "clip_i": 0.62876, "n_refs": 4}
+{"task_id": "hard_040540", "clip_t": 0.28943830728530884, "clip_i_per_subject": [0.83817, 0.72666], "clip_i": 0.78241, "n_refs": 2}
+{"task_id": "hard_040695", "clip_t": 0.3484638035297394, "clip_i_per_subject": [0.66462, 0.5565, 0.68935, 0.6467], "clip_i": 0.63929, "n_refs": 4}
+{"task_id": "hard_040796", "clip_t": 0.26977717876434326, "clip_i_per_subject": [0.67059, 0.7791], "clip_i": 0.72484, "n_refs": 2}
+{"task_id": "hard_040895", "clip_t": 0.3847349286079407, "clip_i_per_subject": [0.67909, 0.56568, 0.61542, 0.532], "clip_i": 0.59805, "n_refs": 4}
+{"task_id": "hard_040959", "clip_t": 0.40007269382476807, "clip_i_per_subject": [0.63429, 0.52468, 0.59089, 0.44016], "clip_i": 0.54751, "n_refs": 4}
+{"task_id": "hard_040964", "clip_t": 0.27119141817092896, "clip_i_per_subject": [0.71425, 0.74534], "clip_i": 0.7298, "n_refs": 2}
+{"task_id": "hard_040979", "clip_t": 0.3937886357307434, "clip_i_per_subject": [0.44368, 0.64996, 0.60629, 0.6616], "clip_i": 0.59038, "n_refs": 4}
+{"task_id": "hard_040980", "clip_t": 0.32341837882995605, "clip_i_per_subject": [0.66761, 0.59391], "clip_i": 0.63076, "n_refs": 2}
+{"task_id": "hard_040984", "clip_t": 0.31864988803863525, "clip_i_per_subject": [0.73332, 0.80487], "clip_i": 0.76909, "n_refs": 2}
+{"task_id": "hard_041020", "clip_t": 0.22649861872196198, "clip_i_per_subject": [0.70473, 0.83262], "clip_i": 0.76868, "n_refs": 2}
+{"task_id": "hard_041036", "clip_t": 0.3234151005744934, "clip_i_per_subject": [0.59982, 0.6572], "clip_i": 0.62851, "n_refs": 2}
+{"task_id": "hard_041072", "clip_t": 0.2513115406036377, "clip_i_per_subject": [0.7387, 0.64106], "clip_i": 0.68988, "n_refs": 2}
+{"task_id": "hard_041076", "clip_t": 0.2985433340072632, "clip_i_per_subject": [0.72817, 0.67435], "clip_i": 0.70126, "n_refs": 2}
+{"task_id": "hard_041099", "clip_t": 0.3518819808959961, "clip_i_per_subject": [0.62019, 0.51875, 0.53777, 0.59809], "clip_i": 0.5687, "n_refs": 4}
+{"task_id": "hard_041155", "clip_t": 0.42295634746551514, "clip_i_per_subject": [0.59187, 0.64297, 0.46043, 0.55479], "clip_i": 0.56251, "n_refs": 4}
+{"task_id": "hard_041196", "clip_t": 0.33368340134620667, "clip_i_per_subject": [0.80865, 0.64679], "clip_i": 0.72772, "n_refs": 2}
+{"task_id": "hard_041231", "clip_t": 0.40260833501815796, "clip_i_per_subject": [0.62283, 0.68414, 0.51879, 0.51853], "clip_i": 0.58607, "n_refs": 4}
+{"task_id": "hard_041240", "clip_t": 0.34932371973991394, "clip_i_per_subject": [0.6131, 0.73704], "clip_i": 0.67507, "n_refs": 2}
+{"task_id": "hard_041260", "clip_t": 0.23203690350055695, "clip_i_per_subject": [0.72848, 0.72087], "clip_i": 0.72468, "n_refs": 2}
+{"task_id": "hard_041283", "clip_t": 0.32880616188049316, "clip_i_per_subject": [0.62759, 0.59625, 0.45046, 0.57605], "clip_i": 0.56259, "n_refs": 4}
+{"task_id": "hard_041303", "clip_t": 0.36327892541885376, "clip_i_per_subject": [0.46635, 0.52781, 0.61279, 0.54428], "clip_i": 0.53781, "n_refs": 4}
+{"task_id": "hard_041399", "clip_t": 0.32086822390556335, "clip_i_per_subject": [0.53707, 0.51197, 0.56981, 0.517], "clip_i": 0.53396, "n_refs": 4}
+{"task_id": "hard_041443", "clip_t": 0.41667014360427856, "clip_i_per_subject": [0.65134, 0.67537, 0.54725, 0.57556], "clip_i": 0.61238, "n_refs": 4}
+{"task_id": "hard_041463", "clip_t": 0.34103479981422424, "clip_i_per_subject": [0.79283, 0.64806, 0.64278, 0.61287], "clip_i": 0.67414, "n_refs": 4}
+{"task_id": "hard_041563", "clip_t": 0.28653430938720703, "clip_i_per_subject": [0.8019, 0.87034, 0.52815, 0.53406], "clip_i": 0.68361, "n_refs": 4}
+{"task_id": "hard_041671", "clip_t": 0.3396391272544861, "clip_i_per_subject": [0.5223, 0.62108, 0.50274, 0.53399], "clip_i": 0.54502, "n_refs": 4}
+{"task_id": "hard_041683", "clip_t": 0.3516550064086914, "clip_i_per_subject": [0.60866, 0.63733, 0.61965, 0.51102], "clip_i": 0.59417, "n_refs": 4}
+{"task_id": "hard_041711", "clip_t": 0.39001569151878357, "clip_i_per_subject": [0.67391, 0.62585, 0.5951, 0.61891], "clip_i": 0.62844, "n_refs": 4}
+{"task_id": "hard_041715", "clip_t": 0.31662288308143616, "clip_i_per_subject": [0.62773, 0.61608, 0.44383, 0.55536], "clip_i": 0.56075, "n_refs": 4}
+{"task_id": "hard_041719", "clip_t": 0.3747919797897339, "clip_i_per_subject": [0.61258, 0.64127, 0.53799, 0.60562], "clip_i": 0.59936, "n_refs": 4}
+{"task_id": "hard_041731", "clip_t": 0.3398497700691223, "clip_i_per_subject": [0.63793, 0.53535, 0.61082, 0.53486], "clip_i": 0.57974, "n_refs": 4}
+{"task_id": "hard_041756", "clip_t": 0.3553575575351715, "clip_i_per_subject": [0.69046, 0.74563], "clip_i": 0.71804, "n_refs": 2}
+{"task_id": "hard_041768", "clip_t": 0.2925313115119934, "clip_i_per_subject": [0.71697, 0.70014], "clip_i": 0.70855, "n_refs": 2}
+{"task_id": "hard_041783", "clip_t": 0.3198041617870331, "clip_i_per_subject": [0.54583, 0.4701, 0.69521, 0.67833], "clip_i": 0.59737, "n_refs": 4}
+{"task_id": "hard_041868", "clip_t": 0.24719202518463135, "clip_i_per_subject": [0.71961, 0.61591], "clip_i": 0.66776, "n_refs": 2}
+{"task_id": "hard_041931", "clip_t": 0.3165149688720703, "clip_i_per_subject": [0.6434, 0.6014, 0.73647, 0.58286], "clip_i": 0.64103, "n_refs": 4}
+{"task_id": "hard_041944", "clip_t": 0.30140888690948486, "clip_i_per_subject": [0.70119, 0.74049], "clip_i": 0.72084, "n_refs": 2}
+{"task_id": "hard_041964", "clip_t": 0.27548477053642273, "clip_i_per_subject": [0.63783, 0.82404], "clip_i": 0.73094, "n_refs": 2}
+{"task_id": "hard_041972", "clip_t": 0.2430787980556488, "clip_i_per_subject": [0.75149, 0.59073], "clip_i": 0.67111, "n_refs": 2}
+{"task_id": "hard_041983", "clip_t": 0.36512842774391174, "clip_i_per_subject": [0.6126, 0.63874, 0.65448, 0.61473], "clip_i": 0.63014, "n_refs": 4}
+{"task_id": "hard_042007", "clip_t": 0.3522219657897949, "clip_i_per_subject": [0.49595, 0.47263, 0.41219, 0.51447], "clip_i": 0.47381, "n_refs": 4}
+{"task_id": "hard_042044", "clip_t": 0.26968759298324585, "clip_i_per_subject": [0.62375, 0.75388], "clip_i": 0.68881, "n_refs": 2}
+{"task_id": "hard_042127", "clip_t": 0.3861650824546814, "clip_i_per_subject": [0.50763, 0.63612, 0.64781, 0.55054], "clip_i": 0.58552, "n_refs": 4}
+{"task_id": "hard_042160", "clip_t": 0.26632899045944214, "clip_i_per_subject": [0.76679, 0.70592], "clip_i": 0.73636, "n_refs": 2}
+{"task_id": "hard_042244", "clip_t": 0.30349671840667725, "clip_i_per_subject": [0.73249, 0.79766], "clip_i": 0.76508, "n_refs": 2}
+{"task_id": "hard_042251", "clip_t": 0.30848705768585205, "clip_i_per_subject": [0.62734, 0.73571, 0.45481, 0.57085], "clip_i": 0.59718, "n_refs": 4}
+{"task_id": "hard_042420", "clip_t": 0.2809009552001953, "clip_i_per_subject": [0.62771, 0.63625], "clip_i": 0.63198, "n_refs": 2}
+{"task_id": "hard_042440", "clip_t": 0.25067704916000366, "clip_i_per_subject": [0.63147, 0.78482], "clip_i": 0.70814, "n_refs": 2}
+{"task_id": "hard_042444", "clip_t": 0.3110501170158386, "clip_i_per_subject": [0.77024, 0.67143], "clip_i": 0.72084, "n_refs": 2}
+{"task_id": "hard_042447", "clip_t": 0.35969796776771545, "clip_i_per_subject": [0.57399, 0.51597, 0.55897, 0.49057], "clip_i": 0.53488, "n_refs": 4}
+{"task_id": "hard_042480", "clip_t": 0.26577261090278625, "clip_i_per_subject": [0.60805, 0.78061], "clip_i": 0.69433, "n_refs": 2}
+{"task_id": "hard_042491", "clip_t": 0.4156176447868347, "clip_i_per_subject": [0.6128, 0.62076, 0.53343, 0.54167], "clip_i": 0.57716, "n_refs": 4}
+{"task_id": "hard_042496", "clip_t": 0.30929210782051086, "clip_i_per_subject": [0.77522, 0.74451], "clip_i": 0.75987, "n_refs": 2}
+{"task_id": "hard_042599", "clip_t": 0.3075443506240845, "clip_i_per_subject": [0.61868, 0.66287, 0.63386, 0.63668], "clip_i": 0.63802, "n_refs": 4}
+{"task_id": "hard_042624", "clip_t": 0.2833467721939087, "clip_i_per_subject": [0.71467, 0.85703], "clip_i": 0.78585, "n_refs": 2}
+{"task_id": "hard_042663", "clip_t": 0.42754945158958435, "clip_i_per_subject": [0.6156, 0.66065, 0.54688, 0.58611], "clip_i": 0.60231, "n_refs": 4}
+{"task_id": "hard_042703", "clip_t": 0.3466157019138336, "clip_i_per_subject": [0.60674, 0.64801, 0.57743, 0.50852], "clip_i": 0.58517, "n_refs": 4}
+{"task_id": "hard_042759", "clip_t": 0.3781307637691498, "clip_i_per_subject": [0.64384, 0.55804, 0.63067, 0.59952], "clip_i": 0.60802, "n_refs": 4}
+{"task_id": "hard_042763", "clip_t": 0.3212469220161438, "clip_i_per_subject": [0.61657, 0.70379, 0.68388, 0.60089], "clip_i": 0.65128, "n_refs": 4}
+{"task_id": "hard_042792", "clip_t": 0.2911558747291565, "clip_i_per_subject": [0.67098, 0.68925], "clip_i": 0.68012, "n_refs": 2}
+{"task_id": "hard_042895", "clip_t": 0.3180975317955017, "clip_i_per_subject": [0.57769, 0.53105, 0.54044, 0.56402], "clip_i": 0.5533, "n_refs": 4}
+{"task_id": "hard_042896", "clip_t": 0.33655476570129395, "clip_i_per_subject": [0.65951, 0.72573], "clip_i": 0.69262, "n_refs": 2}
+{"task_id": "hard_043031", "clip_t": 0.343677818775177, "clip_i_per_subject": [0.69152, 0.61407, 0.63383, 0.59333], "clip_i": 0.63319, "n_refs": 4}
+{"task_id": "hard_043088", "clip_t": 0.3348270356655121, "clip_i_per_subject": [0.61924, 0.70856], "clip_i": 0.6639, "n_refs": 2}
+{"task_id": "hard_043091", "clip_t": 0.3544328510761261, "clip_i_per_subject": [0.65543, 0.60661, 0.62986, 0.49545], "clip_i": 0.59684, "n_refs": 4}
+{"task_id": "hard_043092", "clip_t": 0.2995797395706177, "clip_i_per_subject": [0.82244, 0.72152], "clip_i": 0.77198, "n_refs": 2}
+{"task_id": "hard_043103", "clip_t": 0.3617728352546692, "clip_i_per_subject": [0.54846, 0.35892, 0.57162, 0.49946], "clip_i": 0.49462, "n_refs": 4}
+{"task_id": "hard_043152", "clip_t": 0.33185744285583496, "clip_i_per_subject": [0.62072, 0.67442], "clip_i": 0.64757, "n_refs": 2}
+{"task_id": "hard_043164", "clip_t": 0.32217496633529663, "clip_i_per_subject": [0.61958, 0.75485], "clip_i": 0.68722, "n_refs": 2}
+{"task_id": "hard_043192", "clip_t": 0.2514427602291107, "clip_i_per_subject": [0.68995, 0.82427], "clip_i": 0.75711, "n_refs": 2}
+{"task_id": "hard_043223", "clip_t": 0.3653813302516937, "clip_i_per_subject": [0.66682, 0.5653, 0.61191, 0.57944], "clip_i": 0.60587, "n_refs": 4}
+{"task_id": "hard_043252", "clip_t": 0.3021043539047241, "clip_i_per_subject": [0.75166, 0.74359], "clip_i": 0.74763, "n_refs": 2}
+{"task_id": "hard_043303", "clip_t": 0.3918415307998657, "clip_i_per_subject": [0.62959, 0.65951, 0.43513, 0.46857], "clip_i": 0.5482, "n_refs": 4}
+{"task_id": "hard_043340", "clip_t": 0.25000709295272827, "clip_i_per_subject": [0.75183, 0.77238], "clip_i": 0.76211, "n_refs": 2}
+{"task_id": "hard_043375", "clip_t": 0.3773012161254883, "clip_i_per_subject": [0.66351, 0.59985, 0.54442, 0.60458], "clip_i": 0.60309, "n_refs": 4}
+{"task_id": "hard_043396", "clip_t": 0.30497992038726807, "clip_i_per_subject": [0.60709, 0.74717], "clip_i": 0.67713, "n_refs": 2}
+{"task_id": "hard_043460", "clip_t": 0.34398341178894043, "clip_i_per_subject": [0.77984, 0.82989], "clip_i": 0.80486, "n_refs": 2}
+{"task_id": "hard_043492", "clip_t": 0.30401477217674255, "clip_i_per_subject": [0.72281, 0.65959], "clip_i": 0.6912, "n_refs": 2}
+{"task_id": "hard_043559", "clip_t": 0.29112181067466736, "clip_i_per_subject": [0.71064, 0.69603, 0.72114, 0.65688], "clip_i": 0.69617, "n_refs": 4}
+{"task_id": "hard_043588", "clip_t": 0.12464046478271484, "clip_i_per_subject": [0.72341, 0.75565], "clip_i": 0.73953, "n_refs": 2}
+{"task_id": "hard_043620", "clip_t": 0.22771888971328735, "clip_i_per_subject": [0.65602, 0.83675], "clip_i": 0.74638, "n_refs": 2}
+{"task_id": "hard_043655", "clip_t": 0.2870112359523773, "clip_i_per_subject": [0.61931, 0.61541, 0.66303, 0.56082], "clip_i": 0.61464, "n_refs": 4}
+{"task_id": "hard_043683", "clip_t": 0.36358827352523804, "clip_i_per_subject": [0.53557, 0.7101, 0.53043, 0.54856], "clip_i": 0.58116, "n_refs": 4}
+{"task_id": "hard_043743", "clip_t": 0.3525702655315399, "clip_i_per_subject": [0.49458, 0.51429, 0.5002, 0.46685], "clip_i": 0.49398, "n_refs": 4}
+{"task_id": "hard_043788", "clip_t": 0.3045155107975006, "clip_i_per_subject": [0.69993, 0.81798], "clip_i": 0.75895, "n_refs": 2}
+{"task_id": "hard_043844", "clip_t": 0.24398654699325562, "clip_i_per_subject": [0.81768, 0.65351], "clip_i": 0.7356, "n_refs": 2}
+{"task_id": "hard_043896", "clip_t": 0.3160749673843384, "clip_i_per_subject": [0.51615, 0.5656], "clip_i": 0.54087, "n_refs": 2}
+{"task_id": "hard_043912", "clip_t": 0.2876800298690796, "clip_i_per_subject": [0.7009, 0.81856], "clip_i": 0.75973, "n_refs": 2}
+{"task_id": "hard_043971", "clip_t": 0.30412694811820984, "clip_i_per_subject": [0.58256, 0.54156, 0.61118, 0.54767], "clip_i": 0.57075, "n_refs": 4}
+{"task_id": "hard_043987", "clip_t": 0.38203194737434387, "clip_i_per_subject": [0.58674, 0.60482, 0.59691, 0.60297], "clip_i": 0.59786, "n_refs": 4}
+{"task_id": "hard_044079", "clip_t": 0.31135040521621704, "clip_i_per_subject": [0.63597, 0.63272, 0.71701, 0.58051], "clip_i": 0.64155, "n_refs": 4}
+{"task_id": "hard_044080", "clip_t": 0.33791592717170715, "clip_i_per_subject": [0.58275, 0.81918], "clip_i": 0.70097, "n_refs": 2}
+{"task_id": "hard_044087", "clip_t": 0.334496408700943, "clip_i_per_subject": [0.58183, 0.56313, 0.68548, 0.62609], "clip_i": 0.61414, "n_refs": 4}
+{"task_id": "hard_044103", "clip_t": 0.30519795417785645, "clip_i_per_subject": [0.58157, 0.61033, 0.38087, 0.54164], "clip_i": 0.5286, "n_refs": 4}
+{"task_id": "hard_044160", "clip_t": 0.22399334609508514, "clip_i_per_subject": [0.65496, 0.75855], "clip_i": 0.70675, "n_refs": 2}
+{"task_id": "hard_044188", "clip_t": 0.28770026564598083, "clip_i_per_subject": [0.69459, 0.7354], "clip_i": 0.715, "n_refs": 2}
+{"task_id": "hard_044204", "clip_t": 0.2899569869041443, "clip_i_per_subject": [0.68925, 0.64877], "clip_i": 0.66901, "n_refs": 2}
+{"task_id": "hard_044243", "clip_t": 0.3230166435241699, "clip_i_per_subject": [0.60689, 0.41248, 0.60613, 0.55898], "clip_i": 0.54612, "n_refs": 4}
+{"task_id": "hard_044259", "clip_t": 0.3606911301612854, "clip_i_per_subject": [0.74229, 0.67815, 0.46427, 0.52383], "clip_i": 0.60213, "n_refs": 4}
+{"task_id": "hard_044263", "clip_t": 0.35264384746551514, "clip_i_per_subject": [0.68127, 0.69934, 0.6184, 0.55079], "clip_i": 0.63745, "n_refs": 4}
+{"task_id": "hard_044324", "clip_t": 0.3197469711303711, "clip_i_per_subject": [0.63959, 0.65885], "clip_i": 0.64922, "n_refs": 2}
+{"task_id": "hard_044419", "clip_t": 0.35898470878601074, "clip_i_per_subject": [0.52691, 0.60594, 0.5142, 0.47284], "clip_i": 0.52997, "n_refs": 4}
+{"task_id": "hard_044432", "clip_t": 0.26345157623291016, "clip_i_per_subject": [0.59851, 0.74805], "clip_i": 0.67328, "n_refs": 2}
+{"task_id": "hard_044504", "clip_t": 0.36583518981933594, "clip_i_per_subject": [0.64476, 0.67677], "clip_i": 0.66076, "n_refs": 2}
+{"task_id": "hard_044540", "clip_t": 0.3158007860183716, "clip_i_per_subject": [0.66933, 0.68674], "clip_i": 0.67804, "n_refs": 2}
+{"task_id": "hard_044564", "clip_t": 0.2660185694694519, "clip_i_per_subject": [0.67411, 0.76702], "clip_i": 0.72057, "n_refs": 2}
+{"task_id": "hard_044584", "clip_t": 0.26217401027679443, "clip_i_per_subject": [0.75441, 0.74906], "clip_i": 0.75173, "n_refs": 2}
+{"task_id": "hard_044620", "clip_t": 0.29331982135772705, "clip_i_per_subject": [0.74769, 0.73605], "clip_i": 0.74187, "n_refs": 2}
+{"task_id": "hard_044631", "clip_t": 0.3539896011352539, "clip_i_per_subject": [0.44943, 0.49631, 0.6459, 0.52576], "clip_i": 0.52935, "n_refs": 4}
+{"task_id": "hard_044788", "clip_t": 0.3415478765964508, "clip_i_per_subject": [0.65843, 0.64504], "clip_i": 0.65174, "n_refs": 2}
+{"task_id": "hard_044824", "clip_t": 0.22179217636585236, "clip_i_per_subject": [0.79458, 0.66087], "clip_i": 0.72773, "n_refs": 2}
+{"task_id": "hard_044883", "clip_t": 0.35168370604515076, "clip_i_per_subject": [0.67935, 0.65289, 0.54148, 0.58571], "clip_i": 0.61486, "n_refs": 4}
+{"task_id": "hard_044924", "clip_t": 0.3201761245727539, "clip_i_per_subject": [0.8395, 0.67503], "clip_i": 0.75726, "n_refs": 2}
+{"task_id": "hard_045028", "clip_t": 0.2396358698606491, "clip_i_per_subject": [0.65569, 0.7972], "clip_i": 0.72644, "n_refs": 2}
+{"task_id": "hard_045095", "clip_t": 0.34958577156066895, "clip_i_per_subject": [0.68258, 0.71544, 0.51815, 0.60955], "clip_i": 0.63143, "n_refs": 4}
+{"task_id": "hard_045100", "clip_t": 0.3303850293159485, "clip_i_per_subject": [0.72202, 0.68743], "clip_i": 0.70473, "n_refs": 2}
+{"task_id": "hard_045132", "clip_t": 0.3324570059776306, "clip_i_per_subject": [0.59238, 0.70862], "clip_i": 0.6505, "n_refs": 2}
+{"task_id": "hard_045160", "clip_t": 0.3001940846443176, "clip_i_per_subject": [0.76675, 0.73989], "clip_i": 0.75332, "n_refs": 2}
+{"task_id": "hard_045212", "clip_t": 0.34790971875190735, "clip_i_per_subject": [0.65968, 0.57896], "clip_i": 0.61932, "n_refs": 2}
+{"task_id": "hard_045223", "clip_t": 0.4161486327648163, "clip_i_per_subject": [0.71796, 0.44585, 0.629, 0.50782], "clip_i": 0.57516, "n_refs": 4}
+{"task_id": "hard_045239", "clip_t": 0.3531920313835144, "clip_i_per_subject": [0.61963, 0.70734, 0.51476, 0.54804], "clip_i": 0.59744, "n_refs": 4}
+{"task_id": "hard_045244", "clip_t": 0.26952624320983887, "clip_i_per_subject": [0.67649, 0.59821], "clip_i": 0.63735, "n_refs": 2}
+{"task_id": "hard_045251", "clip_t": 0.3369028866291046, "clip_i_per_subject": [0.65093, 0.65699, 0.57748, 0.51772], "clip_i": 0.60078, "n_refs": 4}
+{"task_id": "hard_045272", "clip_t": 0.26972460746765137, "clip_i_per_subject": [0.64992, 0.80702], "clip_i": 0.72847, "n_refs": 2}
+{"task_id": "hard_045295", "clip_t": 0.3900148570537567, "clip_i_per_subject": [0.6431, 0.60499, 0.51226, 0.56212], "clip_i": 0.58062, "n_refs": 4}
+{"task_id": "hard_045303", "clip_t": 0.37254399061203003, "clip_i_per_subject": [0.60254, 0.59689, 0.63813, 0.55351], "clip_i": 0.59777, "n_refs": 4}
+{"task_id": "hard_045339", "clip_t": 0.358035683631897, "clip_i_per_subject": [0.48096, 0.55882, 0.46141, 0.38313], "clip_i": 0.47108, "n_refs": 4}
+{"task_id": "hard_045392", "clip_t": 0.3204673230648041, "clip_i_per_subject": [0.72412, 0.70732], "clip_i": 0.71572, "n_refs": 2}
+{"task_id": "hard_045524", "clip_t": 0.3170351982116699, "clip_i_per_subject": [0.81809, 0.59101], "clip_i": 0.70455, "n_refs": 2}
+{"task_id": "hard_045588", "clip_t": 0.2511037290096283, "clip_i_per_subject": [0.66666, 0.85209], "clip_i": 0.75937, "n_refs": 2}
+{"task_id": "hard_045608", "clip_t": 0.31365931034088135, "clip_i_per_subject": [0.58061, 0.61492], "clip_i": 0.59776, "n_refs": 2}
+{"task_id": "hard_045631", "clip_t": 0.26420915126800537, "clip_i_per_subject": [0.64724, 0.63139, 0.59873, 0.60573], "clip_i": 0.62077, "n_refs": 4}
+{"task_id": "hard_045664", "clip_t": 0.22718846797943115, "clip_i_per_subject": [0.59012, 0.72507], "clip_i": 0.6576, "n_refs": 2}
+{"task_id": "hard_045736", "clip_t": 0.3103383779525757, "clip_i_per_subject": [0.75789, 0.66854], "clip_i": 0.71322, "n_refs": 2}
+{"task_id": "hard_045879", "clip_t": 0.26933953166007996, "clip_i_per_subject": [0.70399, 0.74083, 0.5907, 0.62025], "clip_i": 0.66394, "n_refs": 4}
+{"task_id": "hard_045883", "clip_t": 0.3643275201320648, "clip_i_per_subject": [0.6024, 0.65858, 0.55174, 0.64593], "clip_i": 0.61466, "n_refs": 4}
+{"task_id": "hard_045915", "clip_t": 0.36252886056900024, "clip_i_per_subject": [0.77588, 0.7005, 0.48024, 0.48288], "clip_i": 0.60987, "n_refs": 4}
+{"task_id": "hard_046016", "clip_t": 0.27797460556030273, "clip_i_per_subject": [0.66034, 0.75568], "clip_i": 0.70801, "n_refs": 2}
+{"task_id": "hard_046068", "clip_t": 0.3333026170730591, "clip_i_per_subject": [0.66636, 0.71123], "clip_i": 0.68879, "n_refs": 2}
+{"task_id": "hard_046191", "clip_t": 0.3890480399131775, "clip_i_per_subject": [0.70598, 0.49673, 0.57035, 0.66912], "clip_i": 0.61055, "n_refs": 4}
+{"task_id": "hard_046203", "clip_t": 0.3089721202850342, "clip_i_per_subject": [0.63094, 0.74649, 0.74125, 0.63345], "clip_i": 0.68803, "n_refs": 4}
+{"task_id": "hard_046204", "clip_t": 0.31231117248535156, "clip_i_per_subject": [0.55784, 0.69318], "clip_i": 0.62551, "n_refs": 2}
+{"task_id": "hard_046240", "clip_t": 0.2960960865020752, "clip_i_per_subject": [0.73577, 0.65944], "clip_i": 0.6976, "n_refs": 2}
+{"task_id": "hard_046247", "clip_t": 0.38103312253952026, "clip_i_per_subject": [0.6682, 0.61612, 0.43712, 0.37118], "clip_i": 0.52316, "n_refs": 4}
+{"task_id": "hard_046259", "clip_t": 0.38881364464759827, "clip_i_per_subject": [0.65674, 0.57803, 0.58956, 0.60785], "clip_i": 0.60805, "n_refs": 4}
+{"task_id": "hard_046283", "clip_t": 0.40251976251602173, "clip_i_per_subject": [0.5672, 0.54391, 0.59679, 0.64812], "clip_i": 0.589, "n_refs": 4}
+{"task_id": "hard_046299", "clip_t": 0.35510092973709106, "clip_i_per_subject": [0.38182, 0.70656, 0.61813, 0.66359], "clip_i": 0.59253, "n_refs": 4}
+{"task_id": "hard_046323", "clip_t": 0.29710277915000916, "clip_i_per_subject": [0.54625, 0.55039, 0.5435, 0.51451], "clip_i": 0.53866, "n_refs": 4}
+{"task_id": "hard_046336", "clip_t": 0.29724782705307007, "clip_i_per_subject": [0.76592, 0.64312], "clip_i": 0.70452, "n_refs": 2}
+{"task_id": "hard_046404", "clip_t": 0.3355455994606018, "clip_i_per_subject": [0.79117, 0.74973], "clip_i": 0.77045, "n_refs": 2}
+{"task_id": "hard_046499", "clip_t": 0.3462008535861969, "clip_i_per_subject": [0.75061, 0.76988, 0.74577, 0.65437], "clip_i": 0.73016, "n_refs": 4}
+{"task_id": "hard_046519", "clip_t": 0.3058388829231262, "clip_i_per_subject": [0.52039, 0.52067, 0.41471, 0.5714], "clip_i": 0.50679, "n_refs": 4}
+{"task_id": "hard_046540", "clip_t": 0.29355931282043457, "clip_i_per_subject": [0.81714, 0.76177], "clip_i": 0.78946, "n_refs": 2}
+{"task_id": "hard_046568", "clip_t": 0.29788872599601746, "clip_i_per_subject": [0.80947, 0.7174], "clip_i": 0.76344, "n_refs": 2}
+{"task_id": "hard_046615", "clip_t": 0.35470712184906006, "clip_i_per_subject": [0.63913, 0.73271, 0.57615, 0.55543], "clip_i": 0.62586, "n_refs": 4}
+{"task_id": "hard_046659", "clip_t": 0.3562711477279663, "clip_i_per_subject": [0.59012, 0.6308, 0.48745, 0.64555], "clip_i": 0.58848, "n_refs": 4}
+{"task_id": "hard_046751", "clip_t": 0.40058642625808716, "clip_i_per_subject": [0.58419, 0.60743, 0.65603, 0.63107], "clip_i": 0.61968, "n_refs": 4}
+{"task_id": "hard_046759", "clip_t": 0.3716822862625122, "clip_i_per_subject": [0.59219, 0.61583, 0.55034, 0.60861], "clip_i": 0.59174, "n_refs": 4}
+{"task_id": "hard_046803", "clip_t": 0.2992119789123535, "clip_i_per_subject": [0.66323, 0.66243, 0.66655, 0.64134], "clip_i": 0.65839, "n_refs": 4}
+{"task_id": "hard_046856", "clip_t": 0.23912853002548218, "clip_i_per_subject": [0.48796, 0.56503], "clip_i": 0.52649, "n_refs": 2}
+{"task_id": "hard_046895", "clip_t": 0.3510284423828125, "clip_i_per_subject": [0.67598, 0.74509, 0.63759, 0.66867], "clip_i": 0.68183, "n_refs": 4}
+{"task_id": "hard_046907", "clip_t": 0.3584063649177551, "clip_i_per_subject": [0.51971, 0.54962, 0.47373, 0.40499], "clip_i": 0.48701, "n_refs": 4}
+{"task_id": "hard_046947", "clip_t": 0.32888054847717285, "clip_i_per_subject": [0.55695, 0.41943, 0.54461, 0.46855], "clip_i": 0.49739, "n_refs": 4}
+{"task_id": "hard_046956", "clip_t": 0.32866334915161133, "clip_i_per_subject": [0.73517, 0.70327], "clip_i": 0.71922, "n_refs": 2}
+{"task_id": "hard_046975", "clip_t": 0.3296835720539093, "clip_i_per_subject": [0.78308, 0.72231, 0.63375, 0.47443], "clip_i": 0.65339, "n_refs": 4}
+{"task_id": "hard_046987", "clip_t": 0.35301268100738525, "clip_i_per_subject": [0.67356, 0.48218, 0.64432, 0.60008], "clip_i": 0.60003, "n_refs": 4}
+{"task_id": "hard_047151", "clip_t": 0.29181212186813354, "clip_i_per_subject": [0.68939, 0.78128, 0.62255, 0.60118], "clip_i": 0.6736, "n_refs": 4}
+{"task_id": "hard_047199", "clip_t": 0.3483443856239319, "clip_i_per_subject": [0.67462, 0.59004, 0.63187, 0.66775], "clip_i": 0.64107, "n_refs": 4}
+{"task_id": "hard_047240", "clip_t": 0.3003115653991699, "clip_i_per_subject": [0.70229, 0.69986], "clip_i": 0.70107, "n_refs": 2}
+{"task_id": "hard_047268", "clip_t": 0.29333820939064026, "clip_i_per_subject": [0.67841, 0.6805], "clip_i": 0.67946, "n_refs": 2}
+{"task_id": "hard_047271", "clip_t": 0.37111222743988037, "clip_i_per_subject": [0.56137, 0.54978, 0.62156, 0.64743], "clip_i": 0.59504, "n_refs": 4}
+{"task_id": "hard_047288", "clip_t": 0.3036038875579834, "clip_i_per_subject": [0.62931, 0.68418], "clip_i": 0.65674, "n_refs": 2}
+{"task_id": "hard_047360", "clip_t": 0.24009867012500763, "clip_i_per_subject": [0.79686, 0.66902], "clip_i": 0.73294, "n_refs": 2}
+{"task_id": "hard_047364", "clip_t": 0.2568262219429016, "clip_i_per_subject": [0.61497, 0.75171], "clip_i": 0.68334, "n_refs": 2}
+{"task_id": "hard_047416", "clip_t": 0.2920868396759033, "clip_i_per_subject": [0.67953, 0.73259], "clip_i": 0.70606, "n_refs": 2}
+{"task_id": "hard_047484", "clip_t": 0.27618730068206787, "clip_i_per_subject": [0.84919, 0.78917], "clip_i": 0.81918, "n_refs": 2}
+{"task_id": "hard_047492", "clip_t": 0.2571679949760437, "clip_i_per_subject": [0.82993, 0.80997], "clip_i": 0.81995, "n_refs": 2}
+{"task_id": "hard_047500", "clip_t": 0.28574541211128235, "clip_i_per_subject": [0.84152, 0.75118], "clip_i": 0.79635, "n_refs": 2}
+{"task_id": "hard_047524", "clip_t": 0.3001014292240143, "clip_i_per_subject": [0.80484, 0.71481], "clip_i": 0.75982, "n_refs": 2}
+{"task_id": "hard_047527", "clip_t": 0.290069043636322, "clip_i_per_subject": [0.61312, 0.63553, 0.65385, 0.72151], "clip_i": 0.656, "n_refs": 4}
+{"task_id": "hard_047548", "clip_t": 0.2762230932712555, "clip_i_per_subject": [0.65226, 0.56043], "clip_i": 0.60634, "n_refs": 2}
+{"task_id": "hard_047555", "clip_t": 0.2848275303840637, "clip_i_per_subject": [0.64177, 0.4661, 0.44344, 0.41573], "clip_i": 0.49176, "n_refs": 4}
+{"task_id": "hard_047608", "clip_t": 0.25859373807907104, "clip_i_per_subject": [0.69433, 0.71143], "clip_i": 0.70288, "n_refs": 2}
+{"task_id": "hard_047756", "clip_t": 0.2940274178981781, "clip_i_per_subject": [0.81207, 0.83727], "clip_i": 0.82467, "n_refs": 2}
+{"task_id": "hard_047768", "clip_t": 0.3019058108329773, "clip_i_per_subject": [0.70431, 0.68885], "clip_i": 0.69658, "n_refs": 2}
+{"task_id": "hard_047807", "clip_t": 0.3279162645339966, "clip_i_per_subject": [0.70553, 0.47836, 0.67342, 0.42366], "clip_i": 0.57025, "n_refs": 4}
+{"task_id": "hard_047820", "clip_t": 0.28983351588249207, "clip_i_per_subject": [0.67277, 0.749], "clip_i": 0.71088, "n_refs": 2}
+{"task_id": "hard_047831", "clip_t": 0.3017081022262573, "clip_i_per_subject": [0.82062, 0.67659, 0.53157, 0.57383], "clip_i": 0.65065, "n_refs": 4}
+{"task_id": "hard_047848", "clip_t": 0.31440865993499756, "clip_i_per_subject": [0.66996, 0.69387], "clip_i": 0.68192, "n_refs": 2}
+{"task_id": "hard_047875", "clip_t": 0.3162308633327484, "clip_i_per_subject": [0.5344, 0.53507, 0.63528, 0.57498], "clip_i": 0.56994, "n_refs": 4}
+{"task_id": "hard_047891", "clip_t": 0.3807889223098755, "clip_i_per_subject": [0.54414, 0.49639, 0.46962, 0.41637], "clip_i": 0.48163, "n_refs": 4}
+{"task_id": "hard_047972", "clip_t": 0.3084906339645386, "clip_i_per_subject": [0.69477, 0.74551], "clip_i": 0.72014, "n_refs": 2}
+{"task_id": "hard_048007", "clip_t": 0.3290984630584717, "clip_i_per_subject": [0.65984, 0.4232, 0.54298, 0.58267], "clip_i": 0.55217, "n_refs": 4}
+{"task_id": "hard_048036", "clip_t": 0.21375983953475952, "clip_i_per_subject": [0.5472, 0.66172], "clip_i": 0.60446, "n_refs": 2}
+{"task_id": "hard_048104", "clip_t": 0.2872944176197052, "clip_i_per_subject": [0.70329, 0.55985], "clip_i": 0.63157, "n_refs": 2}
+{"task_id": "hard_048136", "clip_t": 0.27722427248954773, "clip_i_per_subject": [0.62983, 0.79829], "clip_i": 0.71406, "n_refs": 2}
+{"task_id": "hard_048151", "clip_t": 0.3467113971710205, "clip_i_per_subject": [0.718, 0.74399, 0.61593, 0.56856], "clip_i": 0.66162, "n_refs": 4}
+{"task_id": "hard_048231", "clip_t": 0.32995402812957764, "clip_i_per_subject": [0.61649, 0.47797, 0.57958, 0.5215], "clip_i": 0.54889, "n_refs": 4}
+{"task_id": "hard_048316", "clip_t": 0.24358534812927246, "clip_i_per_subject": [0.6123, 0.72223], "clip_i": 0.66726, "n_refs": 2}
+{"task_id": "hard_048391", "clip_t": 0.30695778131484985, "clip_i_per_subject": [0.67126, 0.62918, 0.51928, 0.64044], "clip_i": 0.61504, "n_refs": 4}
+{"task_id": "hard_048400", "clip_t": 0.1804160475730896, "clip_i_per_subject": [0.66861, 0.77617], "clip_i": 0.72239, "n_refs": 2}
+{"task_id": "hard_048435", "clip_t": 0.3287580609321594, "clip_i_per_subject": [0.66774, 0.71704, 0.72431, 0.57044], "clip_i": 0.66988, "n_refs": 4}
+{"task_id": "hard_048516", "clip_t": 0.2591056823730469, "clip_i_per_subject": [0.65152, 0.68855], "clip_i": 0.67004, "n_refs": 2}
+{"task_id": "hard_048539", "clip_t": 0.33680450916290283, "clip_i_per_subject": [0.53588, 0.56872, 0.58739, 0.62984], "clip_i": 0.58046, "n_refs": 4}
+{"task_id": "hard_048579", "clip_t": 0.2981906533241272, "clip_i_per_subject": [0.69192, 0.72803, 0.65699, 0.57302], "clip_i": 0.66249, "n_refs": 4}
+{"task_id": "hard_048583", "clip_t": 0.39091071486473083, "clip_i_per_subject": [0.6188, 0.77041, 0.5601, 0.59706], "clip_i": 0.63659, "n_refs": 4}
+{"task_id": "hard_048707", "clip_t": 0.36546677350997925, "clip_i_per_subject": [0.65574, 0.57838, 0.60413, 0.72356], "clip_i": 0.64045, "n_refs": 4}
+{"task_id": "hard_048743", "clip_t": 0.3749274015426636, "clip_i_per_subject": [0.57357, 0.64027, 0.60251, 0.63466], "clip_i": 0.61276, "n_refs": 4}
+{"task_id": "hard_048828", "clip_t": 0.2682136595249176, "clip_i_per_subject": [0.75834, 0.80183], "clip_i": 0.78008, "n_refs": 2}
+{"task_id": "hard_048859", "clip_t": 0.3961813449859619, "clip_i_per_subject": [0.61414, 0.57683, 0.68798, 0.65333], "clip_i": 0.63307, "n_refs": 4}
+{"task_id": "hard_048867", "clip_t": 0.3482925593852997, "clip_i_per_subject": [0.71486, 0.61632, 0.63199, 0.67607], "clip_i": 0.65981, "n_refs": 4}
+{"task_id": "hard_048912", "clip_t": 0.22106695175170898, "clip_i_per_subject": [0.6861, 0.74254], "clip_i": 0.71432, "n_refs": 2}
+{"task_id": "hard_048972", "clip_t": 0.23653285205364227, "clip_i_per_subject": [0.67026, 0.70406], "clip_i": 0.68716, "n_refs": 2}
+{"task_id": "hard_048983", "clip_t": 0.35706010460853577, "clip_i_per_subject": [0.57981, 0.61172, 0.57861, 0.65443], "clip_i": 0.60614, "n_refs": 4}
+{"task_id": "hard_049027", "clip_t": 0.3564416766166687, "clip_i_per_subject": [0.58988, 0.64699, 0.58387, 0.62236], "clip_i": 0.61078, "n_refs": 4}
+{"task_id": "hard_049088", "clip_t": 0.3042396306991577, "clip_i_per_subject": [0.77457, 0.71269], "clip_i": 0.74363, "n_refs": 2}
+{"task_id": "hard_049184", "clip_t": 0.24155214428901672, "clip_i_per_subject": [0.78744, 0.61968], "clip_i": 0.70356, "n_refs": 2}
+{"task_id": "hard_049315", "clip_t": 0.408743679523468, "clip_i_per_subject": [0.57894, 0.49418, 0.64115, 0.62208], "clip_i": 0.58409, "n_refs": 4}
+{"task_id": "hard_049392", "clip_t": 0.3392145335674286, "clip_i_per_subject": [0.57843, 0.65683], "clip_i": 0.61763, "n_refs": 2}
+{"task_id": "hard_049400", "clip_t": 0.23744219541549683, "clip_i_per_subject": [0.71592, 0.65626], "clip_i": 0.68609, "n_refs": 2}
+{"task_id": "hard_049543", "clip_t": 0.3803291320800781, "clip_i_per_subject": [0.67307, 0.66349, 0.64674, 0.56025], "clip_i": 0.63589, "n_refs": 4}
+{"task_id": "hard_049628", "clip_t": 0.2866004705429077, "clip_i_per_subject": [0.76295, 0.63627], "clip_i": 0.69961, "n_refs": 2}
+{"task_id": "hard_049644", "clip_t": 0.30685120820999146, "clip_i_per_subject": [0.60403, 0.65973], "clip_i": 0.63188, "n_refs": 2}
+{"task_id": "hard_049735", "clip_t": 0.3312484622001648, "clip_i_per_subject": [0.59963, 0.68955, 0.62066, 0.66443], "clip_i": 0.64357, "n_refs": 4}
+{"task_id": "hard_049759", "clip_t": 0.3742954432964325, "clip_i_per_subject": [0.70397, 0.70504, 0.61999, 0.6618], "clip_i": 0.6727, "n_refs": 4}
+{"task_id": "hard_049787", "clip_t": 0.2893352508544922, "clip_i_per_subject": [0.75822, 0.65939, 0.58408, 0.60625], "clip_i": 0.65199, "n_refs": 4}
+{"task_id": "hard_049832", "clip_t": 0.2851739823818207, "clip_i_per_subject": [0.74412, 0.69348], "clip_i": 0.7188, "n_refs": 2}
+{"task_id": "hard_049836", "clip_t": 0.322465717792511, "clip_i_per_subject": [0.59602, 0.70117], "clip_i": 0.64859, "n_refs": 2}
+{"task_id": "hard_049960", "clip_t": 0.321675568819046, "clip_i_per_subject": [0.57389, 0.7151], "clip_i": 0.64449, "n_refs": 2}
+{"task_id": "hard_050004", "clip_t": 0.3602410852909088, "clip_i_per_subject": [0.67224, 0.73981], "clip_i": 0.70603, "n_refs": 2}
+{"task_id": "hard_050135", "clip_t": 0.321551650762558, "clip_i_per_subject": [0.64494, 0.53393, 0.56178, 0.65974], "clip_i": 0.6001, "n_refs": 4}
+{"task_id": "hard_050155", "clip_t": 0.3740176856517792, "clip_i_per_subject": [0.63342, 0.67184, 0.59558, 0.57177], "clip_i": 0.61815, "n_refs": 4}
+{"task_id": "hard_050188", "clip_t": 0.3270893096923828, "clip_i_per_subject": [0.78394, 0.77902], "clip_i": 0.78148, "n_refs": 2}
+{"task_id": "hard_050191", "clip_t": 0.33691972494125366, "clip_i_per_subject": [0.7168, 0.65304, 0.66508, 0.62984], "clip_i": 0.66619, "n_refs": 4}
+{"task_id": "hard_050244", "clip_t": 0.3400147557258606, "clip_i_per_subject": [0.53821, 0.81113], "clip_i": 0.67467, "n_refs": 2}
+{"task_id": "hard_050291", "clip_t": 0.4142204225063324, "clip_i_per_subject": [0.65593, 0.53932, 0.6758, 0.59118], "clip_i": 0.61556, "n_refs": 4}
+{"task_id": "hard_050399", "clip_t": 0.2959781885147095, "clip_i_per_subject": [0.57682, 0.64261, 0.54738, 0.55686], "clip_i": 0.58092, "n_refs": 4}
+{"task_id": "hard_050415", "clip_t": 0.34662875533103943, "clip_i_per_subject": [0.60365, 0.62386, 0.53107, 0.49158], "clip_i": 0.56254, "n_refs": 4}
+{"task_id": "hard_050416", "clip_t": 0.3261941969394684, "clip_i_per_subject": [0.76321, 0.69963], "clip_i": 0.73142, "n_refs": 2}
+{"task_id": "hard_050443", "clip_t": 0.32452592253685, "clip_i_per_subject": [0.76229, 0.72128, 0.70578, 0.56678], "clip_i": 0.68903, "n_refs": 4}
+{"task_id": "hard_050508", "clip_t": 0.22221927344799042, "clip_i_per_subject": [0.74374, 0.82282], "clip_i": 0.78328, "n_refs": 2}
+{"task_id": "hard_050515", "clip_t": 0.3231676518917084, "clip_i_per_subject": [0.65992, 0.68341, 0.59558, 0.52994], "clip_i": 0.61721, "n_refs": 4}
+{"task_id": "hard_050519", "clip_t": 0.3806430399417877, "clip_i_per_subject": [0.59575, 0.64237, 0.57659, 0.66902], "clip_i": 0.62093, "n_refs": 4}
+{"task_id": "hard_050587", "clip_t": 0.2988598942756653, "clip_i_per_subject": [0.7503, 0.687, 0.56564, 0.47455], "clip_i": 0.61938, "n_refs": 4}
+{"task_id": "hard_050812", "clip_t": 0.28114673495292664, "clip_i_per_subject": [0.68674, 0.85343], "clip_i": 0.77008, "n_refs": 2}
+{"task_id": "hard_050872", "clip_t": 0.31050392985343933, "clip_i_per_subject": [0.673, 0.7667], "clip_i": 0.71985, "n_refs": 2}
+{"task_id": "hard_050948", "clip_t": 0.2560124397277832, "clip_i_per_subject": [0.62508, 0.6886], "clip_i": 0.65684, "n_refs": 2}
+{"task_id": "hard_050984", "clip_t": 0.22720344364643097, "clip_i_per_subject": [0.82627, 0.83488], "clip_i": 0.83057, "n_refs": 2}
+{"task_id": "hard_051000", "clip_t": 0.2873396873474121, "clip_i_per_subject": [0.65018, 0.76608], "clip_i": 0.70813, "n_refs": 2}
+{"task_id": "hard_051152", "clip_t": 0.3118172287940979, "clip_i_per_subject": [0.72797, 0.61293], "clip_i": 0.67045, "n_refs": 2}
+{"task_id": "hard_051155", "clip_t": 0.36879199743270874, "clip_i_per_subject": [0.49768, 0.58013, 0.61428, 0.40848], "clip_i": 0.52515, "n_refs": 4}
+{"task_id": "hard_051163", "clip_t": 0.3116810619831085, "clip_i_per_subject": [0.68106, 0.50434, 0.51812, 0.67055], "clip_i": 0.59352, "n_refs": 4}
+{"task_id": "hard_051167", "clip_t": 0.2907809317111969, "clip_i_per_subject": [0.57823, 0.59209, 0.52849, 0.66821], "clip_i": 0.59176, "n_refs": 4}
+{"task_id": "hard_051187", "clip_t": 0.3326670229434967, "clip_i_per_subject": [0.65845, 0.61829, 0.50459, 0.65995], "clip_i": 0.61032, "n_refs": 4}
+{"task_id": "hard_051199", "clip_t": 0.3556731939315796, "clip_i_per_subject": [0.61447, 0.70175, 0.59598, 0.71421], "clip_i": 0.6566, "n_refs": 4}
+{"task_id": "hard_051235", "clip_t": 0.3177831172943115, "clip_i_per_subject": [0.55158, 0.6118, 0.60412, 0.39884], "clip_i": 0.54158, "n_refs": 4}
+{"task_id": "hard_051252", "clip_t": 0.3356173634529114, "clip_i_per_subject": [0.71196, 0.67053], "clip_i": 0.69125, "n_refs": 2}
+{"task_id": "hard_051275", "clip_t": 0.28937962651252747, "clip_i_per_subject": [0.75249, 0.6811, 0.59799, 0.62774], "clip_i": 0.66483, "n_refs": 4}
+{"task_id": "hard_051276", "clip_t": 0.30219608545303345, "clip_i_per_subject": [0.74426, 0.66324], "clip_i": 0.70375, "n_refs": 2}
+{"task_id": "hard_051315", "clip_t": 0.30829113721847534, "clip_i_per_subject": [0.62196, 0.61411, 0.64193, 0.53641], "clip_i": 0.6036, "n_refs": 4}
+{"task_id": "hard_051436", "clip_t": 0.2711537480354309, "clip_i_per_subject": [0.80201, 0.71057], "clip_i": 0.75629, "n_refs": 2}
+{"task_id": "hard_051495", "clip_t": 0.2929255962371826, "clip_i_per_subject": [0.64778, 0.76172, 0.72537, 0.53242], "clip_i": 0.66682, "n_refs": 4}
+{"task_id": "hard_051616", "clip_t": 0.2815408706665039, "clip_i_per_subject": [0.68081, 0.64455], "clip_i": 0.66268, "n_refs": 2}
+{"task_id": "hard_051627", "clip_t": 0.37606531381607056, "clip_i_per_subject": [0.65476, 0.67011, 0.66045, 0.57106], "clip_i": 0.6391, "n_refs": 4}
+{"task_id": "hard_051660", "clip_t": 0.32942116260528564, "clip_i_per_subject": [0.71892, 0.75713], "clip_i": 0.73802, "n_refs": 2}
+{"task_id": "hard_051691", "clip_t": 0.35849565267562866, "clip_i_per_subject": [0.56848, 0.67107, 0.41068, 0.50195], "clip_i": 0.53805, "n_refs": 4}
+{"task_id": "hard_051747", "clip_t": 0.332993745803833, "clip_i_per_subject": [0.60411, 0.71149, 0.56967, 0.50358], "clip_i": 0.59721, "n_refs": 4}
+{"task_id": "hard_051776", "clip_t": 0.33706381916999817, "clip_i_per_subject": [0.5912, 0.69726], "clip_i": 0.64423, "n_refs": 2}
+{"task_id": "hard_051860", "clip_t": 0.2729748487472534, "clip_i_per_subject": [0.73981, 0.57796], "clip_i": 0.65888, "n_refs": 2}
+{"task_id": "hard_051915", "clip_t": 0.31643572449684143, "clip_i_per_subject": [0.64379, 0.55376, 0.69871, 0.60881], "clip_i": 0.62627, "n_refs": 4}
+{"task_id": "hard_052019", "clip_t": 0.38167864084243774, "clip_i_per_subject": [0.62194, 0.571, 0.53381, 0.55452], "clip_i": 0.57032, "n_refs": 4}
+{"task_id": "hard_052023", "clip_t": 0.2856982946395874, "clip_i_per_subject": [0.51462, 0.806, 0.77797, 0.50527], "clip_i": 0.65097, "n_refs": 4}
+{"task_id": "hard_052088", "clip_t": 0.3232411742210388, "clip_i_per_subject": [0.69855, 0.64721], "clip_i": 0.67288, "n_refs": 2}
+{"task_id": "hard_052100", "clip_t": 0.33611994981765747, "clip_i_per_subject": [0.75471, 0.6875], "clip_i": 0.72111, "n_refs": 2}
+{"task_id": "hard_052243", "clip_t": 0.2857058048248291, "clip_i_per_subject": [0.59186, 0.53573, 0.51607, 0.56253], "clip_i": 0.55155, "n_refs": 4}
+{"task_id": "hard_052287", "clip_t": 0.3567548096179962, "clip_i_per_subject": [0.68691, 0.71502, 0.62237, 0.65574], "clip_i": 0.67001, "n_refs": 4}
+{"task_id": "hard_052311", "clip_t": 0.40820395946502686, "clip_i_per_subject": [0.37361, 0.6349, 0.62221, 0.44215], "clip_i": 0.51822, "n_refs": 4}
+{"task_id": "hard_052407", "clip_t": 0.3331031799316406, "clip_i_per_subject": [0.59171, 0.60239, 0.58917, 0.62831], "clip_i": 0.6029, "n_refs": 4}
+{"task_id": "hard_052423", "clip_t": 0.3350255787372589, "clip_i_per_subject": [0.84008, 0.61865, 0.7225, 0.591], "clip_i": 0.69306, "n_refs": 4}
+{"task_id": "hard_052460", "clip_t": 0.23133184015750885, "clip_i_per_subject": [0.76051, 0.77939], "clip_i": 0.76995, "n_refs": 2}
+{"task_id": "hard_052511", "clip_t": 0.3202856779098511, "clip_i_per_subject": [0.67526, 0.67703, 0.722, 0.58001], "clip_i": 0.66357, "n_refs": 4}
+{"task_id": "hard_052527", "clip_t": 0.3872297704219818, "clip_i_per_subject": [0.68957, 0.57921, 0.52778, 0.6153], "clip_i": 0.60297, "n_refs": 4}
+{"task_id": "hard_052607", "clip_t": 0.40213125944137573, "clip_i_per_subject": [0.59442, 0.71186, 0.51834, 0.60377], "clip_i": 0.6071, "n_refs": 4}
+{"task_id": "hard_052664", "clip_t": 0.25760912895202637, "clip_i_per_subject": [0.67755, 0.66347], "clip_i": 0.67051, "n_refs": 2}
+{"task_id": "hard_052671", "clip_t": 0.330003559589386, "clip_i_per_subject": [0.56906, 0.58637, 0.53318, 0.69689], "clip_i": 0.59638, "n_refs": 4}
+{"task_id": "hard_052672", "clip_t": 0.30562710762023926, "clip_i_per_subject": [0.66433, 0.80173], "clip_i": 0.73303, "n_refs": 2}
+{"task_id": "hard_052708", "clip_t": 0.24669870734214783, "clip_i_per_subject": [0.65747, 0.6942], "clip_i": 0.67583, "n_refs": 2}
+{"task_id": "hard_052812", "clip_t": 0.2763310372829437, "clip_i_per_subject": [0.72706, 0.7177], "clip_i": 0.72238, "n_refs": 2}
+{"task_id": "hard_052828", "clip_t": 0.3199702203273773, "clip_i_per_subject": [0.68785, 0.79246], "clip_i": 0.74016, "n_refs": 2}
+{"task_id": "hard_052839", "clip_t": 0.33641526103019714, "clip_i_per_subject": [0.62205, 0.53206, 0.57693, 0.5769], "clip_i": 0.57699, "n_refs": 4}
+{"task_id": "hard_052848", "clip_t": 0.349613755941391, "clip_i_per_subject": [0.65635, 0.65654], "clip_i": 0.65644, "n_refs": 2}
+{"task_id": "hard_052927", "clip_t": 0.3945247530937195, "clip_i_per_subject": [0.64053, 0.59001, 0.59416, 0.61742], "clip_i": 0.61053, "n_refs": 4}
+{"task_id": "hard_052975", "clip_t": 0.312849223613739, "clip_i_per_subject": [0.61142, 0.56673, 0.51772, 0.58624], "clip_i": 0.57053, "n_refs": 4}
+{"task_id": "hard_052983", "clip_t": 0.37091076374053955, "clip_i_per_subject": [0.58841, 0.59847, 0.62748, 0.59399], "clip_i": 0.60209, "n_refs": 4}
+{"task_id": "hard_053019", "clip_t": 0.3738390803337097, "clip_i_per_subject": [0.60905, 0.57185, 0.59767, 0.54484], "clip_i": 0.58085, "n_refs": 4}
+{"task_id": "hard_053055", "clip_t": 0.3291482627391815, "clip_i_per_subject": [0.68392, 0.49605, 0.43298, 0.64307], "clip_i": 0.56401, "n_refs": 4}
+{"task_id": "hard_053112", "clip_t": 0.3391377925872803, "clip_i_per_subject": [0.73978, 0.61939], "clip_i": 0.67959, "n_refs": 2}
+{"task_id": "hard_053120", "clip_t": 0.3031198978424072, "clip_i_per_subject": [0.84679, 0.84204], "clip_i": 0.84442, "n_refs": 2}
+{"task_id": "hard_053136", "clip_t": 0.29587292671203613, "clip_i_per_subject": [0.61533, 0.62032], "clip_i": 0.61783, "n_refs": 2}
+{"task_id": "hard_053139", "clip_t": 0.3581048250198364, "clip_i_per_subject": [0.62269, 0.64258, 0.53232, 0.59544], "clip_i": 0.59826, "n_refs": 4}
+{"task_id": "hard_053164", "clip_t": 0.23258894681930542, "clip_i_per_subject": [0.80053, 0.81092], "clip_i": 0.80572, "n_refs": 2}
+{"task_id": "hard_053188", "clip_t": 0.30838483572006226, "clip_i_per_subject": [0.69599, 0.64481], "clip_i": 0.6704, "n_refs": 2}
+{"task_id": "hard_053248", "clip_t": 0.2945730686187744, "clip_i_per_subject": [0.58652, 0.51399], "clip_i": 0.55026, "n_refs": 2}
+{"task_id": "hard_053312", "clip_t": 0.25781089067459106, "clip_i_per_subject": [0.65169, 0.84282], "clip_i": 0.74725, "n_refs": 2}
+{"task_id": "hard_053395", "clip_t": 0.34178271889686584, "clip_i_per_subject": [0.64108, 0.60553, 0.73864, 0.56278], "clip_i": 0.63701, "n_refs": 4}
+{"task_id": "hard_053443", "clip_t": 0.3698781728744507, "clip_i_per_subject": [0.67679, 0.71125, 0.48351, 0.73625], "clip_i": 0.65195, "n_refs": 4}
+{"task_id": "hard_053444", "clip_t": 0.2527688443660736, "clip_i_per_subject": [0.72617, 0.70997], "clip_i": 0.71807, "n_refs": 2}
+{"task_id": "hard_053468", "clip_t": 0.2798554301261902, "clip_i_per_subject": [0.67397, 0.81], "clip_i": 0.74198, "n_refs": 2}
+{"task_id": "hard_053488", "clip_t": 0.34627360105514526, "clip_i_per_subject": [0.67946, 0.63676], "clip_i": 0.65811, "n_refs": 2}
+{"task_id": "hard_053500", "clip_t": 0.31905597448349, "clip_i_per_subject": [0.81322, 0.69262], "clip_i": 0.75292, "n_refs": 2}
+{"task_id": "hard_053524", "clip_t": 0.29397571086883545, "clip_i_per_subject": [0.74208, 0.86074], "clip_i": 0.80141, "n_refs": 2}
+{"task_id": "hard_053559", "clip_t": 0.3652591109275818, "clip_i_per_subject": [0.61877, 0.6323, 0.657, 0.63583], "clip_i": 0.63598, "n_refs": 4}
+{"task_id": "hard_053663", "clip_t": 0.3561842739582062, "clip_i_per_subject": [0.58668, 0.46986, 0.46666, 0.50446], "clip_i": 0.50692, "n_refs": 4}
+{"task_id": "hard_053703", "clip_t": 0.4035997986793518, "clip_i_per_subject": [0.58922, 0.57385, 0.57169, 0.61065], "clip_i": 0.58635, "n_refs": 4}
+{"task_id": "hard_053712", "clip_t": 0.33614057302474976, "clip_i_per_subject": [0.80459, 0.78337], "clip_i": 0.79398, "n_refs": 2}
+{"task_id": "hard_053716", "clip_t": 0.2970001995563507, "clip_i_per_subject": [0.80031, 0.74117], "clip_i": 0.77074, "n_refs": 2}
+{"task_id": "hard_053728", "clip_t": 0.34264853596687317, "clip_i_per_subject": [0.78627, 0.76293], "clip_i": 0.7746, "n_refs": 2}
+{"task_id": "hard_053748", "clip_t": 0.30804774165153503, "clip_i_per_subject": [0.85281, 0.64777], "clip_i": 0.75029, "n_refs": 2}
+{"task_id": "hard_053823", "clip_t": 0.35383695363998413, "clip_i_per_subject": [0.61781, 0.66822, 0.60061, 0.66662], "clip_i": 0.63832, "n_refs": 4}
+{"task_id": "hard_053852", "clip_t": 0.28528356552124023, "clip_i_per_subject": [0.78579, 0.78926], "clip_i": 0.78752, "n_refs": 2}
+{"task_id": "hard_053892", "clip_t": 0.28110644221305847, "clip_i_per_subject": [0.72323, 0.76545], "clip_i": 0.74434, "n_refs": 2}
+{"task_id": "hard_053915", "clip_t": 0.39236193895339966, "clip_i_per_subject": [0.62385, 0.6183, 0.59452, 0.6317], "clip_i": 0.61709, "n_refs": 4}
+{"task_id": "hard_053931", "clip_t": 0.3886634111404419, "clip_i_per_subject": [0.71926, 0.74634, 0.56244, 0.62012], "clip_i": 0.66204, "n_refs": 4}
+{"task_id": "hard_053988", "clip_t": 0.3430331349372864, "clip_i_per_subject": [0.81148, 0.7985], "clip_i": 0.80499, "n_refs": 2}
+{"task_id": "hard_054051", "clip_t": 0.2950260043144226, "clip_i_per_subject": [0.61465, 0.71559, 0.6976, 0.59257], "clip_i": 0.6551, "n_refs": 4}
+{"task_id": "hard_054052", "clip_t": 0.26241666078567505, "clip_i_per_subject": [0.81468, 0.80661], "clip_i": 0.81065, "n_refs": 2}
+{"task_id": "hard_054056", "clip_t": 0.3165452480316162, "clip_i_per_subject": [0.76642, 0.77201], "clip_i": 0.76922, "n_refs": 2}
+{"task_id": "hard_054063", "clip_t": 0.3942508101463318, "clip_i_per_subject": [0.67868, 0.60458, 0.66153, 0.59989], "clip_i": 0.63617, "n_refs": 4}
+{"task_id": "hard_054079", "clip_t": 0.3694317638874054, "clip_i_per_subject": [0.53197, 0.57923, 0.52068, 0.59328], "clip_i": 0.55629, "n_refs": 4}
+{"task_id": "hard_054095", "clip_t": 0.3886588513851166, "clip_i_per_subject": [0.7486, 0.51385, 0.5241, 0.57803], "clip_i": 0.59115, "n_refs": 4}
+{"task_id": "hard_054123", "clip_t": 0.32485947012901306, "clip_i_per_subject": [0.60274, 0.67097, 0.53853, 0.59915], "clip_i": 0.60285, "n_refs": 4}
+{"task_id": "hard_054156", "clip_t": 0.32211729884147644, "clip_i_per_subject": [0.71992, 0.74635], "clip_i": 0.73313, "n_refs": 2}
+{"task_id": "hard_054160", "clip_t": 0.3376142084598541, "clip_i_per_subject": [0.72712, 0.76818], "clip_i": 0.74765, "n_refs": 2}
+{"task_id": "hard_054236", "clip_t": 0.3194834887981415, "clip_i_per_subject": [0.80843, 0.81002], "clip_i": 0.80922, "n_refs": 2}
+{"task_id": "hard_054299", "clip_t": 0.3916703760623932, "clip_i_per_subject": [0.49936, 0.62469, 0.54118, 0.57373], "clip_i": 0.55974, "n_refs": 4}
+{"task_id": "hard_054332", "clip_t": 0.3173745572566986, "clip_i_per_subject": [0.76612, 0.77504], "clip_i": 0.77058, "n_refs": 2}
+{"task_id": "hard_054335", "clip_t": 0.33770957589149475, "clip_i_per_subject": [0.49407, 0.56621, 0.58512, 0.50547], "clip_i": 0.53772, "n_refs": 4}
+{"task_id": "hard_054380", "clip_t": 0.3113066852092743, "clip_i_per_subject": [0.64107, 0.85007], "clip_i": 0.74557, "n_refs": 2}
+{"task_id": "hard_054407", "clip_t": 0.3209165334701538, "clip_i_per_subject": [0.69781, 0.58938, 0.63004, 0.6227], "clip_i": 0.63498, "n_refs": 4}
+{"task_id": "hard_054447", "clip_t": 0.33328965306282043, "clip_i_per_subject": [0.56414, 0.72195, 0.67528, 0.69054], "clip_i": 0.66298, "n_refs": 4}
+{"task_id": "hard_054500", "clip_t": 0.3416711390018463, "clip_i_per_subject": [0.73004, 0.81668], "clip_i": 0.77336, "n_refs": 2}
+{"task_id": "hard_054547", "clip_t": 0.3530034124851227, "clip_i_per_subject": [0.58403, 0.65196, 0.56829, 0.65136], "clip_i": 0.61391, "n_refs": 4}
+{"task_id": "hard_054619", "clip_t": 0.38289690017700195, "clip_i_per_subject": [0.60814, 0.55562, 0.55789, 0.46908], "clip_i": 0.54768, "n_refs": 4}
+{"task_id": "hard_054687", "clip_t": 0.3341248333454132, "clip_i_per_subject": [0.48906, 0.61759, 0.63624, 0.63583], "clip_i": 0.59468, "n_refs": 4}
+{"task_id": "hard_054816", "clip_t": 0.296804279088974, "clip_i_per_subject": [0.76295, 0.73458], "clip_i": 0.74876, "n_refs": 2}
+{"task_id": "hard_054828", "clip_t": 0.3330620527267456, "clip_i_per_subject": [0.79946, 0.79913], "clip_i": 0.79929, "n_refs": 2}
+{"task_id": "hard_054839", "clip_t": 0.31326648592948914, "clip_i_per_subject": [0.57139, 0.70613, 0.55982, 0.69178], "clip_i": 0.63228, "n_refs": 4}
+{"task_id": "hard_054848", "clip_t": 0.3330211043357849, "clip_i_per_subject": [0.74838, 0.75492], "clip_i": 0.75165, "n_refs": 2}
+{"task_id": "hard_054860", "clip_t": 0.3739464581012726, "clip_i_per_subject": [0.67049, 0.73994], "clip_i": 0.70522, "n_refs": 2}
+{"task_id": "hard_054996", "clip_t": 0.2801154851913452, "clip_i_per_subject": [0.74557, 0.81328], "clip_i": 0.77942, "n_refs": 2}
+{"task_id": "hard_055047", "clip_t": 0.35205912590026855, "clip_i_per_subject": [0.66598, 0.59269, 0.66212, 0.60711], "clip_i": 0.63198, "n_refs": 4}
+{"task_id": "hard_055071", "clip_t": 0.3868766725063324, "clip_i_per_subject": [0.61331, 0.65562, 0.69217, 0.68292], "clip_i": 0.661, "n_refs": 4}
+{"task_id": "hard_055228", "clip_t": 0.3337595760822296, "clip_i_per_subject": [0.73254, 0.7803], "clip_i": 0.75642, "n_refs": 2}
+{"task_id": "hard_055328", "clip_t": 0.2810724079608917, "clip_i_per_subject": [0.70002, 0.75783], "clip_i": 0.72893, "n_refs": 2}
+{"task_id": "hard_055343", "clip_t": 0.3372167646884918, "clip_i_per_subject": [0.62182, 0.757, 0.56467, 0.73148], "clip_i": 0.66874, "n_refs": 4}
+{"task_id": "hard_055364", "clip_t": 0.27456730604171753, "clip_i_per_subject": [0.81359, 0.64184], "clip_i": 0.72772, "n_refs": 2}
+{"task_id": "hard_055384", "clip_t": 0.347653329372406, "clip_i_per_subject": [0.84118, 0.74917], "clip_i": 0.79518, "n_refs": 2}
+{"task_id": "hard_055395", "clip_t": 0.32944875955581665, "clip_i_per_subject": [0.5786, 0.55951, 0.58738, 0.56586], "clip_i": 0.57284, "n_refs": 4}
+{"task_id": "hard_055403", "clip_t": 0.3396793603897095, "clip_i_per_subject": [0.54529, 0.6428, 0.60022, 0.63999], "clip_i": 0.60708, "n_refs": 4}
+{"task_id": "hard_055444", "clip_t": 0.306235671043396, "clip_i_per_subject": [0.83196, 0.65212], "clip_i": 0.74204, "n_refs": 2}
+{"task_id": "hard_055460", "clip_t": 0.2591933012008667, "clip_i_per_subject": [0.70569, 0.7327], "clip_i": 0.7192, "n_refs": 2}
+{"task_id": "hard_055475", "clip_t": 0.30324286222457886, "clip_i_per_subject": [0.55312, 0.64728, 0.62509, 0.45549], "clip_i": 0.57025, "n_refs": 4}
+{"task_id": "hard_055583", "clip_t": 0.3048551678657532, "clip_i_per_subject": [0.48924, 0.5866, 0.54909, 0.63102], "clip_i": 0.56399, "n_refs": 4}
+{"task_id": "hard_055659", "clip_t": 0.3408612012863159, "clip_i_per_subject": [0.66717, 0.74337, 0.70262, 0.64922], "clip_i": 0.6906, "n_refs": 4}
+{"task_id": "hard_055667", "clip_t": 0.3581208288669586, "clip_i_per_subject": [0.53157, 0.63333, 0.57247, 0.68921], "clip_i": 0.60665, "n_refs": 4}
+{"task_id": "hard_055695", "clip_t": 0.3586949408054352, "clip_i_per_subject": [0.49594, 0.6399, 0.52382, 0.68017], "clip_i": 0.58496, "n_refs": 4}
+{"task_id": "hard_055700", "clip_t": 0.356170117855072, "clip_i_per_subject": [0.79705, 0.77523], "clip_i": 0.78614, "n_refs": 2}
+{"task_id": "hard_055739", "clip_t": 0.38671499490737915, "clip_i_per_subject": [0.49889, 0.59716, 0.62029, 0.68369], "clip_i": 0.60001, "n_refs": 4}
+{"task_id": "hard_055899", "clip_t": 0.3843548893928528, "clip_i_per_subject": [0.57668, 0.57998, 0.48783, 0.51566], "clip_i": 0.54004, "n_refs": 4}
+{"task_id": "hard_055999", "clip_t": 0.357623815536499, "clip_i_per_subject": [0.59584, 0.68522, 0.57338, 0.60751], "clip_i": 0.61549, "n_refs": 4}
+{"task_id": "hard_056039", "clip_t": 0.3477763235569, "clip_i_per_subject": [0.51545, 0.56974, 0.58157, 0.60667], "clip_i": 0.56836, "n_refs": 4}
+{"task_id": "hard_056096", "clip_t": 0.2803790867328644, "clip_i_per_subject": [0.7611, 0.75793], "clip_i": 0.75951, "n_refs": 2}
+{"task_id": "hard_056100", "clip_t": 0.269909143447876, "clip_i_per_subject": [0.77933, 0.81105], "clip_i": 0.79519, "n_refs": 2}
+{"task_id": "hard_056187", "clip_t": 0.38012373447418213, "clip_i_per_subject": [0.60572, 0.62587, 0.54628, 0.66675], "clip_i": 0.61116, "n_refs": 4}
+{"task_id": "hard_056212", "clip_t": 0.3102034032344818, "clip_i_per_subject": [0.71869, 0.75174], "clip_i": 0.73521, "n_refs": 2}
+{"task_id": "hard_056332", "clip_t": 0.28394263982772827, "clip_i_per_subject": [0.76213, 0.83199], "clip_i": 0.79706, "n_refs": 2}
+{"task_id": "hard_056336", "clip_t": 0.3536491394042969, "clip_i_per_subject": [0.72754, 0.82367], "clip_i": 0.7756, "n_refs": 2}
+{"task_id": "hard_056371", "clip_t": 0.34743446111679077, "clip_i_per_subject": [0.53902, 0.56339, 0.4345, 0.55086], "clip_i": 0.52194, "n_refs": 4}
+{"task_id": "hard_056395", "clip_t": 0.32170504331588745, "clip_i_per_subject": [0.57587, 0.69837, 0.4743, 0.64924], "clip_i": 0.59945, "n_refs": 4}
+{"task_id": "hard_056396", "clip_t": 0.2742626667022705, "clip_i_per_subject": [0.79462, 0.84942], "clip_i": 0.82202, "n_refs": 2}
+{"task_id": "hard_056420", "clip_t": 0.31385791301727295, "clip_i_per_subject": [0.79685, 0.75785], "clip_i": 0.77735, "n_refs": 2}
+{"task_id": "hard_056432", "clip_t": 0.2879023551940918, "clip_i_per_subject": [0.78055, 0.7465], "clip_i": 0.76352, "n_refs": 2}
+{"task_id": "hard_056443", "clip_t": 0.3820129632949829, "clip_i_per_subject": [0.54343, 0.62307, 0.64164, 0.6599], "clip_i": 0.61701, "n_refs": 4}
+{"task_id": "hard_056472", "clip_t": 0.26225680112838745, "clip_i_per_subject": [0.77696, 0.78941], "clip_i": 0.78318, "n_refs": 2}
+{"task_id": "hard_056484", "clip_t": 0.3194951117038727, "clip_i_per_subject": [0.88149, 0.76539], "clip_i": 0.82344, "n_refs": 2}
+{"task_id": "hard_056504", "clip_t": 0.310361385345459, "clip_i_per_subject": [0.74429, 0.71204], "clip_i": 0.72816, "n_refs": 2}
+{"task_id": "hard_056535", "clip_t": 0.3248884975910187, "clip_i_per_subject": [0.60212, 0.54057, 0.53567, 0.46885], "clip_i": 0.5368, "n_refs": 4}
+{"task_id": "hard_056551", "clip_t": 0.37683361768722534, "clip_i_per_subject": [0.6, 0.7162, 0.58581, 0.62819], "clip_i": 0.63255, "n_refs": 4}
+{"task_id": "hard_056563", "clip_t": 0.3406464457511902, "clip_i_per_subject": [0.61497, 0.64561, 0.62447, 0.68325], "clip_i": 0.64207, "n_refs": 4}
+{"task_id": "hard_056567", "clip_t": 0.3193431496620178, "clip_i_per_subject": [0.52046, 0.5747, 0.54383, 0.66339], "clip_i": 0.5756, "n_refs": 4}
+{"task_id": "hard_056595", "clip_t": 0.294145792722702, "clip_i_per_subject": [0.45059, 0.61652, 0.72051, 0.65046], "clip_i": 0.60952, "n_refs": 4}
+{"task_id": "hard_056620", "clip_t": 0.3191811740398407, "clip_i_per_subject": [0.68179, 0.76061], "clip_i": 0.7212, "n_refs": 2}
+{"task_id": "hard_056624", "clip_t": 0.30658698081970215, "clip_i_per_subject": [0.83092, 0.77717], "clip_i": 0.80405, "n_refs": 2}
+{"task_id": "hard_056659", "clip_t": 0.4165128171443939, "clip_i_per_subject": [0.54426, 0.53871, 0.50227, 0.4546], "clip_i": 0.50996, "n_refs": 4}
+{"task_id": "hard_056703", "clip_t": 0.31286031007766724, "clip_i_per_subject": [0.60666, 0.57262, 0.55453, 0.59692], "clip_i": 0.58269, "n_refs": 4}
+{"task_id": "hard_056836", "clip_t": 0.3166794776916504, "clip_i_per_subject": [0.81871, 0.75067], "clip_i": 0.78469, "n_refs": 2}
+{"task_id": "hard_056851", "clip_t": 0.34807050228118896, "clip_i_per_subject": [0.59728, 0.49295, 0.42585, 0.55096], "clip_i": 0.51676, "n_refs": 4}
+{"task_id": "hard_056852", "clip_t": 0.334978848695755, "clip_i_per_subject": [0.73455, 0.75228], "clip_i": 0.74341, "n_refs": 2}
+{"task_id": "hard_056955", "clip_t": 0.31574034690856934, "clip_i_per_subject": [0.55073, 0.67862, 0.54863, 0.61473], "clip_i": 0.59818, "n_refs": 4}
+{"task_id": "hard_056972", "clip_t": 0.28474676609039307, "clip_i_per_subject": [0.82032, 0.82535], "clip_i": 0.82283, "n_refs": 2}
+{"task_id": "hard_057044", "clip_t": 0.2811294496059418, "clip_i_per_subject": [0.78592, 0.79411], "clip_i": 0.79002, "n_refs": 2}
+{"task_id": "hard_057064", "clip_t": 0.31230396032333374, "clip_i_per_subject": [0.81605, 0.76322], "clip_i": 0.78963, "n_refs": 2}
+{"task_id": "hard_057120", "clip_t": 0.34581291675567627, "clip_i_per_subject": [0.67158, 0.75268], "clip_i": 0.71213, "n_refs": 2}
+{"task_id": "hard_057135", "clip_t": 0.3031381070613861, "clip_i_per_subject": [0.52696, 0.73098, 0.69846, 0.70552], "clip_i": 0.66548, "n_refs": 4}
+{"task_id": "hard_057140", "clip_t": 0.2623804807662964, "clip_i_per_subject": [0.85669, 0.86399], "clip_i": 0.86034, "n_refs": 2}
+{"task_id": "hard_057155", "clip_t": 0.34931501746177673, "clip_i_per_subject": [0.67922, 0.63831, 0.58137, 0.5835], "clip_i": 0.6206, "n_refs": 4}
+{"task_id": "hard_057156", "clip_t": 0.336497038602829, "clip_i_per_subject": [0.70826, 0.69394], "clip_i": 0.7011, "n_refs": 2}
+{"task_id": "hard_057251", "clip_t": 0.3397606611251831, "clip_i_per_subject": [0.56784, 0.68333, 0.66461, 0.71437], "clip_i": 0.65754, "n_refs": 4}
+{"task_id": "hard_057287", "clip_t": 0.3298581838607788, "clip_i_per_subject": [0.61965, 0.56155, 0.45559, 0.56139], "clip_i": 0.54954, "n_refs": 4}
+{"task_id": "hard_057320", "clip_t": 0.3417695462703705, "clip_i_per_subject": [0.70282, 0.81375], "clip_i": 0.75829, "n_refs": 2}
+{"task_id": "hard_057328", "clip_t": 0.29491978883743286, "clip_i_per_subject": [0.87659, 0.68261], "clip_i": 0.7796, "n_refs": 2}
+{"task_id": "hard_057348", "clip_t": 0.3106110095977783, "clip_i_per_subject": [0.71721, 0.76827], "clip_i": 0.74274, "n_refs": 2}
+{"task_id": "hard_057387", "clip_t": 0.2794233560562134, "clip_i_per_subject": [0.57781, 0.68021, 0.57121, 0.64262], "clip_i": 0.61796, "n_refs": 4}
+{"task_id": "hard_057411", "clip_t": 0.353442519903183, "clip_i_per_subject": [0.58527, 0.51801, 0.53435, 0.54902], "clip_i": 0.54666, "n_refs": 4}
+{"task_id": "hard_057432", "clip_t": 0.2854733467102051, "clip_i_per_subject": [0.74946, 0.84378], "clip_i": 0.79662, "n_refs": 2}
+{"task_id": "hard_057483", "clip_t": 0.3257698714733124, "clip_i_per_subject": [0.5162, 0.58029, 0.48143, 0.57331], "clip_i": 0.53781, "n_refs": 4}
+{"task_id": "hard_057600", "clip_t": 0.23958073556423187, "clip_i_per_subject": [0.61707, 0.79599], "clip_i": 0.70653, "n_refs": 2}
+{"task_id": "hard_057635", "clip_t": 0.33023566007614136, "clip_i_per_subject": [0.51292, 0.73664, 0.58503, 0.57593], "clip_i": 0.60263, "n_refs": 4}
+{"task_id": "hard_057696", "clip_t": 0.2613248825073242, "clip_i_per_subject": [0.79487, 0.80015], "clip_i": 0.79751, "n_refs": 2}
+{"task_id": "hard_057699", "clip_t": 0.35011231899261475, "clip_i_per_subject": [0.59538, 0.62147, 0.59493, 0.65098], "clip_i": 0.61569, "n_refs": 4}
+{"task_id": "hard_057719", "clip_t": 0.38517263531684875, "clip_i_per_subject": [0.70525, 0.74042, 0.73502, 0.72857], "clip_i": 0.72732, "n_refs": 4}
+{"task_id": "hard_057747", "clip_t": 0.37684208154678345, "clip_i_per_subject": [0.66417, 0.6073, 0.61421, 0.55154], "clip_i": 0.60931, "n_refs": 4}
+{"task_id": "hard_057755", "clip_t": 0.37351536750793457, "clip_i_per_subject": [0.60079, 0.65233, 0.6623, 0.5883], "clip_i": 0.62593, "n_refs": 4}
+{"task_id": "hard_057827", "clip_t": 0.35151559114456177, "clip_i_per_subject": [0.4595, 0.62103, 0.56838, 0.60047], "clip_i": 0.56234, "n_refs": 4}
+{"task_id": "hard_057831", "clip_t": 0.29179584980010986, "clip_i_per_subject": [0.59847, 0.48682, 0.51983, 0.49354], "clip_i": 0.52467, "n_refs": 4}
+{"task_id": "hard_057839", "clip_t": 0.33131417632102966, "clip_i_per_subject": [0.5669, 0.58643, 0.51019, 0.51621], "clip_i": 0.54493, "n_refs": 4}
+{"task_id": "hard_057912", "clip_t": 0.2935250997543335, "clip_i_per_subject": [0.74128, 0.64507], "clip_i": 0.69317, "n_refs": 2}
+{"task_id": "hard_057923", "clip_t": 0.37335607409477234, "clip_i_per_subject": [0.62504, 0.63201, 0.68348, 0.57058], "clip_i": 0.62778, "n_refs": 4}
+{"task_id": "hard_057983", "clip_t": 0.33196163177490234, "clip_i_per_subject": [0.53433, 0.61907, 0.56467, 0.58219], "clip_i": 0.57506, "n_refs": 4}
+{"task_id": "hard_058008", "clip_t": 0.2959417402744293, "clip_i_per_subject": [0.74041, 0.75306], "clip_i": 0.74673, "n_refs": 2}
+{"task_id": "hard_058047", "clip_t": 0.3035341203212738, "clip_i_per_subject": [0.58558, 0.47819, 0.32868, 0.46678], "clip_i": 0.46481, "n_refs": 4}
+{"task_id": "hard_058139", "clip_t": 0.32873523235321045, "clip_i_per_subject": [0.56877, 0.61868, 0.65578, 0.63403], "clip_i": 0.61931, "n_refs": 4}
+{"task_id": "hard_058143", "clip_t": 0.33099380135536194, "clip_i_per_subject": [0.52681, 0.61386, 0.59926, 0.53532], "clip_i": 0.56881, "n_refs": 4}
+{"task_id": "hard_058195", "clip_t": 0.39817988872528076, "clip_i_per_subject": [0.56132, 0.64705, 0.52897, 0.60196], "clip_i": 0.58482, "n_refs": 4}
+{"task_id": "hard_058239", "clip_t": 0.28573256731033325, "clip_i_per_subject": [0.67609, 0.62817, 0.54887, 0.50371], "clip_i": 0.58921, "n_refs": 4}
+{"task_id": "hard_058303", "clip_t": 0.3520534634590149, "clip_i_per_subject": [0.64013, 0.67261, 0.68429, 0.63635], "clip_i": 0.65835, "n_refs": 4}
+{"task_id": "hard_058332", "clip_t": 0.34309840202331543, "clip_i_per_subject": [0.75494, 0.71095], "clip_i": 0.73294, "n_refs": 2}
+{"task_id": "hard_058431", "clip_t": 0.330608069896698, "clip_i_per_subject": [0.60871, 0.72086, 0.6536, 0.71829], "clip_i": 0.67537, "n_refs": 4}
+{"task_id": "hard_058435", "clip_t": 0.27345937490463257, "clip_i_per_subject": [0.52485, 0.60532, 0.57485, 0.59767], "clip_i": 0.57567, "n_refs": 4}
+{"task_id": "hard_058591", "clip_t": 0.32587870955467224, "clip_i_per_subject": [0.56255, 0.57591, 0.54117, 0.55566], "clip_i": 0.55882, "n_refs": 4}
+{"task_id": "hard_058603", "clip_t": 0.3075202405452728, "clip_i_per_subject": [0.50008, 0.596, 0.65658, 0.57415], "clip_i": 0.5817, "n_refs": 4}
+{"task_id": "hard_058631", "clip_t": 0.3652500510215759, "clip_i_per_subject": [0.6951, 0.54473, 0.54595, 0.63882], "clip_i": 0.60615, "n_refs": 4}
+{"task_id": "hard_058632", "clip_t": 0.31943121552467346, "clip_i_per_subject": [0.7477, 0.77889], "clip_i": 0.7633, "n_refs": 2}
+{"task_id": "hard_058648", "clip_t": 0.29942426085472107, "clip_i_per_subject": [0.75391, 0.73395], "clip_i": 0.74393, "n_refs": 2}
+{"task_id": "hard_058655", "clip_t": 0.321414589881897, "clip_i_per_subject": [0.60966, 0.59221, 0.4936, 0.64477], "clip_i": 0.58506, "n_refs": 4}
+{"task_id": "hard_058691", "clip_t": 0.3618084490299225, "clip_i_per_subject": [0.57031, 0.5972, 0.57293, 0.62584], "clip_i": 0.59157, "n_refs": 4}
+{"task_id": "hard_058700", "clip_t": 0.258532851934433, "clip_i_per_subject": [0.67256, 0.67171], "clip_i": 0.67213, "n_refs": 2}
+{"task_id": "hard_058711", "clip_t": 0.3656717538833618, "clip_i_per_subject": [0.60549, 0.63586, 0.59013, 0.56906], "clip_i": 0.60014, "n_refs": 4}
+{"task_id": "hard_058732", "clip_t": 0.2620970606803894, "clip_i_per_subject": [0.75861, 0.79241], "clip_i": 0.77551, "n_refs": 2}
+{"task_id": "hard_058767", "clip_t": 0.3291102945804596, "clip_i_per_subject": [0.50762, 0.63329, 0.57997, 0.71568], "clip_i": 0.60914, "n_refs": 4}
+{"task_id": "hard_058772", "clip_t": 0.27230972051620483, "clip_i_per_subject": [0.76184, 0.75469], "clip_i": 0.75827, "n_refs": 2}
+{"task_id": "hard_058836", "clip_t": 0.3008556067943573, "clip_i_per_subject": [0.69196, 0.78674], "clip_i": 0.73935, "n_refs": 2}
+{"task_id": "hard_058872", "clip_t": 0.3211984634399414, "clip_i_per_subject": [0.78874, 0.74836], "clip_i": 0.76855, "n_refs": 2}
+{"task_id": "hard_058896", "clip_t": 0.34499773383140564, "clip_i_per_subject": [0.66727, 0.72106], "clip_i": 0.69416, "n_refs": 2}
+{"task_id": "hard_058956", "clip_t": 0.32120198011398315, "clip_i_per_subject": [0.71033, 0.77383], "clip_i": 0.74208, "n_refs": 2}
+{"task_id": "hard_058984", "clip_t": 0.29782772064208984, "clip_i_per_subject": [0.76942, 0.81637], "clip_i": 0.79289, "n_refs": 2}
+{"task_id": "hard_059000", "clip_t": 0.3305789530277252, "clip_i_per_subject": [0.78018, 0.77701], "clip_i": 0.77859, "n_refs": 2}
+{"task_id": "hard_059027", "clip_t": 0.40957847237586975, "clip_i_per_subject": [0.5559, 0.64231, 0.58665, 0.62875], "clip_i": 0.6034, "n_refs": 4}
+{"task_id": "hard_059028", "clip_t": 0.33333635330200195, "clip_i_per_subject": [0.67235, 0.7334], "clip_i": 0.70287, "n_refs": 2}
+{"task_id": "hard_059048", "clip_t": 0.28661149740219116, "clip_i_per_subject": [0.70773, 0.71084], "clip_i": 0.70929, "n_refs": 2}
+{"task_id": "hard_059075", "clip_t": 0.3995794951915741, "clip_i_per_subject": [0.49951, 0.57463, 0.51985, 0.48286], "clip_i": 0.51921, "n_refs": 4}
+{"task_id": "hard_059099", "clip_t": 0.3370313048362732, "clip_i_per_subject": [0.62658, 0.69056, 0.58976, 0.6252], "clip_i": 0.63302, "n_refs": 4}
+{"task_id": "hard_059196", "clip_t": 0.285575807094574, "clip_i_per_subject": [0.7891, 0.75626], "clip_i": 0.77268, "n_refs": 2}
+{"task_id": "hard_059228", "clip_t": 0.3190641403198242, "clip_i_per_subject": [0.68765, 0.75348], "clip_i": 0.72057, "n_refs": 2}
+{"task_id": "hard_059280", "clip_t": 0.3423958420753479, "clip_i_per_subject": [0.78982, 0.71634], "clip_i": 0.75308, "n_refs": 2}
+{"task_id": "hard_059300", "clip_t": 0.3247475028038025, "clip_i_per_subject": [0.63358, 0.65866], "clip_i": 0.64612, "n_refs": 2}
+{"task_id": "hard_059379", "clip_t": 0.2878496050834656, "clip_i_per_subject": [0.6068, 0.58297, 0.67259, 0.6822], "clip_i": 0.63614, "n_refs": 4}
+{"task_id": "hard_059388", "clip_t": 0.31217652559280396, "clip_i_per_subject": [0.82662, 0.69694], "clip_i": 0.76178, "n_refs": 2}
+{"task_id": "hard_059400", "clip_t": 0.2835550308227539, "clip_i_per_subject": [0.75483, 0.66163], "clip_i": 0.70823, "n_refs": 2}
+{"task_id": "hard_059499", "clip_t": 0.33153754472732544, "clip_i_per_subject": [0.54209, 0.59202, 0.56263, 0.59398], "clip_i": 0.57268, "n_refs": 4}
+{"task_id": "hard_059592", "clip_t": 0.3346075415611267, "clip_i_per_subject": [0.77104, 0.8246], "clip_i": 0.79782, "n_refs": 2}
+{"task_id": "hard_059631", "clip_t": 0.376365602016449, "clip_i_per_subject": [0.60629, 0.63765, 0.62491, 0.61735], "clip_i": 0.62155, "n_refs": 4}
+{"task_id": "hard_059704", "clip_t": 0.29604560136795044, "clip_i_per_subject": [0.8094, 0.78712], "clip_i": 0.79826, "n_refs": 2}
+{"task_id": "hard_059723", "clip_t": 0.35517480969429016, "clip_i_per_subject": [0.68019, 0.72111, 0.63537, 0.55056], "clip_i": 0.64681, "n_refs": 4}
+{"task_id": "hard_059776", "clip_t": 0.3231809735298157, "clip_i_per_subject": [0.79937, 0.81616], "clip_i": 0.80776, "n_refs": 2}
+{"task_id": "hard_059804", "clip_t": 0.3470735251903534, "clip_i_per_subject": [0.74167, 0.74278], "clip_i": 0.74222, "n_refs": 2}
+{"task_id": "hard_059820", "clip_t": 0.29079848527908325, "clip_i_per_subject": [0.75981, 0.76106], "clip_i": 0.76044, "n_refs": 2}
+{"task_id": "hard_059947", "clip_t": 0.3683425784111023, "clip_i_per_subject": [0.60095, 0.53182, 0.54491, 0.60051], "clip_i": 0.56955, "n_refs": 4}
+{"task_id": "hard_060000", "clip_t": 0.3480796217918396, "clip_i_per_subject": [0.7535, 0.71907], "clip_i": 0.73628, "n_refs": 2}

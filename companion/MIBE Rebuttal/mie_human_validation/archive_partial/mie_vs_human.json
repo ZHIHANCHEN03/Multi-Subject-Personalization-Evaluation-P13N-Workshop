@@ -1,0 +1,252 @@
+{
+ "meta": {
+  "mie_checkpoint": "/workspace/Model_Training_runs/v2/unsloth_Qwen3.5-4B/20260503_045230/outputs/unsloth_Qwen3.5-4B-lora_layer-best",
+  "mie_base_model": "unsloth/Qwen3.5-4B",
+  "batches": {
+   "pp1": [
+    "nb",
+    "mosaic"
+   ],
+   "pp2": [
+    "flux2",
+    "gpt15"
+   ]
+  }
+ },
+ "pp1": {
+  "preference_agreement": {
+   "n_items": 623,
+   "agreement": 0.9904,
+   "ci95": [
+    0.9791,
+    0.9956
+   ],
+   "human_nb_win_rate": 0.9984,
+   "mie_nb_win_rate": 0.992,
+   "majority_class_baseline": 0.9984,
+   "mie_minus_baseline": -0.008,
+   "auc": 0.5788,
+   "auc_ci95": [
+    0.5371,
+    0.6158
+   ],
+   "positive_rate": 0.9984
+  },
+  "systematic_bias_mie_minus_human": {
+   "nano_banana.existence": 0.019,
+   "nano_banana.appearance": 0.2157,
+   "nano_banana.interaction": -0.0231,
+   "mosaic.existence": 0.0498,
+   "mosaic.appearance": 0.0545,
+   "mosaic.interaction": -0.0333
+  },
+  "facet_alignment": {
+   "nano_banana.existence": {
+    "n": 648,
+    "pearson_r": 0.8555,
+    "human_mean": 0.8897,
+    "mie_mean": 0.9087,
+    "binary_agreement": 0.976
+   },
+   "nano_banana.appearance": {
+    "n": 648,
+    "pearson_r": 0.6753,
+    "human_mean": 0.4151,
+    "mie_mean": 0.6308,
+    "binary_agreement": 0.7578
+   },
+   "nano_banana.interaction": {
+    "n": 648,
+    "pearson_r": 0.4582,
+    "human_mean": 0.6196,
+    "mie_mean": 0.5965,
+    "binary_agreement": 0.7669
+   },
+   "mosaic.existence": {
+    "n": 648,
+    "pearson_r": 0.9001,
+    "human_mean": 0.26,
+    "mie_mean": 0.3098,
+    "binary_agreement": 0.9669
+   },
+   "mosaic.appearance": {
+    "n": 648,
+    "pearson_r": 0.5165,
+    "human_mean": 0.0741,
+    "mie_mean": 0.1286,
+    "binary_agreement": 0.949
+   },
+   "mosaic.interaction": {
+    "n": 648,
+    "pearson_r": 0.5377,
+    "human_mean": 0.1134,
+    "mie_mean": 0.0801,
+    "binary_agreement": 0.9501
+   }
+  },
+  "margin_vs_agreement": {
+   "low": {
+    "n": 42,
+    "agreement": 0.9048
+   },
+   "mid": {
+    "n": 224,
+    "agreement": 0.9911
+   },
+   "high": {
+    "n": 357,
+    "agreement": 1.0
+   }
+  },
+  "fleiss_kappa": {
+   "nano_banana.existence": 0.8139,
+   "nano_banana.appearance": 0.5638,
+   "nano_banana.interaction": 0.4632,
+   "mosaic.existence": 0.8199,
+   "mosaic.appearance": 0.5399,
+   "mosaic.interaction": 0.3214,
+   "preference": 0.0537
+  },
+  "by_level": {
+   "2": {
+    "n": 147,
+    "agreement": 1.0
+   },
+   "4": {
+    "n": 158,
+    "agreement": 0.9873
+   },
+   "6": {
+    "n": 157,
+    "agreement": 0.9809
+   },
+   "8": {
+    "n": 161,
+    "agreement": 0.9938
+   }
+  },
+  "drop_split": {
+   "items_before": 648,
+   "items_after": 648,
+   "dropped": 0
+  }
+ },
+ "pp2": {
+  "preference_agreement": {
+   "n_items": 547,
+   "agreement": 0.8629,
+   "ci95": [
+    0.8315,
+    0.8892
+   ],
+   "human_flux2_win_rate": 0.1024,
+   "mie_flux2_win_rate": 0.0786,
+   "majority_class_baseline": 0.8976,
+   "mie_minus_baseline": -0.0347,
+   "auc": 0.7645,
+   "auc_ci95": [
+    0.7031,
+    0.8218
+   ],
+   "positive_rate": 0.1024
+  },
+  "systematic_bias_mie_minus_human": {
+   "flux2.existence": 0.2342,
+   "flux2.appearance": 0.1748,
+   "flux2.interaction": -0.0054,
+   "gpt15.existence": 0.0136,
+   "gpt15.appearance": 0.0979,
+   "gpt15.interaction": 0.012
+  },
+  "facet_alignment": {
+   "flux2.existence": {
+    "n": 622,
+    "pearson_r": 0.4982,
+    "human_mean": 0.6174,
+    "mie_mean": 0.8515,
+    "binary_agreement": 0.7398
+   },
+   "flux2.appearance": {
+    "n": 622,
+    "pearson_r": 0.4918,
+    "human_mean": 0.2926,
+    "mie_mean": 0.4674,
+    "binary_agreement": 0.7429
+   },
+   "flux2.interaction": {
+    "n": 622,
+    "pearson_r": 0.4632,
+    "human_mean": 0.365,
+    "mie_mean": 0.3595,
+    "binary_agreement": 0.7338
+   },
+   "gpt15.existence": {
+    "n": 622,
+    "pearson_r": 0.9214,
+    "human_mean": 0.9124,
+    "mie_mean": 0.926,
+    "binary_agreement": 0.9886
+   },
+   "gpt15.appearance": {
+    "n": 622,
+    "pearson_r": 0.2833,
+    "human_mean": 0.7452,
+    "mie_mean": 0.8431,
+    "binary_agreement": 0.8227
+   },
+   "gpt15.interaction": {
+    "n": 622,
+    "pearson_r": 0.5016,
+    "human_mean": 0.582,
+    "mie_mean": 0.594,
+    "binary_agreement": 0.7566
+   }
+  },
+  "margin_vs_agreement": {
+   "low": {
+    "n": 338,
+    "agreement": 0.7929
+   },
+   "mid": {
+    "n": 192,
+    "agreement": 0.974
+   },
+   "high": {
+    "n": 17,
+    "agreement": 1.0
+   }
+  },
+  "fleiss_kappa": {
+   "flux2.existence": 0.8252,
+   "flux2.appearance": 0.2207,
+   "flux2.interaction": 0.5009,
+   "gpt15.existence": 0.8682,
+   "gpt15.appearance": 0.1805,
+   "gpt15.interaction": 0.5374,
+   "preference": 0.3211
+  },
+  "by_level": {
+   "2": {
+    "n": 131,
+    "agreement": 0.8626
+   },
+   "4": {
+    "n": 133,
+    "agreement": 0.8045
+   },
+   "6": {
+    "n": 140,
+    "agreement": 0.8714
+   },
+   "8": {
+    "n": 143,
+    "agreement": 0.9091
+   }
+  },
+  "drop_split": {
+   "items_before": 622,
+   "items_after": 622,
+   "dropped": 0
+  }
+ }
+}

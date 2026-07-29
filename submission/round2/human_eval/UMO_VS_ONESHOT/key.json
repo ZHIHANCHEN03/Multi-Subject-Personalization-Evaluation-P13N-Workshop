@@ -1,0 +1,602 @@
+{
+ "umo_s0_vs_one_shot_s0__hard_041443": {
+  "task_id": "hard_041443",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_040895": {
+  "task_id": "hard_040895",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_053443": {
+  "task_id": "hard_053443",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_043971": {
+  "task_id": "hard_043971",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_058431": {
+  "task_id": "hard_058431",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_058591": {
+  "task_id": "hard_058591",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_047807": {
+  "task_id": "hard_047807",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_049787": {
+  "task_id": "hard_049787",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_057135": {
+  "task_id": "hard_057135",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_049315": {
+  "task_id": "hard_049315",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_052975": {
+  "task_id": "hard_052975",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046803": {
+  "task_id": "hard_046803",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_059075": {
+  "task_id": "hard_059075",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_057411": {
+  "task_id": "hard_057411",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046659": {
+  "task_id": "hard_046659",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_055403": {
+  "task_id": "hard_055403",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_041155": {
+  "task_id": "hard_041155",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_050515": {
+  "task_id": "hard_050515",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_045879": {
+  "task_id": "hard_045879",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_047271": {
+  "task_id": "hard_047271",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_047199": {
+  "task_id": "hard_047199",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_048579": {
+  "task_id": "hard_048579",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_040539": {
+  "task_id": "hard_040539",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_047891": {
+  "task_id": "hard_047891",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_040327": {
+  "task_id": "hard_040327",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_058435": {
+  "task_id": "hard_058435",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_047151": {
+  "task_id": "hard_047151",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_054063": {
+  "task_id": "hard_054063",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_052671": {
+  "task_id": "hard_052671",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_050519": {
+  "task_id": "hard_050519",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_053703": {
+  "task_id": "hard_053703",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_047875": {
+  "task_id": "hard_047875",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_043375": {
+  "task_id": "hard_043375",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_056551": {
+  "task_id": "hard_056551",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_059099": {
+  "task_id": "hard_059099",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_055899": {
+  "task_id": "hard_055899",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_041671": {
+  "task_id": "hard_041671",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_045303": {
+  "task_id": "hard_045303",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046247": {
+  "task_id": "hard_046247",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_049027": {
+  "task_id": "hard_049027",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_055739": {
+  "task_id": "hard_055739",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_059499": {
+  "task_id": "hard_059499",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_044103": {
+  "task_id": "hard_044103",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_043655": {
+  "task_id": "hard_043655",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_056535": {
+  "task_id": "hard_056535",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_057827": {
+  "task_id": "hard_057827",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046751": {
+  "task_id": "hard_046751",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_055695": {
+  "task_id": "hard_055695",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_058047": {
+  "task_id": "hard_058047",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_043559": {
+  "task_id": "hard_043559",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_040399": {
+  "task_id": "hard_040399",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_052607": {
+  "task_id": "hard_052607",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_052983": {
+  "task_id": "hard_052983",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_054123": {
+  "task_id": "hard_054123",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_059947": {
+  "task_id": "hard_059947",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_042663": {
+  "task_id": "hard_042663",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_041683": {
+  "task_id": "hard_041683",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046615": {
+  "task_id": "hard_046615",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_050135": {
+  "task_id": "hard_050135",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_045095": {
+  "task_id": "hard_045095",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_054299": {
+  "task_id": "hard_054299",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_054839": {
+  "task_id": "hard_054839",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_045295": {
+  "task_id": "hard_045295",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_053395": {
+  "task_id": "hard_053395",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046259": {
+  "task_id": "hard_046259",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_042491": {
+  "task_id": "hard_042491",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_055343": {
+  "task_id": "hard_055343",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_048983": {
+  "task_id": "hard_048983",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_048007": {
+  "task_id": "hard_048007",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_044883": {
+  "task_id": "hard_044883",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_042895": {
+  "task_id": "hard_042895",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_054407": {
+  "task_id": "hard_054407",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_045339": {
+  "task_id": "hard_045339",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046907": {
+  "task_id": "hard_046907",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_046323": {
+  "task_id": "hard_046323",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_051747": {
+  "task_id": "hard_051747",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_055583": {
+  "task_id": "hard_055583",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_052927": {
+  "task_id": "hard_052927",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_056851": {
+  "task_id": "hard_056851",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_041463": {
+  "task_id": "hard_041463",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_057387": {
+  "task_id": "hard_057387",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_043223": {
+  "task_id": "hard_043223",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_051155": {
+  "task_id": "hard_051155",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_054447": {
+  "task_id": "hard_054447",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_040111": {
+  "task_id": "hard_040111",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_059379": {
+  "task_id": "hard_059379",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_052023": {
+  "task_id": "hard_052023",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_056955": {
+  "task_id": "hard_056955",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_056395": {
+  "task_id": "hard_056395",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_042251": {
+  "task_id": "hard_042251",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_050399": {
+  "task_id": "hard_050399",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_043031": {
+  "task_id": "hard_043031",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_051315": {
+  "task_id": "hard_051315",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_045223": {
+  "task_id": "hard_045223",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_053915": {
+  "task_id": "hard_053915",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_052839": {
+  "task_id": "hard_052839",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_051627": {
+  "task_id": "hard_051627",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "RIGHT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_041231": {
+  "task_id": "hard_041231",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_058767": {
+  "task_id": "hard_058767",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ },
+ "umo_s0_vs_one_shot_s0__hard_058655": {
+  "task_id": "hard_058655",
+  "main": "umo_s0",
+  "other": "one_shot_s0",
+  "ours_side": "LEFT"
+ }
+}

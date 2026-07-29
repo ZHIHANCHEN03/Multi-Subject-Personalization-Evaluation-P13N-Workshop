@@ -1,0 +1,119 @@
+{
+ "main": "umo_s0",
+ "other": "one_shot_s0",
+ "n_pairs": 100,
+ "labelers": [
+  "labeler_A",
+  "labeler_B"
+ ],
+ "questions": {
+  "q1": "existence",
+  "q2": "identity/appearance"
+ },
+ "per_labeler": {
+  "q1.labeler_A": {
+   "tie": 86,
+   "umo": 4,
+   "one_shot": 10,
+   "n_nontie": 14,
+   "umo_win_rate": 0.2857,
+   "ci95": [
+    0.1172,
+    0.5465
+   ],
+   "binom_p": 0.1796
+  },
+  "q1.labeler_B": {
+   "tie": 73,
+   "umo": 6,
+   "one_shot": 21,
+   "n_nontie": 27,
+   "umo_win_rate": 0.2222,
+   "ci95": [
+    0.1061,
+    0.4076
+   ],
+   "binom_p": 0.0059
+  },
+  "q2.labeler_A": {
+   "tie": 95,
+   "umo": 4,
+   "one_shot": 1,
+   "n_nontie": 5,
+   "umo_win_rate": 0.8,
+   "ci95": [
+    0.3755,
+    0.9638
+   ],
+   "binom_p": 0.375
+  },
+  "q2.labeler_B": {
+   "tie": 32,
+   "umo": 36,
+   "one_shot": 32,
+   "n_nontie": 68,
+   "umo_win_rate": 0.5294,
+   "ci95": [
+    0.4124,
+    0.6433
+   ],
+   "binom_p": 0.7163
+  }
+ },
+ "pooled": {
+  "q1": {
+   "tie": 159,
+   "umo": 10,
+   "one_shot": 31,
+   "n_nontie": 41,
+   "tie_rate": 0.795,
+   "umo_win_rate": 0.2439,
+   "ci95": [
+    0.1382,
+    0.3934
+   ],
+   "binom_p": 0.0015
+  },
+  "q2": {
+   "tie": 127,
+   "umo": 40,
+   "one_shot": 33,
+   "n_nontie": 73,
+   "tie_rate": 0.635,
+   "umo_win_rate": 0.5479,
+   "ci95": [
+    0.4342,
+    0.6569
+   ],
+   "binom_p": 0.4828
+  }
+ },
+ "inter_labeler": {
+  "q1": {
+   "n": 100,
+   "raw_agreement": 0.85,
+   "cohen_kappa": 0.57
+  },
+  "q2": {
+   "n": 100,
+   "raw_agreement": 0.37,
+   "cohen_kappa": 0.0713
+  }
+ },
+ "automatic_metrics_same_tasks": {
+  "scr": {
+   "n": 100,
+   "mean_diff": 0.0025,
+   "umo_better": 23,
+   "tie": 53,
+   "one_shot_better": 24
+  },
+  "dino_mean": {
+   "n": 100,
+   "mean_diff": -0.00388,
+   "umo_better": 51,
+   "tie": 0,
+   "one_shot_better": 49
+  }
+ }
+}

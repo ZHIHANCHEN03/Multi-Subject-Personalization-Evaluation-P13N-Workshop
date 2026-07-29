@@ -1,0 +1,461 @@
+{
+ "n_subjects": 22,
+ "facets": {
+  "human.appearance": {
+   "per_subject": {
+    "black_teen_girl_braids": {
+     "mean_residual": -0.0089,
+     "n": 1752
+    },
+    "woman_pink_hair": {
+     "mean_residual": -0.0109,
+     "n": 1216
+    },
+    "elderly_black_woman_headwrap": {
+     "mean_residual": -0.0299,
+     "n": 1224
+    },
+    "latino_man_black_polo": {
+     "mean_residual": 0.0216,
+     "n": 1272
+    },
+    "cupcake": {
+     "mean_residual": 0.0249,
+     "n": 548
+    },
+    "alpaca": {
+     "mean_residual": 0.0013,
+     "n": 1252
+    },
+    "croissant": {
+     "mean_residual": 0.0314,
+     "n": 1128
+    },
+    "shopping_cart": {
+     "mean_residual": 0.0132,
+     "n": 1248
+    },
+    "southeast_asian_woman": {
+     "mean_residual": -0.0563,
+     "n": 1488
+    },
+    "middle_eastern_teen_boy": {
+     "mean_residual": -0.0187,
+     "n": 1052
+    },
+    "dairy_cow": {
+     "mean_residual": -0.0033,
+     "n": 936
+    },
+    "picnic_basket": {
+     "mean_residual": 0.0545,
+     "n": 888
+    },
+    "desk_globe": {
+     "mean_residual": 0.0133,
+     "n": 960
+    },
+    "middleaged_white_woman_glasses": {
+     "mean_residual": -0.0156,
+     "n": 1176
+    },
+    "east_asian_man_leather_jacket": {
+     "mean_residual": -0.0203,
+     "n": 1104
+    },
+    "hamster": {
+     "mean_residual": 0.0058,
+     "n": 1440
+    },
+    "man_orange_turtleneck": {
+     "mean_residual": -0.0016,
+     "n": 1164
+    },
+    "violin": {
+     "mean_residual": 0.0083,
+     "n": 1128
+    },
+    "electric_kettle": {
+     "mean_residual": 0.0144,
+     "n": 832
+    },
+    "elderly_south_asian_man": {
+     "mean_residual": -0.0021,
+     "n": 1488
+    },
+    "flamingo": {
+     "mean_residual": 0.0109,
+     "n": 1228
+    },
+    "turtle": {
+     "mean_residual": 0.0145,
+     "n": 1292
+    }
+   },
+   "by_kind": {
+    "new category": {
+     "mean_residual": 0.0145,
+     "ci95": [
+      0.0084,
+      0.0208
+     ],
+     "n": 12880
+    },
+    "new identity": {
+     "mean_residual": -0.0145,
+     "ci95": [
+      -0.0204,
+      -0.0086
+     ],
+     "n": 12936
+    }
+   },
+   "permutation_p": 0.0005,
+   "category_minus_identity": {
+    "diff": 0.029,
+    "ci95": [
+     0.0208,
+     0.0376
+    ]
+   }
+  },
+  "human.existence": {
+   "per_subject": {
+    "black_teen_girl_braids": {
+     "mean_residual": -0.0151,
+     "n": 1752
+    },
+    "woman_pink_hair": {
+     "mean_residual": -0.022,
+     "n": 1216
+    },
+    "elderly_black_woman_headwrap": {
+     "mean_residual": -0.0129,
+     "n": 1224
+    },
+    "latino_man_black_polo": {
+     "mean_residual": -0.0432,
+     "n": 1272
+    },
+    "cupcake": {
+     "mean_residual": 0.0012,
+     "n": 548
+    },
+    "alpaca": {
+     "mean_residual": 0.0493,
+     "n": 1252
+    },
+    "croissant": {
+     "mean_residual": -0.0105,
+     "n": 1128
+    },
+    "shopping_cart": {
+     "mean_residual": 0.0251,
+     "n": 1248
+    },
+    "southeast_asian_woman": {
+     "mean_residual": -0.0194,
+     "n": 1488
+    },
+    "middle_eastern_teen_boy": {
+     "mean_residual": -0.0231,
+     "n": 1052
+    },
+    "dairy_cow": {
+     "mean_residual": 0.0165,
+     "n": 936
+    },
+    "picnic_basket": {
+     "mean_residual": 0.0317,
+     "n": 888
+    },
+    "desk_globe": {
+     "mean_residual": 0.0517,
+     "n": 960
+    },
+    "middleaged_white_woman_glasses": {
+     "mean_residual": -0.0092,
+     "n": 1176
+    },
+    "east_asian_man_leather_jacket": {
+     "mean_residual": -0.0216,
+     "n": 1104
+    },
+    "hamster": {
+     "mean_residual": 0.0008,
+     "n": 1440
+    },
+    "man_orange_turtleneck": {
+     "mean_residual": -0.0297,
+     "n": 1164
+    },
+    "violin": {
+     "mean_residual": 0.0431,
+     "n": 1128
+    },
+    "electric_kettle": {
+     "mean_residual": 0.0338,
+     "n": 832
+    },
+    "elderly_south_asian_man": {
+     "mean_residual": -0.0156,
+     "n": 1488
+    },
+    "flamingo": {
+     "mean_residual": 0.0143,
+     "n": 1228
+    },
+    "turtle": {
+     "mean_residual": -0.0008,
+     "n": 1292
+    }
+   },
+   "by_kind": {
+    "new category": {
+     "mean_residual": 0.0209,
+     "ci95": [
+      0.0149,
+      0.0267
+     ],
+     "n": 12880
+    },
+    "new identity": {
+     "mean_residual": -0.0208,
+     "ci95": [
+      -0.0269,
+      -0.0149
+     ],
+     "n": 12936
+    }
+   },
+   "permutation_p": 0.0005,
+   "category_minus_identity": {
+    "diff": 0.0417,
+    "ci95": [
+     0.0337,
+     0.0504
+    ]
+   }
+  },
+  "mie.appearance": {
+   "per_subject": {
+    "black_teen_girl_braids": {
+     "mean_residual": -0.0221,
+     "n": 876
+    },
+    "woman_pink_hair": {
+     "mean_residual": -0.0093,
+     "n": 610
+    },
+    "elderly_black_woman_headwrap": {
+     "mean_residual": -0.0185,
+     "n": 612
+    },
+    "latino_man_black_polo": {
+     "mean_residual": 0.0095,
+     "n": 636
+    },
+    "cupcake": {
+     "mean_residual": -0.0019,
+     "n": 275
+    },
+    "alpaca": {
+     "mean_residual": 0.0018,
+     "n": 631
+    },
+    "croissant": {
+     "mean_residual": 0.0263,
+     "n": 564
+    },
+    "shopping_cart": {
+     "mean_residual": 0.0191,
+     "n": 624
+    },
+    "southeast_asian_woman": {
+     "mean_residual": -0.0312,
+     "n": 744
+    },
+    "middle_eastern_teen_boy": {
+     "mean_residual": -0.0304,
+     "n": 527
+    },
+    "dairy_cow": {
+     "mean_residual": 0.0193,
+     "n": 468
+    },
+    "picnic_basket": {
+     "mean_residual": 0.0395,
+     "n": 444
+    },
+    "desk_globe": {
+     "mean_residual": 0.034,
+     "n": 480
+    },
+    "middleaged_white_woman_glasses": {
+     "mean_residual": -0.0116,
+     "n": 588
+    },
+    "east_asian_man_leather_jacket": {
+     "mean_residual": 0.0063,
+     "n": 552
+    },
+    "hamster": {
+     "mean_residual": 0.0051,
+     "n": 720
+    },
+    "man_orange_turtleneck": {
+     "mean_residual": -0.0458,
+     "n": 585
+    },
+    "violin": {
+     "mean_residual": 0.0206,
+     "n": 570
+    },
+    "electric_kettle": {
+     "mean_residual": 0.0086,
+     "n": 418
+    },
+    "elderly_south_asian_man": {
+     "mean_residual": -0.0216,
+     "n": 744
+    },
+    "flamingo": {
+     "mean_residual": 0.0234,
+     "n": 619
+    },
+    "turtle": {
+     "mean_residual": 0.0186,
+     "n": 647
+    }
+   },
+   "by_kind": {
+    "new category": {
+     "mean_residual": 0.0179,
+     "ci95": [
+      0.0135,
+      0.0224
+     ],
+     "n": 6460
+    },
+    "new identity": {
+     "mean_residual": -0.0179,
+     "ci95": [
+      -0.0221,
+      -0.0136
+     ],
+     "n": 6474
+    }
+   }
+  },
+  "mie.existence": {
+   "per_subject": {
+    "black_teen_girl_braids": {
+     "mean_residual": -0.0094,
+     "n": 876
+    },
+    "woman_pink_hair": {
+     "mean_residual": -0.0436,
+     "n": 610
+    },
+    "elderly_black_woman_headwrap": {
+     "mean_residual": -0.0183,
+     "n": 612
+    },
+    "latino_man_black_polo": {
+     "mean_residual": -0.0401,
+     "n": 636
+    },
+    "cupcake": {
+     "mean_residual": 0.0107,
+     "n": 275
+    },
+    "alpaca": {
+     "mean_residual": 0.0324,
+     "n": 631
+    },
+    "croissant": {
+     "mean_residual": 0.0291,
+     "n": 564
+    },
+    "shopping_cart": {
+     "mean_residual": 0.0382,
+     "n": 624
+    },
+    "southeast_asian_woman": {
+     "mean_residual": -0.0335,
+     "n": 744
+    },
+    "middle_eastern_teen_boy": {
+     "mean_residual": -0.0321,
+     "n": 527
+    },
+    "dairy_cow": {
+     "mean_residual": 0.0109,
+     "n": 468
+    },
+    "picnic_basket": {
+     "mean_residual": 0.0506,
+     "n": 444
+    },
+    "desk_globe": {
+     "mean_residual": 0.0473,
+     "n": 480
+    },
+    "middleaged_white_woman_glasses": {
+     "mean_residual": -0.0265,
+     "n": 588
+    },
+    "east_asian_man_leather_jacket": {
+     "mean_residual": -0.0334,
+     "n": 552
+    },
+    "hamster": {
+     "mean_residual": 0.0076,
+     "n": 720
+    },
+    "man_orange_turtleneck": {
+     "mean_residual": -0.0421,
+     "n": 585
+    },
+    "violin": {
+     "mean_residual": 0.049,
+     "n": 570
+    },
+    "electric_kettle": {
+     "mean_residual": 0.0305,
+     "n": 418
+    },
+    "elderly_south_asian_man": {
+     "mean_residual": -0.0163,
+     "n": 744
+    },
+    "flamingo": {
+     "mean_residual": 0.0374,
+     "n": 619
+    },
+    "turtle": {
+     "mean_residual": 0.0013,
+     "n": 647
+    }
+   },
+   "by_kind": {
+    "new category": {
+     "mean_residual": 0.0285,
+     "ci95": [
+      0.0226,
+      0.0346
+     ],
+     "n": 6460
+    },
+    "new identity": {
+     "mean_residual": -0.0284,
+     "ci95": [
+      -0.0348,
+      -0.0222
+     ],
+     "n": 6474
+    }
+   }
+  }
+ }
+}

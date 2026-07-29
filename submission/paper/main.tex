@@ -16,8 +16,6 @@
 \usepackage{multirow}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{tikz}
-\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds}
 
 \pdfinfo{/TemplateVersion (2027.1)}
 
@@ -29,7 +27,7 @@
 \maketitle
 
 \begin{abstract}
-Personalized image generation with multiple subjects suffers from \emph{interaction-induced identity collapse}: as the number of subjects grows, models increasingly merge, swap, or drop identities, even when each subject is provided as a reference image. We introduce \textbf{MIDC}, a training-free, inference-time correction paradigm that treats a \emph{decomposed} verifier as a structured diagnostic signal and routes correction to the most deficient facet. Given a candidate image, a decomposed evaluator scores three facets---existence, appearance, and interaction---and we convert each facet score into a standardized deficit against a calibrated per-facet baseline. A \emph{calibrated routing} mechanism then selects which facet to correct and which action to apply, while a dual-signal diagnosis (facet deficit $+$ subject-level identity similarity) localizes the collapsed subject. Correction proceeds as a propose--verify loop with a guarded acceptance criterion that accepts a revision only if the verifier's overall score does not regress and the collapsed subject's identity similarity strictly improves. On OmniGen2, MIDC reduces Subject Collapse Rate (SCR) to \textbf{0.470} on 4-entity hard cases versus \textbf{0.531} for the retrained state-of-the-art (UMO) and \textbf{0.536} for one-shot generation. Notably, the retrained SOTA is itself a near-tie with one-shot (SCR $\Delta{=}{-}0.005$, DINO identity similarity $\Delta{=}{-}0.0002$ over $500{\times}3$ pairs): retraining the \emph{identity-consistency} axis yields near-zero gain on hard interaction cases, indicating collapse's cause is not on the optimized axis. MIDC's decomposed diagnosis localizes that cause and cheaply repairs it at inference, with 15/16 paired bootstrap comparisons significant at $p<0.05$. On FLUX.2-klein-9B, scaling from 6 to 8 subjects, MIDC again outperforms one-shot and best-of-8 selection on both SCR and DINO identity similarity, with the gap \emph{widening} as subjects increase, while using roughly half the generations of best-of-8. A blind human study independently corroborates the existence result: labelers prefer MIDC over UMO 84.6\% of the time ($p{=}4{\times}10^{-7}$). Ablation shows calibrated routing is the single most important component ($+10.3\%$ SCR without it); dual-signal diagnosis contributes the smallest marginal gain ($+1.3\%$ on 4-entity cases), and we conjecture it matters more at higher subject counts.
+Personalized image generation with multiple subjects suffers from \emph{interaction-induced identity collapse}: as the number of subjects grows, models increasingly merge, swap, or drop identities, even when each subject is provided as a reference image. We introduce \textbf{MIDC}, a training-free, inference-time correction paradigm that treats a \emph{decomposed} verifier as a structured diagnostic signal and routes correction to the most deficient facet. Given a candidate image, a decomposed evaluator scores three facets---existence, appearance, and interaction---and we convert each facet score into a standardized deficit against a calibrated per-facet baseline. A \emph{calibrated routing} mechanism then selects which facet to correct and which action to apply, while a dual-signal diagnosis (facet deficit $+$ subject-level identity similarity) localizes the collapsed subject. Correction proceeds as a propose--verify loop with a guarded acceptance criterion that accepts a revision only if the verifier's overall score does not regress and the collapsed subject's identity similarity strictly improves. On OmniGen2, MIDC reduces Subject Collapse Rate (SCR) to \textbf{0.470} on 4-entity hard cases versus \textbf{0.531} for the retrained state-of-the-art (UMO) and \textbf{0.536} for one-shot generation. Notably, the retrained SOTA is itself a near-tie with one-shot (SCR $\Delta{=}{-}0.005$, DINO identity similarity $\Delta{=}{-}0.0002$ over $500{\times}3$ pairs): retraining the \emph{identity-consistency} axis yields near-zero gain on hard interaction cases, indicating collapse's cause is not on the optimized axis. MIDC's decomposed diagnosis localizes that cause and cheaply repairs it at inference, with 11 of 12 paired bootstrap comparisons significant at $p<0.05$. On FLUX.2-klein-9B, MIDC transfers to a larger, distilled base and improves over one-shot at both 6 and 8 subjects on both metrics ($p\le0.001$) using roughly half the generations of best-of-8; against best-of-8 itself the \emph{aggregate} difference is not significant, because MIDC deliberately acts on only the $28$--$33\%$ of rows its calibrated deficit flags---on those rows it cuts SCR by $23.8\%$ and beats best-of-8 decisively. A blind human study independently corroborates the existence result: labelers prefer MIDC over UMO 84.6\% of the time ($p{=}4{\times}10^{-7}$). Ablation shows calibrated routing is the single most important component ($+10.3\%$ SCR without it); dual-signal diagnosis contributes the smallest marginal gain ($+1.3\%$ on 4-entity cases), and we conjecture it matters more at higher subject counts.
 \end{abstract}
 
 \begin{figure}[t]
@@ -37,18 +35,16 @@ Personalized image generation with multiple subjects suffers from \emph{interact
 \setlength{\tabcolsep}{1pt}
 \begin{tabular}{cc}
 \footnotesize one-shot (SCR $0.67$) & \footnotesize MIDC (SCR $0.21$) \\
-\includegraphics[width=0.47\columnwidth]{figures/oneshot_hard_048829.png} &
-\includegraphics[width=0.47\columnwidth]{figures/ours_hard_048829.png} \\
+\includegraphics[width=0.44\columnwidth]{figures/oneshot_hard_048829.png} &
+\includegraphics[width=0.44\columnwidth]{figures/ours_hard_048829.png} \\
 \end{tabular}
-\caption{Interaction-induced identity collapse on an 8-entity FLUX.2-klein-9B task. One-shot generation drops 3 of 8 subjects and merges hands at contact (left, SCR $0.67$); MIDC's calibrated routing on the decomposed verifier retains more subjects with cleaner interactions (right, SCR $0.21$). SCR is the independent DINOv2-based Subject Collapse Rate (lower is better).}
+\caption{Interaction-induced identity collapse, 8-entity FLUX.2-klein-9B. One-shot drops 3 of 8 subjects and merges hands at contact (left); MIDC retains more subjects with cleaner interactions (right). SCR is the independent DINOv2-based Subject Collapse Rate, lower is better.}
 \label{fig:teaser}
 \end{figure}
-
 
 \section{Introduction}
 
 Personalized text-to-image generation has progressed rapidly, with subject-driven methods~\citep{gal2022image,ruiz2023dreambooth,kumari2023multi,ye2023ip} now able to condition on reference images of specific subjects. Yet a persistent failure mode remains: when a prompt asks for \emph{several} subjects at once---especially in interaction---models frequently produce images where one subject's identity leaks into another, a subject is dropped entirely, or identities merge into an ambiguous composite. We call this \emph{interaction-induced identity collapse}, and it worsens monotonically with the number of subjects (Figure~\ref{fig:teaser}): in our experiments, the Subject Collapse Rate (SCR) of one-shot FLUX.2-klein-9B rises from $0.615$ at 6 subjects to $0.671$ at 8 subjects.
-
 
 Existing remedies fall into two camps. \emph{Retraining-based} approaches~\citep{she2025mosaic,chen2025xverse,wang2025psr,he2024uniportrait} fine-tune on multi-identity data, but they are bound to a specific base model, expensive to train, and---as we show---barely improve over one-shot generation on hard interaction cases: UMO~\citep{cheng2025umo}, a retrained SOTA, scores SCR $0.531$ vs.\ one-shot $0.536$ on our hard 4-entity split (a near-tie, with DINO identity similarity $\Delta{=}{-}0.0002$ over $500{\times}3$ pairs---marginally better on SCR, marginally worse on DINO). This is not a failure of training in general---it is evidence that the axis retraining optimizes (identity consistency) is \emph{not} where interaction-induced collapse bites, which is precisely why the collapse is inference-diagnosable and cheaply partially repairable. \emph{Training-free} selection approaches such as best-of-$N$~\citep{snell2024testtime} spend extra inference compute but apply \emph{no structured diagnosis}: they pick the highest-scoring candidate without knowing \emph{what} is wrong or \emph{which subject} collapsed, so gains are modest and compute-inefficient.
 
@@ -61,26 +57,25 @@ We introduce \textbf{MIDC} (Multi-subject Interaction Diagnosis and Correction),
 \item \textbf{Propose--verify with guarded acceptance.} Each step applies an action from a small portfolio (targeted reference reordering, layout hint, facet-specific prompt rewrite) and is accepted only if the verifier's overall score does not regress and the collapsed subject's identity similarity improves---preventing the correction loop from drifting.
 \end{itemize}
 
-Crucially, MIDC is \emph{training-free} and \emph{model-agnostic}: it treats the generator as a black box and only requires a decomposed scorer. We instantiate it on two base models---OmniGen2~\citep{wu2025omnigen2} and FLUX.2-klein-9B~\citep{blackforest2025flux2}---using a Qwen3.5-4B-based decomposed evaluator (MIE) as the verifier, and use an \emph{independent} DINOv2-based Subject Collapse Rate as the judge to avoid self-evaluation circularity.
+Crucially, MIDC is \emph{training-free} and \emph{model-agnostic}: it treats the generator as a black box and only requires a decomposed scorer. We instantiate it on two base models---OmniGen2~\citep{wu2025omnigen2} and FLUX.2-klein-9B~\citep{blackforest2025flux2}---using a Qwen3.5-4B-based decomposed evaluator (MIE) as the verifier, and report a DINOv2-based Subject Collapse Rate as the judge. That judge is independent of the verifier but \emph{not} of the loop---MIDC also consults DINOv2 per-subject similarity when diagnosing and accepting---so we quantify the exposure in \S\ref{sec:limits} rather than claim independence.
 
 Our contributions:
 \begin{enumerate}
 \item We formalize \emph{interaction-induced identity collapse} and show it worsens with subject count---a problem retraining alone does not solve.
 \item We propose \emph{calibrated deficit routing} on a decomposed verifier as the core mechanism for training-free multi-subject correction, and ablate it as the single most important component ($+10.3\%$ SCR without it).
-\item \textbf{Finding:} on hard interaction cases, retraining the identity-consistency axis yields near-zero gain---the retrained SOTA (UMO) is a near-tie with one-shot (SCR $0.531$ vs $0.536$, DINO $\Delta{=}{-}0.0002$ over $500{\times}3$). This indicates interaction-induced collapse's cause is \emph{not} on the axis retraining optimizes, which is why it is inference-diagnosable and cheaply partially repairable. Across 500 tasks $\times$ 3 seeds on OmniGen2, MIDC beats UMO on both SCR and DINO identity similarity at $p=0.0$ (15/16 comparisons significant).
-\item On FLUX.2-klein-9B, MIDC generalizes to a larger, distilled model: it beats one-shot and best-of-8 on both 6- and 8-entity cases, with the advantage \emph{widening} as subjects increase---and at a fraction of best-of-8's compute.
+\item \textbf{Finding:} on hard interaction cases, retraining the identity-consistency axis yields near-zero gain---the retrained SOTA (UMO) is a near-tie with one-shot (SCR $0.531$ vs $0.536$, DINO $\Delta{=}{-}0.0002$ over $500{\times}3$). This indicates interaction-induced collapse's cause is \emph{not} on the axis retraining optimizes, which is why it is inference-diagnosable and cheaply partially repairable. Across 500 tasks $\times$ 3 seeds on OmniGen2, MIDC beats UMO on both SCR and DINO identity similarity at $p=0.0$ (11 of 12 MIDC-vs-baseline comparisons significant).
+\item On FLUX.2-klein-9B, MIDC generalizes to a larger, distilled model, significantly improving over one-shot at both 6 and 8 entities on both metrics at a fraction of best-of-8's compute. We further show the gain is \emph{selective} rather than diffuse: MIDC acts on only the $28$--$33\%$ of rows its calibrated deficit flags, cuts SCR by $23.8\%$ on those, and is a measurable no-op on the rest.
 \end{enumerate}
-
 
 \section{Related Work}
 
 \paragraph{Subject-driven generation.} Personalization methods condition a diffusion model on a few reference images of a subject. DreamBooth~\citep{ruiz2023dreambooth} and Custom Diffusion~\citep{kumari2023multi} fine-tune weights; IP-Adapter~\citep{ye2023ip}, InstantID~\citep{wang2024instantid}, and PhotoMaker~\citep{li2024photomaker} add lightweight conditioning modules; ControlNet~\citep{zhang2023adding} adds spatial conditioning. Foundational text-to-image models~\citep{ramesh2022hierarchical} established the CLIP-latent conditioning paradigm. These are largely single-subject; multi-subject extensions~\citep{xiao2023fastcomposer,gu2024mix,he2024uniportrait,she2025mosaic,chen2025xverse,wang2024ms,he2025anystory} require retraining and are tied to a specific base model.
 
-\paragraph{Multi-subject identity consistency.} MOSAIC~\citep{she2025mosaic}, XVerse~\citep{chen2025xverse}, UniPortrait~\citep{he2024uniportrait}, PSR~\citep{wang2025psr}, MS-Diffusion~\citep{wang2024ms}, and AnyStory~\citep{he2025anystory} improve multi-identity fidelity through dedicated training data and identity-preserving losses; FocusDPO~\citep{jin2025focusdpo} aligns multi-subject generation with preference optimization, and InteractCustom~\citep{xu2025interactcustom} targets human-object interaction. Recent benchmarks~\citep{borse2025multihuman,oshima2025multibanana} quantify multi-identity fidelity at scale. UMO~\citep{cheng2025umo} is a retrained SOTA that applies a multi-to-multi matching reward (ReReFL) to OmniGen2~\citep{wu2025omnigen2} via a context-refiner LoRA. We show these retrained methods, while strong on easy cases, do not resolve \emph{interaction-induced} collapse and can even underperform one-shot generation on hard interaction splits.
+\paragraph{Multi-subject identity consistency.} MOSAIC~\citep{she2025mosaic}, XVerse~\citep{chen2025xverse}, UniPortrait~\citep{he2024uniportrait}, PSR~\citep{wang2025psr}, MS-Diffusion~\citep{wang2024ms}, and AnyStory~\citep{he2025anystory} improve multi-identity fidelity through dedicated training data and identity-preserving losses; FocusDPO~\citep{jin2025focusdpo} aligns multi-subject generation with preference optimization, and InteractCustom~\citep{xu2025interactcustom} targets human-object interaction. Recent benchmarks~\citep{borse2025multihuman,oshima2025multibanana} quantify multi-identity fidelity at scale. UMO~\citep{cheng2025umo} is a retrained SOTA that applies a multi-to-multi matching reward (ReReFL) to OmniGen2~\citep{wu2025omnigen2} via a context-refiner LoRA. We show these methods do not resolve \emph{interaction-induced} collapse and can even underperform one-shot generation on hard splits.
 
 \paragraph{Training-free test-time methods.} Best-of-$N$ selection~\citep{snell2024testtime,cobbe2021gsm8k} and self-refinement~\citep{madaan2023selfrefine} spend extra inference compute but use a scalar reward. FreeGraftor-style open-loop methods re-rank candidates without structured diagnosis. MIDC differs by using a \emph{decomposed} verifier to route correction to a specific facet and subject, yielding larger gains per unit of compute.
 
-\paragraph{Decomposed evaluation.} Benchmarks such as DreamBench~\citep{ruiz2023dreambooth}, DreamBench++~\citep{peng2024dreambench++}, and T2I-CompBench~\citep{huang2023t2i} evaluate text-to-image alignment along multiple axes. Human-preference reward models---ImageReward~\citep{xu2023imagereward}, PickScore~\citep{kirstain2023pick}, and HPS~\citep{wu2023human}---and reference-based similarity metrics such as CLIP~\citep{radford2021learning}, ArcFace~\citep{deng2019arcface}, and SSIM/PSNR/MS-SSIM~\citep{wang2004image,hore2010image,wang2003multiscale} provide scalar scores but do not decompose \emph{which} facet failed for \emph{which} subject. We build on MIE~\citep{anon2025mibe}, a decomposed multi-subject evaluator that scores existence, appearance, and interaction separately. MIE is a lightweight, reference-conditioned evaluator trained on a 60K-pair LLM-labeled Silver Set and validated on a 4K-pair double-blind human Gold Set, where it achieves $0.922$ pairwise agreement with human preference ($0.982$ on seen generators, $0.884$ on unseen), substantially above CLIP/DINO-style baselines. We use MIE as a \emph{verifier} for correction rather than only for evaluation; to avoid circularity, all reported headline metrics use an \emph{independent} DINOv2-based Subject Collapse Rate.
+\paragraph{Decomposed evaluation.} Benchmarks such as DreamBench~\citep{ruiz2023dreambooth}, DreamBench++~\citep{peng2024dreambench++}, and T2I-CompBench~\citep{huang2023t2i} evaluate text-to-image alignment along multiple axes. Human-preference reward models~\citep{xu2023imagereward,kirstain2023pick,wu2023human} and reference-based similarity metrics~\citep{radford2021learning,deng2019arcface,wang2004image,hore2010image,wang2003multiscale} give scalar scores but do not decompose \emph{which} facet failed for \emph{which} subject. We build on MIE~\citep{anon2025mibe}, a decomposed multi-subject evaluator that scores existence, appearance, and interaction separately. MIE is a lightweight reference-conditioned evaluator trained on a 60K-pair LLM-labeled Silver Set, reaching $0.922$ pairwise agreement with human preference on a 4K-pair double-blind Gold Set ($0.884$ on unseen generators). We use MIE as a \emph{verifier} for correction rather than only for evaluation, and report headline metrics from a separate DINOv2-based Subject Collapse Rate; \S\ref{sec:limits} audits what that separation does and does not buy.
 
 \section{Method}
 
@@ -88,40 +83,10 @@ MIDC is a training-free, inference-time correction loop. Given a prompt, a set o
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-  node distance=4mm and 5mm,
-  box/.style={draw, rounded corners=2pt, align=center, font=\footnotesize, minimum height=8mm, inner sep=3pt},
-  proc/.style={box, fill=black!8},
-  decision/.style={box, fill=black!15},
-  io/.style={box, fill=black!3},
-  arr/.style={-Stealth, thick, black!70},
-  lbl/.style={font=\scriptsize, black!60}
-]
-\node[io] (prompt) {prompt + refs};
-\node[proc, right=of prompt] (gen) {Generator\\ $G$};
-\node[proc, right=of gen] (ver) {Decomposed\\ Verifier $V$};
-\node[decision, below=8mm of ver] (route) {Calibrated\\ Routing\\ $\arg\max_d \delta_d$};
-\node[decision, left=of route] (dual) {Dual-Signal\\ Diagnosis\\ $(d^\star, i^\star)$};
-\node[proc, left=of dual] (act) {Action\\ Portfolio};
-\node[proc, above=of act] (prop) {Propose\\ $K$ candidates};
-\node[decision, right=of prop] (accept) {Guarded\\ Accept?};
-\node[io, right=of accept] (out) {corrected\\ image};
-
-\draw[arr] (prompt) -- (gen);
-\draw[arr] (gen) -- (ver);
-\draw[arr] (ver) -- (route);
-\draw[arr] (route) -- (dual);
-\draw[arr] (dual) -- (act);
-\draw[arr] (act) -- (prop);
-\draw[arr] (prop) -- (accept);
-\draw[arr] (accept) -- node[above, lbl]{accept} (out);
-\draw[arr] (accept.north) to[bend left=25] node[above, lbl]{reject} (gen.north);
-\draw[arr, dashed] (out.south) to[bend right=35] node[below, lbl]{iterate $\times K$ steps} (ver.south);
-\end{tikzpicture}
-\caption{MIDC pipeline. A decomposed verifier scores existence/appearance/interaction; calibrated routing selects the most deficient facet ($d^\star$); dual-signal diagnosis localizes the weak subject ($i^\star$); an action portfolio proposes candidates; guarded acceptance keeps a revision only if the verifier's overall score does not regress and the collapsed subject's identity improves. The loop iterates $K$ steps.}
+\includegraphics[width=\columnwidth]{figures/pipeline.pdf}
+\caption{MIDC on one real task (\texttt{hard\_058139}). The loop generates, scores with the decomposed verifier, acts, and keeps a revision only under guarded acceptance; rejected proposals roll back and resample. The two panels show the decisions the verifier actually drives, with values from that task's record: \emph{calibrated routing} takes the facet with the largest standardized deficit (interaction, $\delta{=}0.69$, over existence $0.54$ and appearance $-1.08$), and \emph{dual-signal diagnosis} takes the subject with the lowest identity similarity ($s_4$, undetected, $\mathrm{sim}{=}{-}1$). Acting on that pair lifts the verifier total from $-0.63$ to $-0.35$ and recovers all four subjects (SCR $0.00$).}
 \label{fig:pipeline}
 \end{figure}
-
 
 \subsection{Decomposed Verifier}
 \label{sec:verifier}
@@ -148,7 +113,7 @@ This is the facet MIDC will correct. Calibration is the key enabler: without it,
 \subsection{Dual-Signal Diagnosis}
 \label{sec:dual}
 
-Knowing \emph{which facet} is deficient is not enough; we must know \emph{which subject} collapsed. We compute a subject-level identity similarity $\rho_i$ for each reference $i$ using DINOv2~\citep{oquab2023dinov2} features, made detection-aware via Grounding-DINO~\citep{liu2023grounding}: we first detect subjects in $I$, match each detection to a reference by feature similarity, and set $\rho_i$ to the best-match similarity (or $0$ if subject $i$ is not detected). The \emph{weak subject} is
+Knowing \emph{which facet} is deficient is not enough; we must know \emph{which subject} collapsed. We compute a subject-level identity similarity $\rho_i$ for each reference $i$ using DINOv2~\citep{oquab2023dinov2} features, made detection-aware via Grounding-DINO~\citep{liu2023grounding}: we first detect subjects in $I$, match each detection to a reference by feature similarity, and set $\rho_i$ to the best-match similarity, or $-1$ if subject $i$ is not detected at all---so an undetected subject always sorts below a merely degraded one. The \emph{weak subject} is
 \[
 i^\star = \arg\min_i \rho_i.
 \]
@@ -157,13 +122,13 @@ The dual signal $(d^\star, i^\star)$---facet deficit plus weak subject---targets
 \subsection{Action Portfolio}
 \label{sec:portfolio}
 
-For each correction step we sample an action from a small portfolio conditioned on $d^\star$:
+At each correction step we instantiate up to three distinct actions conditioned on $d^\star$, generate proposals for \emph{each}, and keep the best---an action-space search, not a single sampled edit, which is where most of MIDC's extra generations go:
 \begin{itemize}
 \item \textbf{Targeted reference reordering} (for $d^\star\in\{\mathrm{ex},\mathrm{ap}\}$): move reference $i^\star$ to the front and duplicate it, biasing the generator's cross-attention toward the weak subject.
 \item \textbf{Layout hint} (for $d^\star=\mathrm{int}$): prepend a spatial layout description to the prompt to enforce the requested arrangement.
 \item \textbf{Facet-specific prompt rewrite} (for any $d^\star$): append an explicit instruction targeting the deficient facet (e.g., ``ensure every subject is fully visible'').
 \end{itemize}
-At each step we generate $K=2$ proposals per action and keep the best by verifier total.
+We draw $K_p$ proposals per action; the candidate kept is the one that most improves the diagnosed subject's identity similarity.
 
 \subsection{Guarded Acceptance}
 \label{sec:accept}
@@ -172,7 +137,7 @@ A proposal $I'$ is accepted only if the verifier's \emph{overall} score does not
 \[
 \mathrm{accept}(I') \iff \big(V_{\mathrm{total}}(I') > V_{\mathrm{total}}(I)\big) \;\wedge\; \big(\mathrm{sim}_{i^\star}(I') > \mathrm{sim}_{i^\star}(I)\big),
 \]
-where $V_{\mathrm{total}}$ is the verifier's aggregate score and $\mathrm{sim}_{i^\star}$ is the DINOv2 identity similarity of the weak subject $i^\star$ identified by dual-signal diagnosis. We use a \emph{relaxed} acceptance that drops an explicit per-subject collateral check: emphasizing one subject inherently trades off attention from others, so requiring every other subject's similarity not to dip rejects nearly every correction, while $V_{\mathrm{total}}$ already guards overall quality. The total-improvement margin is strict ($\tau_{\mathrm{total}}{=}0$). The loop runs $K_{\mathrm{steps}}{=}2$ correction steps and always keeps the best image seen so far by verifier total.
+where $V_{\mathrm{total}}$ is the verifier's aggregate score and $\mathrm{sim}_{i^\star}$ is the DINOv2 identity similarity of the weak subject $i^\star$ identified by dual-signal diagnosis. We use a \emph{relaxed} acceptance that drops an explicit per-subject collateral check: emphasizing one subject inherently trades off attention from others, so requiring every other subject's similarity not to dip rejects nearly every correction, while $V_{\mathrm{total}}$ already guards overall quality. The total-improvement margin is strict ($\tau_{\mathrm{total}}{=}0$). The loop runs $K$ correction steps and always keeps the best image seen so far by verifier total. Throughout, $K$ counts correction steps and $K_p$ proposals per action.
 
 \subsection{Algorithm}
 
@@ -205,11 +170,13 @@ where $V_{\mathrm{total}}$ is the verifier's aggregate score and $\mathrm{sim}_{
 
 \paragraph{Benchmarks.} We use the MIB-Gold hard splits from MIBE~\citep{anon2025mibe}: (i) a 500-task OmniGen2 split (250 hard 4-entity $+$ 250 easy 2-entity) and (ii) FLUX.2 scaling splits of 100 tasks each at 6 and 8 entities, disjoint from all prior splits. Tasks emphasize interaction and occlusion.
 
-\paragraph{Baselines.} On OmniGen2 we compare to \textbf{one\_shot} (single generation), \textbf{best\_of\_n} (generate $N{=}8$ candidates, pick best by verifier total; a stronger-compute baseline at $\sim 2\times$ MIDC's generations), and \textbf{UMO}~\citep{cheng2025umo} (retrained SOTA for multi-identity consistency, applied to OmniGen2~\citep{wu2025omnigen2} via a context-refiner LoRA of rank $512$ that fine-tunes both the context refiner and the main transformer blocks). UMO uses its officially recommended \texttt{image\_guidance\_scale}$=2.0$; MIDC uses $2.5$ for OmniGen2.\footnote{We verified the UMO LoRA loads correctly and is not a silent no-op over base OmniGen2: a key-match check returns zero unexpected keys (all 304 LoRA keys load), and a same-seed pixel-diff between base and UMO yields a mean absolute difference of $10.44$ (on $0$–$255$), confirming substantial effect. Details in the supplementary. For full disclosure, the UMO runner also uses a longer negative prompt (naming ``extra limbs, fused fingers'') and does not pass \texttt{max\_pixels}, following UMO's official inference config; our one\_shot/MIDC runner uses a shorter negative prompt and \texttt{max\_pixels}$=1024^2$. These are each method's own recommended setting; we did not equalize them.} On FLUX.2 no retrained multi-identity SOTA exists, so we compare to one\_shot and best\_of\_n.
+\paragraph{Baselines.} On OmniGen2 we compare to \textbf{one\_shot} (single generation), \textbf{best\_of\_n} (generate $N{=}8$ candidates, pick best by verifier total; a stronger-compute baseline at $\sim 2\times$ MIDC's generations), and \textbf{UMO}~\citep{cheng2025umo} (retrained SOTA for multi-identity consistency, applied to OmniGen2~\citep{wu2025omnigen2} via a context-refiner LoRA of rank $512$ that fine-tunes both the context refiner and the main transformer blocks). UMO uses its officially recommended \texttt{image\_guidance\_scale}$=2.0$; MIDC uses $2.5$ for OmniGen2.\footnote{We verified the UMO LoRA loads correctly and is not a silent no-op over base OmniGen2: a key-match check returns zero unexpected keys (all 304 LoRA keys load), and a same-seed pixel-diff between base and UMO yields a mean absolute difference of $10.44$ (on $0$–$255$), confirming substantial effect. Details in the supplementary. For full disclosure, the UMO runner also uses a longer negative prompt (naming ``extra limbs, fused fingers'') and does not pass \texttt{max\_pixels}, following UMO's official inference config; our one\_shot/MIDC runner uses a shorter negative prompt and \texttt{max\_pixels}$=1024^2$. We keep each method's own recommended setting rather than equalizing, but this is not a cosmetic difference: it roughly halves output sharpness (\S\ref{sec:main}), which we quantify and control for rather than leave implicit.} On FLUX.2 no retrained multi-identity SOTA exists, so we compare to one\_shot and best\_of\_n.
 
 \paragraph{Metrics.} Headline metrics are \emph{independent} of the verifier $V$ to avoid circularity: (i) \textbf{Subject Collapse Rate (SCR)}---detection-aware, DINOv2-based; lower is better; (ii) \textbf{DINO identity similarity}---mean DINOv2 similarity of detected subjects to their references; higher is better. We also report verifier scores for diagnosis. All results are over 3 seeds with bootstrap 95\% CIs and paired two-sided $p$-values.
 
 \paragraph{Implementation.} MIDC uses $K{=}2$ correction steps, $K_p{=}2$ proposals per action, 3 actions per step, and relaxed guarded acceptance ($\tau_{\mathrm{total}}{=}0$; per-subject collateral dropped). Reference reordering uses front-duplication of the weak subject. FLUX.2 uses 4 inference steps (step-distilled) with guidance 4.0.
+
+\paragraph{Infrastructure.} All generation and scoring runs on NVIDIA A100 GPUs (one per evaluation shard, four in parallel) with PyTorch 2.6.0 (CUDA 12.4), \texttt{diffusers} 0.39.0, \texttt{transformers} 4.51.3. The OmniGen2 main run dominates cost at ${\approx}33$ GPU-hours per shard. No weights are trained anywhere; every reported method is inference-only.
 
 \subsection{Main Results: OmniGen2}
 \label{sec:main}
@@ -218,38 +185,42 @@ Table~\ref{tab:main} reports SCR and DINO on the 500-task OmniGen2 split over 3 
 
 \begin{table}[ht]
 \centering
-\small
-\caption{OmniGen2, 3 seeds. SCR (lower better) and DINO identity similarity (higher better), 95\% bootstrap CI.}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\caption{OmniGen2 hard 4-entity ($n{=}250$). SCR and DINO are 3-seed per-task means with 95\% bootstrap CIs; CLIP-I and CLIP-T are seed 0 ($n{=}500$ over both slices). SCR and DINO both derive from the same DINOv2 similarity array, so CLIP-I is the only identity number here independent of that pipeline, and CLIP-T is scored against the prompt \emph{as requested}---it tests whether MIDC's prompt rewriting drifts from the ask.}
 \label{tab:main}
-\begin{tabular}{lcc}
+\begin{tabular}{lcccc}
 \toprule
-& hard\_4 (n=250) & easy\_2 (n=250) \\
+& SCR $\downarrow$ & DINO $\uparrow$ & CLIP-I $\uparrow$ & CLIP-T $\uparrow$ \\
 \midrule
-\multicolumn{3}{l}{\textit{SCR (lower better)}} \\
-\midrule
-one\_shot & 0.536 [0.514, 0.558] & 0.511 [0.479, 0.543] \\
-best\_of\_n & 0.492 [0.465, 0.518] & 0.467 [0.432, 0.503] \\
-UMO (retrained SOTA) & 0.531 [0.509, 0.553] & 0.517 [0.487, 0.548] \\
-\textbf{MIDC (ours)} & \textbf{0.470 [0.448, 0.491]} & \textbf{0.438 [0.405, 0.472]} \\
-\midrule
-\multicolumn{3}{l}{\textit{DINO (higher better)}} \\
-\midrule
-one\_shot & 0.455 [0.441, 0.469] & 0.507 [0.492, 0.523] \\
-best\_of\_n & 0.492 [0.476, 0.507] & 0.526 [0.509, 0.543] \\
-UMO & 0.455 [0.441, 0.469] & 0.499 [0.483, 0.515] \\
-\textbf{MIDC (ours)} & \textbf{0.509 [0.496, 0.523]} & \textbf{0.546 [0.530, 0.563]} \\
+one\_shot & 0.536 \tiny[.513,.558] & 0.455 \tiny[.441,.469] & 0.656 & 0.317 \\
+best\_of\_n & 0.492 \tiny[.465,.518] & 0.492 \tiny[.476,.508] & 0.657 & \textbf{0.323} \\
+UMO & 0.531 \tiny[.509,.553] & 0.455 \tiny[.441,.469] & \textbf{0.666} & 0.316 \\
+\textbf{MIDC} & \textbf{0.470} \tiny[.448,.491] & \textbf{0.509} \tiny[.496,.523] & 0.662 & 0.321 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Significance.} Paired bootstrap over 3-seed-averaged per-task scores. On hard\_4, MIDC vs.\ UMO: SCR diff $-0.061$ [$-0.081,-0.041$], $p{=}0.0$, win/tie/loss $135/51/64$; DINO diff $+0.054$ [$0.042,0.067$], $p{=}0.0$, $171/0/79$. MIDC vs.\ best\_of\_n: SCR diff $-0.022$ [$-0.045,0.000$], $p{=}0.050$, $104/60/86$; DINO diff $+0.017$ [$0.005,0.029$], $p{=}0.004$, $147/0/103$. MIDC vs.\ one\_shot: SCR $146/46/58$, DINO $182/0/68$. We report win/tie/loss because SCR is discrete (multiples of $1/n$), producing many ties; note that vs.\ best\_of\_n the SCR win \emph{count} is below $50\%$ yet the mean SCR is still significantly lower---the wins are large (full-subject recoveries) while the losses are small (marginal regressions), so the paired mean favors MIDC. Overall, \textbf{15 of 16} comparisons are significant at $p<0.05$. Notably, the retrained SOTA (UMO) is the \emph{worst} or near-worst method on every slice---retraining alone does not resolve interaction-induced collapse.
+\paragraph{Significance.} Paired bootstrap over 3-seed-averaged per-task scores. On hard\_4, MIDC vs.\ UMO: SCR $-0.061$ [$-0.081,-0.041$], $p{=}0.0$ (win/tie/loss $135/51/64$); DINO $+0.054$ [$0.042,0.067$], $p{=}0.0$. MIDC vs.\ best\_of\_n: SCR $-0.022$ [$-0.044,+0.000$], $p{=}0.056$ (\emph{not} significant); DINO $+0.017$, $p{=}0.004$. SCR is discrete (multiples of $1/n$) so ties are frequent, and against best\_of\_n the win \emph{count} is below $50\%$, consistent with the borderline mean. Overall \textbf{11 of 12} MIDC-vs-baseline comparisons reach $p<0.05$; the sole exception is that best\_of\_n SCR comparison, which we do not claim. Notably, the retrained SOTA (UMO) is the \emph{worst} or near-worst method on every slice---retraining alone does not resolve interaction-induced collapse. Figure~\ref{fig:umo} shows what this looks like on a single task.
 
-\paragraph{On the 2-subject split.} The easy 2-entity slice is included for completeness, but we do not lean on it for the subject-count trend: at $n{=}2$, SCR takes only three values $\{0, 0.5, 1\}$, so per-task bootstrap CIs and win rates are coarse and partially distorted; correspondingly, the one-shot SCR gap between 2 and 4 entities on OmniGen2 is small ($0.511$ vs.\ $0.536$). The monotonic ``collapse worsens with subject count'' claim is instead supported by the FLUX.2 scaling study ($0.615$ at 6 entities $\to$ $0.671$ at 8, \S\ref{sec:scaling}), where SCR has finer resolution and the trend is clear.
+\paragraph{The UMO comparison is not a sharpness artifact.} UMO's official runner produces systematically softer images: on a random 120-task sample it is softer than one\_shot on \textbf{120 of 120} tasks (median Laplacian variance $456$ vs.\ $878$, sign test $p{=}1.2{\times}10^{-12}$), while best\_of\_n ($845$) and MIDC ($832$) match one\_shot. Since SCR and DINO are both DINOv2-derived, softness rather than identity could be driving them. A sharpness-matched control settles it: blurring one\_shot down to UMO's level ($898{\to}422$ median, $n{=}150$) costs only $+0.013$ SCR and $-0.008$ DINO---\emph{larger} than the whole UMO-vs-one\_shot difference we report ($-0.005$, $-0.0002$) and pointing the other way, so correcting for sharpness would make UMO look marginally \emph{better}. The near-tie is robust, and if anything conservative.
+
+\paragraph{An identity signal independent of DINOv2.} SCR is our per-subject DINOv2 similarity array thresholded at $0.5$ and DINO is its mean, so the two are one measurement reported twice (Pearson $r{=}{-}0.81$ across $7860$ records), not independent evidence. Table~\ref{tab:main} therefore also reports CLIP-I (ViT-L/14 image--reference similarity) and CLIP-T (image vs.\ the \emph{originally requested} prompt, never MIDC's rewrite). \textbf{MIDC does not buy subject presence by drifting from the prompt}---the objection its prompt rewriting and reference duplication invite---since CLIP-T \emph{improves} over one\_shot and UMO. CLIP-I, however, puts UMO marginally ahead of MIDC, the one place any metric does: consistent with the sharpness result above, as CLIP features are less blur-sensitive than DINOv2 and so penalise UMO's softer output less. We report this rather than resolve it: on the hard split the identity verdict is metric-dependent, and only the existence axis agrees across DINOv2, CLIP and human labelers.
+
+
+\paragraph{On the 2-subject split.} The easy\_2 slice gives the same ordering (SCR $0.438$ for MIDC vs.\ $0.467$ best\_of\_n, $0.511$ one\_shot, $0.517$ UMO) but we do not lean on it: at $n{=}2$ SCR takes only $\{0,0.5,1\}$, so per-task CIs are coarse. The ``collapse worsens with subject count'' claim rests instead on the FLUX.2 scaling study (\S\ref{sec:scaling}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/umo_qualitative.pdf}
+\caption{The retrained-SOTA comparison, OmniGen2 hard 4-entity task \texttt{hard\_041671} (``adult man beard pets the brown horse; man sportswear folds the folding umbrella''). UMO drops the bearded man entirely and mounts the umbrella on the horse's head---all four subjects collapse (SCR $1.00$). One-shot also loses a subject and leaks the sportswear identity onto the remaining man. MIDC and best-of-8 both recover both men; MIDC is closest to the references on DINO. Selected under a pre-committed rule---all three labelers unanimously preferred MIDC on existence, both metrics agree, and MIDC applied \emph{no} correction step on this row so the result cannot be a layout artifact---and additionally chosen because all four methods land at comparable sharpness here, so what is visible is structural rather than a by-product of UMO's softer runner (\S\ref{sec:main}).}
+\label{fig:umo}
+\end{figure}
 
 \subsection{FLUX.2 Scaling: 6 and 8 Subjects}
 \label{sec:scaling}
 
-Table~\ref{tab:flux2} tests whether MIDC generalizes to a larger, distilled base model and whether gains hold or widen as subjects increase. On FLUX.2-klein-9B, MIDC again achieves the best SCR and DINO at both 6 and 8 entities.
+Table~\ref{tab:flux2} tests generalization to a larger, distilled base. MIDC has the best point estimate on SCR and DINO at both 6 and 8 entities; we quantify below which differences are statistically supported.
 
 \begin{table}[ht]
 \centering
@@ -275,26 +246,11 @@ best\_of\_8 & 0.408 [0.387, 0.428] & 0.369 [0.349, 0.390] \\
 \end{tabular}
 \end{table}
 
-Two observations stand out. First, \textbf{collapse worsens with subject count}: one\_shot SCR rises from $0.615$ (6 entities) to $0.671$ (8 entities). Second, \textbf{MIDC's advantage widens}: the SCR gap to one\_shot grows from $-0.035$ ($-5.7\%$) at 6 entities to $-0.041$ ($-6.1\%$) at 8 entities, and the DINO 95\% CI of MIDC vs.\ one\_shot does \emph{not overlap} at 8 entities---the strongest single significance result in the scaling story.
+\paragraph{Significance.} Paired bootstrap over 3-seed-averaged per-task scores ($n{=}100$ per cell). \textbf{Against one\_shot all four comparisons are significant}: SCR $-0.035$ [$-0.053,-0.018$] at 6 entities, $-0.041$ [$-0.066,-0.017$] at 8 ($p{\le}0.001$); DINO $+0.035$ [$+0.024,+0.048$] and $+0.033$ [$+0.019,+0.048$] ($p{=}0.000$). \textbf{Against best\_of\_8 the aggregate differences are mostly not significant}: SCR $p{=}0.067$ at 6 entities and $p{=}0.312$ at 8; DINO $+0.021$ [$+0.007,+0.034$], $p{=}0.002$ at 6 but $p{=}0.233$ at 8. We therefore claim a significant improvement over the base generator, and \emph{not} an aggregate win over best-of-8. \S\ref{sec:gating} shows why: MIDC is a selective fixer, so its aggregate mixes a large gain on the minority of rows it acts on with a deliberate no-op on the rest.
 
-\paragraph{Compute.} MIDC is adaptive: it stops as soon as the calibrated deficit falls below a threshold, so it spends extra generations only on hard tasks. Table~\ref{tab:compute} reports generator calls per task. MIDC averages \textbf{4.6} generations on OmniGen2 and \textbf{4.3} on FLUX.2-8, roughly \emph{half} of best-of-8's fixed 8, while \emph{beating} best-of-8 on every metric. One-shot and UMO use 1 generation but lack any diagnostic structure.
+\paragraph{Collapse worsens with subject count.} One\_shot SCR rises from $0.615$ (6 entities) to $0.671$ (8). MIDC's gap to one\_shot is nominally larger at 8 ($-0.041$) than at 6 ($-0.035$), but the intervals overlap and we did not test the interaction, so we do not claim it widens.
 
-\begin{table}[ht]
-\centering
-\small
-\caption{Generator calls per task (mean; lower is cheaper). MIDC is adaptive and stops early; best-of-$N$ is fixed.}
-\label{tab:compute}
-\begin{tabular}{lcc}
-\toprule
-method & OmniGen2 (500 tasks) & FLUX.2 8-entity (100) \\
-\midrule
-one\_shot & 1.0 & 1.0 \\
-UMO (retrained) & 1.0 & --- \\
-best\_of\_8 & 8.0 & 8.0 \\
-\textbf{MIDC (ours)} & \textbf{4.6} & \textbf{4.3} \\
-\bottomrule
-\end{tabular}
-\end{table}
+\paragraph{Compute.} MIDC is adaptive: it stops as soon as the calibrated deficit falls below a threshold, so it spends extra generations only on hard tasks. Averaged over all tasks it issues \textbf{4.6} generator calls on OmniGen2 and \textbf{4.3} on FLUX.2 8-entity, against a fixed $8.0$ for best-of-8 and $1.0$ for one\_shot and UMO. MIDC therefore reaches its results at roughly \emph{half} best-of-8's generation budget; one\_shot and UMO are cheaper still but carry no diagnostic structure and, as shown above, no advantage on hard interaction cases.
 
 \begin{figure}[t]
 \centering
@@ -308,14 +264,10 @@ best\_of\_8 & 8.0 & 8.0 \\
 \includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_042313.png} &
 \includegraphics[width=0.31\columnwidth]{figures/bon_hard_042313.png} &
 \includegraphics[width=0.31\columnwidth]{figures/ours_hard_042313.png} \\
-\includegraphics[width=0.31\columnwidth]{figures/oneshot_hard_057505.png} &
-\includegraphics[width=0.31\columnwidth]{figures/bon_hard_057505.png} &
-\includegraphics[width=0.31\columnwidth]{figures/ours_hard_057505.png} \\
 \end{tabular}
-\caption{Qualitative comparison on FLUX.2-klein-9B, 8-entity tasks. Columns: one-shot, best-of-8 ($\sim 2\times$ MIDC's compute), MIDC. Rows: three hard tasks with monotonic SCR improvement (top: $0.67{\to}0.50{\to}0.21$; mid: $0.79{\to}0.75{\to}0.42$; bottom: $0.75{\to}0.50{\to}0.42$). One-shot frequently drops or merges subjects; best-of-8 helps marginally; MIDC retains more subjects and reduces collapse. Residual merging artifacts remain (e.g., extra limbs at contact), consistent with the non-zero SCR.}
+\caption{Qualitative comparison on FLUX.2-klein-9B, 8-entity tasks. Columns: one-shot, best-of-8 ($\sim 2\times$ MIDC's compute), MIDC. Rows: two hard tasks with monotonic SCR improvement ($0.67{\to}0.50{\to}0.21$ and $0.79{\to}0.75{\to}0.42$). One-shot frequently drops or merges subjects; best-of-8 helps marginally; MIDC retains more subjects and reduces collapse. Residual merging artifacts remain (e.g., extra limbs at contact), consistent with the non-zero SCR.}
 \label{fig:results}
 \end{figure}
-
 
 \subsection{Ablation}
 \label{sec:ablation}
@@ -341,48 +293,36 @@ w/o dual-signal diagnosis & 0.481 & $+1.3\%$ \\
 \end{tabular}
 \end{table}
 
-Every component contributes positively. \textbf{Calibrated routing is the single most important component} ($+10.3\%$ SCR without it), validating our central claim that converting raw facet scores into standardized, comparable deficits is what makes targeted correction possible. Dual-signal diagnosis contributes the smallest marginal gain ($+1.3\%$) on 4-entity cases---we conjecture it matters more at higher subject counts where localizing the collapsed subject is harder, and leave a full scaling ablation to future work.
+Every component contributes positively, and \textbf{calibrated routing is the single most important} ($+10.3\%$ SCR without it): converting raw facet scores into standardized, comparable deficits is what makes targeted correction possible. Dual-signal diagnosis contributes least ($+1.3\%$) at 4 entities; we conjecture it matters more as subjects increase.
 
 \subsection{Selective Correction: When MIDC Triggers}
 \label{sec:gating}
 
-A natural question is where MIDC's average gain comes from: does it spread a small fix across all tasks, or concentrate a larger fix on the tasks that need it? We split the FLUX.2-klein-9B evaluation by whether any correction step was \emph{accepted} (\texttt{accepted\_steps}$>0$), pooling over $(\text{task}, \text{seed})$ rows. Table~\ref{tab:gating} shows that MIDC is a \emph{selective, high-precision} fixer: it triggers on only $28\%$ of 8-entity rows and $33\%$ of 6-entity rows---and the triggered set is systematically \emph{harder} (one-shot SCR $0.688$ on triggered vs.\ $0.665$ on no-op at 8 entities).
+A natural question is where MIDC's average gain comes from: does it spread a small fix across all tasks, or concentrate a larger fix on the tasks that need it? We split the FLUX.2-klein-9B evaluation by whether any correction step was \emph{accepted} (\texttt{accepted\_steps}$>0$), pooling over $(\text{task}, \text{seed})$ rows. Figure~\ref{fig:gating} shows that MIDC is a \emph{selective, high-precision} fixer: it triggers on only $28\%$ of 8-entity rows and $33\%$ of 6-entity rows, and the triggered set is systematically \emph{harder}.
 
-\begin{table}[ht]
+\begin{figure}[ht]
 \centering
-\small
-\setlength{\tabcolsep}{4pt}
-\caption{Selective correction on FLUX.2-klein-9B, 3 seeds, pooled over $(\text{task}, \text{seed})$ rows. ``Triggered'' = at least one correction step accepted on that row; ``no-op'' = MIDC declined to act. SCR (lower better). On the triggered set MIDC cuts SCR sharply and beats best-of-8 on the \emph{same} rows; on the no-op set MIDC is within $0.006$ of one-shot (no measurable regression vs the base) but forgoes the small gain best-of-8 buys with $8\times$ compute---a deliberate trade-off, not a free lunch.}
-\label{tab:gating}
-\begin{tabular}{lcccc}
-\toprule
-split & subset & $n$ (\%) & one-shot & best-of-8 & MIDC \\
-\midrule
-8-entity & triggered & 84 (28\%) & 0.688 & 0.653 & \textbf{0.524} \\
-8-entity & no-op & 216 (72\%) & 0.665 & 0.641 & 0.671 \\
-\midrule
-6-entity & triggered & 100 (33\%) & 0.653 & 0.657 & \textbf{0.547} \\
-6-entity & no-op & 200 (67\%) & 0.596 & 0.583 & 0.597 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=\columnwidth]{figures/gating.pdf}
+\caption{Selective correction on FLUX.2-klein-9B, 3 seeds, pooled over $(\text{task},\text{seed})$ rows. ``Triggered'' = at least one correction step accepted. On triggered rows MIDC cuts SCR sharply and beats best-of-8 on the \emph{same} rows; on no-op rows it lands on one-shot, forgoing the small gain best-of-8 buys with $8\times$ compute---a deliberate trade-off, not a free lunch.}
+\label{fig:gating}
+\end{figure}
 
-Two observations follow. \textbf{First, on the triggered set MIDC cuts SCR sharply and beats best-of-8 on the same rows.} At 8 entities, MIDC SCR $0.524$ vs one-shot $0.688$ ($\Delta{=}{-}0.164$, $95\%$CI $[-0.207,-0.122]$, $p{<}0.001$, win/tie/loss $57/16/11$) and vs best-of-8 $0.653$ ($\Delta{=}{-}0.130$, $[-0.173,-0.085]$, $p{<}0.001$, $52/17/15$); at 6 entities, MIDC $0.547$ vs one-shot $0.653$ ($\Delta{=}{-}0.107$, $p{<}0.001$) and vs best-of-8 $0.657$ ($\Delta{=}{-}0.110$, $p{<}0.001$). Best-of-8 itself only marginally beats one-shot on the triggered set ($\Delta{=}{-}0.034$, $p{=}0.040$ at 8 entities; $\Delta{=}{+}0.003$, $p{=}0.85$ at 6 entities)---scalar re-ranking by verifier total does not fix the hard cases that decomposed diagnosis targets.
+Two observations follow. \textbf{First, on the triggered set MIDC cuts SCR sharply and beats best-of-8 on the same rows.} At 8 entities, MIDC vs one-shot is $\Delta{=}{-}0.164$ ($95\%$CI $[-0.207,-0.122]$, $p{<}0.001$, win/tie/loss $57/16/11$) and vs best-of-8 $\Delta{=}{-}0.130$ ($[-0.173,-0.085]$, $p{<}0.001$); at 6 entities, $-0.107$ and $-0.110$ respectively (both $p{<}0.001$). Best-of-8 itself barely beats one-shot here ($-0.034$, $p{=}0.040$ at 8 entities; $+0.003$, $p{=}0.85$ at 6)---scalar re-ranking does not fix the hard cases decomposed diagnosis targets.
 
-\textbf{Second, on the no-op set MIDC is a clean no-op against one-shot but forgoes best-of-8's small gain.} MIDC vs one-shot: $\Delta{=}{+}0.006$ ($p{=}0.53$, ns) at 8 entities and $+0.001$ ($p{=}0.88$, ns) at 6 entities---no measurable regression against the base generator. Best-of-8, however, does buy a small but significant gain on the no-op set by spending $8\times$ compute: $\Delta{=}{-}0.024$ ($p{=}0.026$) at 8 entities and $-0.013$ ($p{=}0.24$) at 6 entities. MIDC deliberately \emph{declines to act} when the calibrated deficit is below threshold, forgoing this $0.013$--$0.024$ gain; an obvious combination is to route no-op rows to best-of-$N$, which we leave to future work.
+\textbf{Second, on the no-op set MIDC is a clean no-op but forgoes best-of-8's small gain.} Against one-shot it is $+0.006$ ($p{=}0.53$) at 8 entities and $+0.001$ ($p{=}0.88$) at 6---no measurable regression against the base. Best-of-8 does buy a small gain there for $8\times$ compute ($-0.024$, $p{=}0.026$ at 8 entities); MIDC declines to act below threshold and forgoes it. Routing no-op rows to best-of-$N$ is an obvious combination we leave to future work.
 
-\paragraph{Where the gain comes from: correction, not selection.} A skeptic might attribute MIDC's gain to scalar selection among its $\sim$2 candidates rather than to correction. The no-op subset rules this out: MIDC's no-op output is a best-of-2 by verifier total, and its SCR ($0.671$ at 8 entities) is within $0.006$ of one-shot ($0.665$, $p{=}0.53$)---scalar selection from 2 candidates buys essentially nothing. Best-of-8's $0.024$ gain on the no-op set requires $8\times$ compute. Meanwhile decomposed diagnosis plus one correction step on the $28\%$ triggered set buys $0.164$ at $\sim$4.3 generations on average. The headline $-0.041$ average at 8 entities is thus the diluted mix of a large targeted fix on the hard minority and a clean no-op on the easy majority---a deliberate property of calibrated routing, not a weakness.
+\paragraph{Correction, not selection.} A skeptic might attribute the gain to scalar selection among MIDC's ${\sim}2$ candidates. The no-op subset rules this out: that output \emph{is} a best-of-2 by verifier total, and its SCR is within $0.006$ of one-shot---selection from 2 candidates buys nothing, while diagnosis plus one correction step buys $0.164$ on the triggered set. The $-0.041$ aggregate is thus a large targeted fix diluted by a deliberate no-op, and the reason the aggregate best-of-8 comparison (\S\ref{sec:scaling}) is not significant.
 
 \subsection{Human Evaluation}
 \label{sec:human}
 
-We conducted a blind A/B study with 3 labelers (A, B, C) over 200 image pairs, judging 4 dimensions: existence (Q1), identity (Q2), interaction (Q3), and overall quality (Q4), with LEFT/RIGHT/TIE options. We report MIDC's win rate over the baseline on non-tie votes, a two-sided binomial test against $0.5$, and Fleiss $\kappa$ for labeler agreement (Table~\ref{tab:human}).
+We ran a blind A/B study with 3 labelers over 200 image pairs, judging existence (Q1), identity (Q2), interaction (Q3) and overall quality (Q4) with LEFT/RIGHT/TIE options (Table~\ref{tab:human}).
 
 \begin{table}[ht]
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\caption{Human eval. MIDC win rate over baseline on non-tie votes, 95\% CI, Fleiss $\kappa$, and binomial $p$ vs.\ $0.5$. $\kappa>0.2$ is moderate agreement; $\kappa<0$ is disagreement (no claim).}
+\caption{Human eval, 3 labelers over 100 pairs per baseline. Win rate is over pairs where at least one labeler expressed a non-tie preference and those preferences were not evenly split, so $n$ is the size of that subset, not the pair count; on Q1 vs.\ UMO all three labelers marked $48$ of $100$ pairs tied. $\kappa>0.2$ is moderate agreement; $\kappa<0$ is disagreement (no claim).}
 \label{tab:human}
 \begin{tabular}{llcccc}
 \toprule
@@ -397,28 +337,23 @@ best-of-8 & Q4 overall  & 0.523 [0.40, 0.65] & 65 & $+0.17$ & $0.80$ \\
 \end{tabular}
 \end{table}
 
-On \textbf{existence (Q1)}, labelers prefer MIDC over the retrained SOTA (UMO) \textbf{84.6\%} of the time ($p{=}4{\times}10^{-7}$, Fleiss $\kappa{=}0.32$ moderate agreement)---the strongest human result and one that directly mirrors the automatic SCR finding that MIDC drops fewer subjects. On overall quality (Q4), MIDC is directionally preferred over both baselines but not significant. Identity (Q2) and interaction (Q3) show negative Fleiss $\kappa$ (labeler disagreement), so we do not claim them; we attribute this to the difficulty of judging fine-grained identity/interaction from a single image and flag reliable human evaluation of these dimensions as an open problem.
+On \textbf{existence (Q1)}, labelers prefer MIDC over the retrained SOTA (UMO) \textbf{84.6\%} of the time ($p{=}4{\times}10^{-7}$, Fleiss $\kappa{=}0.32$ moderate agreement)---the strongest human result and one that directly mirrors the automatic SCR finding that MIDC drops fewer subjects. The result does not depend on how thinly-voted pairs are treated: requiring at least two labelers to express a preference gives $82.9\%$ ($n{=}35$, $p{=}0.0001$) and requiring all three gives $87.0\%$ ($n{=}23$, $p{=}0.0005$). On overall quality (Q4) MIDC is directionally preferred over both baselines but not significantly. Identity (Q2) and interaction (Q3) show negative Fleiss $\kappa$---labelers disagree with each other---so we claim neither, and flag reliable human evaluation of those axes as an open problem.
 
 \section{Discussion and Limitations}
+\label{sec:limits}
 
-\paragraph{``Training-free'' is relative to the generator.} MIDC touches no generator weights, but its decomposed verifier (MIE) is a Qwen3.5-4B model with a LoRA fine-tuned on 60K pairs of the same task family. Strictly, we move training from the generator to the verifier. We follow the convention that best-of-$N$ with a reward model is also called ``training-free,'' but note our verifier is not an off-the-shelf CLIP-style scorer. The real selling point is \emph{decoupling}: the verifier trains once and transfers across generators---we use the \emph{same} MIE verifier on both OmniGen2 and FLUX.2-klein-9B without retraining---whereas a retrained generator (UMO) is bound to one base. Whether fine-tuning directly on our interaction-hard split would close the gap is the open question our diagnosis predicts and the natural next experiment.
+\paragraph{``Training-free'' is relative to the generator.} MIDC touches no generator weights, but its verifier is LoRA-fine-tuned on 60K pairs of the same task family: strictly, we move training from the generator to the verifier, as best-of-$N$ with a reward model also does. The selling point is \emph{decoupling}---the \emph{same} MIE serves both base models---whereas a retrained generator is bound to one.
 
-\paragraph{Self-evaluation circularity.} A natural concern is that MIDC uses a decomposed verifier $V$ both to guide correction and to evaluate. We mitigate this by reporting all headline metrics (SCR, DINO) from an \emph{independent} DINOv2-based judge, not $V$. The verifier is used only for routing and acceptance. The human study (Table~\ref{tab:human}) further validates the SCR result with a $p{=}4{\times}10^{-7}$ preference on existence, independent of $V$.
+\paragraph{The judge is independent of $V$, but not of the loop.} No reported metric comes from the verifier $V$. But SCR and DINO are DINOv2-derived, and MIDC consults DINOv2 per-subject similarity in three places---weak-subject diagnosis, in-portfolio candidate selection, and the acceptance gate---so the loop does partly select on the axis we report, and we should not call the judge independent. Two measurements bound the exposure. \textbf{First}, on the $526$ hard\_4 rows where MIDC accepted nothing, its output is the initial MIE-selected candidate and DINOv2 never influenced it; MIDC still beats UMO there by $+0.030$ DINO ($p{<}0.001$) and $-0.023$ SCR ($p{=}0.022$), so the advantage is not purely self-selection. \textbf{Second}, on the $224$ triggered rows the margin is far larger ($+0.111$ DINO), and there selection-on-the-metric cannot be ruled out from these numbers alone---CLIP-I, which the loop never optimizes, is precisely where MIDC does \emph{not} beat UMO (Table~\ref{tab:main}). The existence conclusion is the one that survives every check, since the human study asks labelers directly and involves neither $V$ nor DINOv2 ($p{=}4{\times}10^{-7}$). An acceptance rule that avoids DINOv2 entirely is the clean fix and the obvious next ablation.
 
-\paragraph{When MIDC fails.} Inspecting the qualitative grid (Figure~\ref{fig:results}), MIDC's residual failures concentrate on (i) heavy occlusion where Grounding-DINO itself misses a subject (so $\rho_i{=}0$ is mis-attributed and correction targets the wrong facet), and (ii) prompts with inherently ambiguous spatial language where layout hints cannot disambiguate. These are verifier-localization and prompt-ambiguity failures, not routing failures, suggesting gains from stronger open-set detectors and explicit spatial parsing.
+\paragraph{SCR inherits its detector's errors.} Inspecting outputs we find cases---heavy occlusion, near-duplicate subjects---where Grounding-DINO's count disagrees with a human reading, in both directions. These errors apply \emph{identically} to every method, inflating variance rather than biasing any comparison.
 
-\paragraph{Modest absolute gaps and marginal significance.} Even MIDC leaves substantial collapse (SCR $\approx 0.47$ at 4 entities, $0.63$ at 8). The benchmark is deliberately hard; we frame MIDC as a \emph{reducer} of collapse, not a complete solution. The gap to one-shot and best-of-$N$ is consistent and statistically significant, though the MIDC-vs-best\_of\_n SCR comparison on hard\_4 sits at $p{=}0.050$ ($\Delta{=}{-}0.022$, CI $[-0.045,0.000]$)---the only one of 16 comparisons not comfortably below $0.05$---so we do not over-claim a best-of-$N$ win on SCR (the DINO comparison is $p{=}0.004$).
+\paragraph{When MIDC fails.} Residual failures (Figure~\ref{fig:results}) concentrate on heavy occlusion, where Grounding-DINO itself misses a subject so the diagnosis targets the wrong facet, and on prompts whose spatial language is inherently ambiguous. These are localization and prompt-ambiguity failures rather than routing failures, pointing to stronger open-set detectors and explicit spatial parsing.
 
-\paragraph{Single retrained baseline; the claim is diagnostic, not a tournament win.} We compare against one retrained SOTA (UMO) on one base (OmniGen2); cross-system baselines (MOSAIC, XVerse) on a shared base are future work. Crucially, the central claim is \emph{not} ``MIDC beats every retrained model''---it is the diagnostic finding that retraining the identity-consistency axis yields near-zero gain on hard interaction cases (UMO vs one-shot: SCR $\Delta{=}{-}0.005$, DINO $\Delta{=}{-}0.0002$ over $500{\times}3$), so collapse's cause is not on the optimized axis, which is why it is inference-diagnosable and cheaply partially repairable. Whether fine-tuning \emph{directly on our interaction-hard split} would close the gap is the open question our diagnosis predicts---and the natural rebuttal experiment.
+\paragraph{Modest absolute gaps.} Even MIDC leaves substantial collapse (SCR ${\approx}0.47$ at 4 entities, $0.63$ at 8): the benchmark is deliberately hard and MIDC is a \emph{reducer}, not a solution. The gap to one-shot is consistent and significant on both bases and metrics; the comparison to best-of-$N$ is weaker and we do not claim it, being concentrated on the subset MIDC elects to correct (\S\ref{sec:gating}) rather than spread over all rows. Matching best-of-$N$'s aggregate at half the compute while decisively winning the hard subset is the honest reading.
 
-\paragraph{Dual-signal diagnosis is the weakest ablation component.} Its marginal gain on 4-entity OmniGen2 is small ($+1.3\%$). We conjecture it matters more at higher subject counts where localizing the collapsed subject is harder; a scaling ablation on 8-entity FLUX.2 is the natural next experiment and is left to future work.
+\paragraph{Single retrained baseline.} We compare against one retrained SOTA on one base; cross-system baselines on a shared base are future work. The claim is not that MIDC beats every retrained model, but the diagnostic finding above.
 
-\section{Conclusion}
-
-We introduced MIDC, a training-free, inference-time correction paradigm for multi-subject identity collapse built on \emph{calibrated deficit routing} over a decomposed verifier. Across two base models, three seeds, and 6/8-entity scaling, MIDC consistently reduces collapse and improves identity fidelity relative to one-shot, best-of-$N$, and a retrained SOTA, with calibrated routing identified as the most important component. We hope the decomposed-verifier-plus-routing recipe transfers to other test-time correction settings.
-
-\section*{Acknowledgments}
-Anonymized for submission.
 
 \bibliography{refs}
 \end{document}

@@ -1,0 +1,200 @@
+{"task_id": "hard_040086", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_040086.png"}
+{"task_id": "hard_040121", "clip_t": 0.36823999881744385, "clip_i_per_subject": [0.47844, 0.55942, 0.51361, 0.46042, 0.57861, 0.52048, 0.51434, 0.50494], "clip_i": 0.51628, "n_refs": 8}
+{"task_id": "hard_040281", "clip_t": 0.3769209384918213, "clip_i_per_subject": [0.62292, 0.63658, 0.56475, 0.63075, 0.45659, 0.46554, 0.41381, 0.44513], "clip_i": 0.52951, "n_refs": 8}
+{"task_id": "hard_040566", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_040566.png"}
+{"task_id": "hard_040586", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_040586.png"}
+{"task_id": "hard_040761", "clip_t": 0.3675330877304077, "clip_i_per_subject": [0.50383, 0.59746, 0.67168, 0.49693, 0.44569, 0.5956, 0.51021, 0.52159], "clip_i": 0.54287, "n_refs": 8}
+{"task_id": "hard_040846", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_040846.png"}
+{"task_id": "hard_040870", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_040870.png"}
+{"task_id": "hard_040986", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_040986.png"}
+{"task_id": "hard_041289", "clip_t": 0.4752141535282135, "clip_i_per_subject": [0.51661, 0.55188, 0.56608, 0.5379, 0.4358, 0.60231, 0.4468, 0.53689], "clip_i": 0.52428, "n_refs": 8}
+{"task_id": "hard_041325", "clip_t": 0.37065836787223816, "clip_i_per_subject": [0.4737, 0.46644, 0.50338, 0.58703, 0.50161, 0.57759, 0.534, 0.50391], "clip_i": 0.51846, "n_refs": 8}
+{"task_id": "hard_041549", "clip_t": 0.3658631443977356, "clip_i_per_subject": [0.52426, 0.45276, 0.38306, 0.55122, 0.48545, 0.53834, 0.53374, 0.66819], "clip_i": 0.51713, "n_refs": 8}
+{"task_id": "hard_041562", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_041562.png"}
+{"task_id": "hard_041770", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_041770.png"}
+{"task_id": "hard_041974", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_041974.png"}
+{"task_id": "hard_041982", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_041982.png"}
+{"task_id": "hard_042030", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_042030.png"}
+{"task_id": "hard_042201", "clip_t": 0.40682804584503174, "clip_i_per_subject": [0.46515, 0.46124, 0.55077, 0.41858, 0.41097, 0.42632, 0.3339, 0.53278], "clip_i": 0.44996, "n_refs": 8}
+{"task_id": "hard_042217", "clip_t": 0.37018465995788574, "clip_i_per_subject": [0.53834, 0.47698, 0.50643, 0.47562, 0.54934, 0.51685, 0.51403, 0.60577], "clip_i": 0.52292, "n_refs": 8}
+{"task_id": "hard_042273", "clip_t": 0.34811046719551086, "clip_i_per_subject": [0.60661, 0.43001, 0.50173, 0.49176, 0.65857, 0.51811, 0.56104, 0.57928], "clip_i": 0.54339, "n_refs": 8}
+{"task_id": "hard_042313", "clip_t": 0.354189932346344, "clip_i_per_subject": [0.59928, 0.63747, 0.55766, 0.70875, 0.61746, 0.51899, 0.53487, 0.55507], "clip_i": 0.59119, "n_refs": 8}
+{"task_id": "hard_042390", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_042390.png"}
+{"task_id": "hard_042614", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_042614.png"}
+{"task_id": "hard_042742", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_042742.png"}
+{"task_id": "hard_042829", "clip_t": 0.4034375548362732, "clip_i_per_subject": [0.66945, 0.52373, 0.63352, 0.65997, 0.61616, 0.54995, 0.54887, 0.55404], "clip_i": 0.59446, "n_refs": 8}
+{"task_id": "hard_043201", "clip_t": 0.397982656955719, "clip_i_per_subject": [0.42675, 0.47052, 0.53592, 0.55862, 0.58658, 0.50107, 0.50092, 0.57525], "clip_i": 0.51945, "n_refs": 8}
+{"task_id": "hard_043261", "clip_t": 0.3574017286300659, "clip_i_per_subject": [0.48992, 0.5701, 0.49409, 0.49244, 0.41942, 0.50811, 0.43555, 0.57631], "clip_i": 0.49824, "n_refs": 8}
+{"task_id": "hard_043606", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_043606.png"}
+{"task_id": "hard_043741", "clip_t": 0.36416327953338623, "clip_i_per_subject": [0.50372, 0.43634, 0.49042, 0.42004, 0.49164, 0.44624, 0.45842, 0.37125], "clip_i": 0.45226, "n_refs": 8}
+{"task_id": "hard_043769", "clip_t": 0.3956257104873657, "clip_i_per_subject": [0.45508, 0.38233, 0.38886, 0.46091, 0.49048, 0.42878, 0.40243, 0.46252], "clip_i": 0.43392, "n_refs": 8}
+{"task_id": "hard_043898", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_043898.png"}
+{"task_id": "hard_044169", "clip_t": 0.3342442512512207, "clip_i_per_subject": [0.56702, 0.5033, 0.5067, 0.5181, 0.61389, 0.47226, 0.61525, 0.44127], "clip_i": 0.52972, "n_refs": 8}
+{"task_id": "hard_044302", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_044302.png"}
+{"task_id": "hard_044446", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_044446.png"}
+{"task_id": "hard_044713", "clip_t": 0.4345981180667877, "clip_i_per_subject": [0.52163, 0.55401, 0.47259, 0.51358, 0.64003, 0.50852, 0.43989, 0.38918], "clip_i": 0.50493, "n_refs": 8}
+{"task_id": "hard_044737", "clip_t": 0.37517815828323364, "clip_i_per_subject": [0.40255, 0.45413, 0.41014, 0.48211, 0.5015, 0.37876, 0.47881, 0.50398], "clip_i": 0.4515, "n_refs": 8}
+{"task_id": "hard_044858", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_044858.png"}
+{"task_id": "hard_045053", "clip_t": 0.3572245240211487, "clip_i_per_subject": [0.51068, 0.54058, 0.57033, 0.50701, 0.52861, 0.67952, 0.44415, 0.46823], "clip_i": 0.53114, "n_refs": 8}
+{"task_id": "hard_045174", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045174.png"}
+{"task_id": "hard_045410", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045410.png"}
+{"task_id": "hard_045426", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045426.png"}
+{"task_id": "hard_045485", "clip_t": 0.3666324019432068, "clip_i_per_subject": [0.49601, 0.53304, 0.56808, 0.55057, 0.56345, 0.49091, 0.38338, 0.52081], "clip_i": 0.51328, "n_refs": 8}
+{"task_id": "hard_045513", "clip_t": 0.3488348722457886, "clip_i_per_subject": [0.55564, 0.40763, 0.48057, 0.38752, 0.55123, 0.54648, 0.55257, 0.49699], "clip_i": 0.49733, "n_refs": 8}
+{"task_id": "hard_045522", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045522.png"}
+{"task_id": "hard_045597", "clip_t": 0.3989543318748474, "clip_i_per_subject": [0.45892, 0.54168, 0.46467, 0.47141, 0.44001, 0.31516, 0.3479, 0.42813], "clip_i": 0.43349, "n_refs": 8}
+{"task_id": "hard_045618", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045618.png"}
+{"task_id": "hard_045658", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045658.png"}
+{"task_id": "hard_045705", "clip_t": 0.33470460772514343, "clip_i_per_subject": [0.49871, 0.6322, 0.52238, 0.53107, 0.59586, 0.55559, 0.452, 0.47631], "clip_i": 0.53301, "n_refs": 8}
+{"task_id": "hard_045734", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045734.png"}
+{"task_id": "hard_045853", "clip_t": 0.3715496063232422, "clip_i_per_subject": [0.60334, 0.59848, 0.56008, 0.61993, 0.54083, 0.47242, 0.37253, 0.49005], "clip_i": 0.53221, "n_refs": 8}
+{"task_id": "hard_045870", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_045870.png"}
+{"task_id": "hard_045889", "clip_t": 0.3869646489620209, "clip_i_per_subject": [0.58896, 0.61924, 0.58575, 0.65155, 0.55497, 0.52353, 0.53189, 0.57418], "clip_i": 0.57876, "n_refs": 8}
+{"task_id": "hard_046090", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_046090.png"}
+{"task_id": "hard_046138", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_046138.png"}
+{"task_id": "hard_046189", "clip_t": 0.36590898036956787, "clip_i_per_subject": [0.57469, 0.48629, 0.4875, 0.38787, 0.5125, 0.41532, 0.4957, 0.41492], "clip_i": 0.47185, "n_refs": 8}
+{"task_id": "hard_046561", "clip_t": 0.3627849817276001, "clip_i_per_subject": [0.63866, 0.61892, 0.57851, 0.59374, 0.59692, 0.6354, 0.58409, 0.46112], "clip_i": 0.58842, "n_refs": 8}
+{"task_id": "hard_046601", "clip_t": 0.3890247344970703, "clip_i_per_subject": [0.60967, 0.58271, 0.51878, 0.56992, 0.44941, 0.48305, 0.41234, 0.57894], "clip_i": 0.5256, "n_refs": 8}
+{"task_id": "hard_046713", "clip_t": 0.3845907151699066, "clip_i_per_subject": [0.50394, 0.55407, 0.5153, 0.48905, 0.56868, 0.37249, 0.37817, 0.36166], "clip_i": 0.46792, "n_refs": 8}
+{"task_id": "hard_046781", "clip_t": 0.4117571711540222, "clip_i_per_subject": [0.51899, 0.47645, 0.59273, 0.40923, 0.56826, 0.48685, 0.37902, 0.50231], "clip_i": 0.49173, "n_refs": 8}
+{"task_id": "hard_046865", "clip_t": 0.3938739001750946, "clip_i_per_subject": [0.49778, 0.52333, 0.4291, 0.52713, 0.47161, 0.48987, 0.44615, 0.5015], "clip_i": 0.48581, "n_refs": 8}
+{"task_id": "hard_046889", "clip_t": 0.32010048627853394, "clip_i_per_subject": [0.44715, 0.52407, 0.51292, 0.55636, 0.5715, 0.57697, 0.51664, 0.33042], "clip_i": 0.50451, "n_refs": 8}
+{"task_id": "hard_046926", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_046926.png"}
+{"task_id": "hard_047097", "clip_t": 0.37188243865966797, "clip_i_per_subject": [0.6295, 0.70195, 0.62704, 0.73885, 0.72821, 0.73182, 0.61928, 0.61541], "clip_i": 0.67401, "n_refs": 8}
+{"task_id": "hard_047290", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_047290.png"}
+{"task_id": "hard_047338", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_047338.png"}
+{"task_id": "hard_047461", "clip_t": 0.367409884929657, "clip_i_per_subject": [0.56691, 0.58206, 0.6172, 0.66038, 0.61623, 0.60496, 0.54457, 0.60842], "clip_i": 0.60009, "n_refs": 8}
+{"task_id": "hard_047521", "clip_t": 0.39082324504852295, "clip_i_per_subject": [0.52675, 0.4704, 0.567, 0.44704, 0.47207, 0.49089, 0.42167, 0.444], "clip_i": 0.47998, "n_refs": 8}
+{"task_id": "hard_047613", "clip_t": 0.3138958513736725, "clip_i_per_subject": [0.68122, 0.67349, 0.47159, 0.53435, 0.7478, 0.51895, 0.55897, 0.49646], "clip_i": 0.58535, "n_refs": 8}
+{"task_id": "hard_047634", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_047634.png"}
+{"task_id": "hard_047742", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_047742.png"}
+{"task_id": "hard_048138", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_048138.png"}
+{"task_id": "hard_048169", "clip_t": 0.3618399500846863, "clip_i_per_subject": [0.4181, 0.51844, 0.4578, 0.37792, 0.36077, 0.35019, 0.34167, 0.47889], "clip_i": 0.41297, "n_refs": 8}
+{"task_id": "hard_048277", "clip_t": 0.37111371755599976, "clip_i_per_subject": [0.40428, 0.48651, 0.55797, 0.48136, 0.49828, 0.486, 0.52632, 0.63178], "clip_i": 0.50906, "n_refs": 8}
+{"task_id": "hard_048505", "clip_t": 0.312857985496521, "clip_i_per_subject": [0.64477, 0.53698, 0.56849, 0.57436, 0.63783, 0.50625, 0.45887, 0.58769], "clip_i": 0.5644, "n_refs": 8}
+{"task_id": "hard_048534", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_048534.png"}
+{"task_id": "hard_048562", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_048562.png"}
+{"task_id": "hard_048589", "clip_t": 0.3413979411125183, "clip_i_per_subject": [0.60998, 0.53744, 0.51331, 0.47891, 0.54594, 0.45186, 0.32183, 0.39038], "clip_i": 0.48121, "n_refs": 8}
+{"task_id": "hard_048829", "clip_t": 0.3226338028907776, "clip_i_per_subject": [0.61675, 0.58823, 0.59799, 0.58888, 0.56493, 0.55037, 0.50623, 0.55457], "clip_i": 0.57099, "n_refs": 8}
+{"task_id": "hard_048934", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_048934.png"}
+{"task_id": "hard_049094", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_049094.png"}
+{"task_id": "hard_049158", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_049158.png"}
+{"task_id": "hard_049229", "clip_t": 0.30373454093933105, "clip_i_per_subject": [0.4115, 0.50954, 0.65206, 0.48121, 0.40495, 0.393, 0.27674, 0.38677], "clip_i": 0.43947, "n_refs": 8}
+{"task_id": "hard_049606", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_049606.png"}
+{"task_id": "hard_049746", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_049746.png"}
+{"task_id": "hard_049821", "clip_t": 0.37246742844581604, "clip_i_per_subject": [0.48445, 0.57665, 0.45228, 0.64347, 0.61861, 0.48007, 0.4792, 0.497], "clip_i": 0.52897, "n_refs": 8}
+{"task_id": "hard_049981", "clip_t": 0.3459244966506958, "clip_i_per_subject": [0.57415, 0.54467, 0.54197, 0.57752, 0.61017, 0.54565, 0.63228, 0.45474], "clip_i": 0.56014, "n_refs": 8}
+{"task_id": "hard_050109", "clip_t": 0.42042025923728943, "clip_i_per_subject": [0.4868, 0.59922, 0.55557, 0.40853, 0.56492, 0.52379, 0.40519, 0.52475], "clip_i": 0.5086, "n_refs": 8}
+{"task_id": "hard_050205", "clip_t": 0.3346290588378906, "clip_i_per_subject": [0.71789, 0.72214, 0.7031, 0.54025, 0.54568, 0.54286, 0.54233, 0.61738], "clip_i": 0.61645, "n_refs": 8}
+{"task_id": "hard_050462", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_050462.png"}
+{"task_id": "hard_050581", "clip_t": 0.3016902208328247, "clip_i_per_subject": [0.52521, 0.43517, 0.53619, 0.49893, 0.4309, 0.33865, 0.35739, 0.31073], "clip_i": 0.42915, "n_refs": 8}
+{"task_id": "hard_050690", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_050690.png"}
+{"task_id": "hard_050733", "clip_t": 0.36544790863990784, "clip_i_per_subject": [0.65548, 0.6454, 0.53565, 0.53683, 0.52495, 0.54595, 0.54469, 0.5691], "clip_i": 0.56976, "n_refs": 8}
+{"task_id": "hard_050789", "clip_t": 0.3873050808906555, "clip_i_per_subject": [0.51534, 0.54369, 0.65467, 0.64737, 0.55909, 0.57548, 0.56507, 0.56861], "clip_i": 0.57866, "n_refs": 8}
+{"task_id": "hard_051046", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_051046.png"}
+{"task_id": "hard_051081", "clip_t": 0.33787986636161804, "clip_i_per_subject": [0.58038, 0.60165, 0.51436, 0.54977, 0.48116, 0.65491, 0.64164, 0.63984], "clip_i": 0.58296, "n_refs": 8}
+{"task_id": "hard_051213", "clip_t": 0.348757803440094, "clip_i_per_subject": [0.62922, 0.58523, 0.37674, 0.46628, 0.56614, 0.61143, 0.52861, 0.48739], "clip_i": 0.53138, "n_refs": 8}
+{"task_id": "hard_051265", "clip_t": 0.3789488673210144, "clip_i_per_subject": [0.56786, 0.62618, 0.61604, 0.75179, 0.57983, 0.7241, 0.62974, 0.60221], "clip_i": 0.63722, "n_refs": 8}
+{"task_id": "hard_051353", "clip_t": 0.3691248595714569, "clip_i_per_subject": [0.49041, 0.70749, 0.55976, 0.54206, 0.51284, 0.46185, 0.41716, 0.39478], "clip_i": 0.51079, "n_refs": 8}
+{"task_id": "hard_051413", "clip_t": 0.33875590562820435, "clip_i_per_subject": [0.65331, 0.68016, 0.54663, 0.58021, 0.70772, 0.66288, 0.41008, 0.50621], "clip_i": 0.5934, "n_refs": 8}
+{"task_id": "hard_051766", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_051766.png"}
+{"task_id": "hard_051845", "clip_t": 0.3367747664451599, "clip_i_per_subject": [0.54093, 0.51458, 0.48029, 0.54863, 0.455, 0.45586, 0.41418, 0.48363], "clip_i": 0.48664, "n_refs": 8}
+{"task_id": "hard_051846", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_051846.png"}
+{"task_id": "hard_051858", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_051858.png"}
+{"task_id": "hard_052049", "clip_t": 0.37309715151786804, "clip_i_per_subject": [0.60928, 0.45043, 0.55085, 0.45068, 0.47013, 0.49424, 0.3176, 0.64741], "clip_i": 0.49883, "n_refs": 8}
+{"task_id": "hard_052422", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052422.png"}
+{"task_id": "hard_052438", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052438.png"}
+{"task_id": "hard_052486", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052486.png"}
+{"task_id": "hard_052549", "clip_t": 0.3481844663619995, "clip_i_per_subject": [0.55672, 0.62537, 0.60332, 0.62424, 0.5794, 0.64985, 0.65785, 0.68153], "clip_i": 0.62229, "n_refs": 8}
+{"task_id": "hard_052562", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052562.png"}
+{"task_id": "hard_052570", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052570.png"}
+{"task_id": "hard_052670", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052670.png"}
+{"task_id": "hard_052713", "clip_t": 0.37542086839675903, "clip_i_per_subject": [0.49603, 0.47437, 0.50135, 0.53313, 0.54893, 0.55355, 0.46378, 0.50751], "clip_i": 0.50983, "n_refs": 8}
+{"task_id": "hard_052762", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052762.png"}
+{"task_id": "hard_052914", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_052914.png"}
+{"task_id": "hard_053010", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053010.png"}
+{"task_id": "hard_053153", "clip_t": 0.3476787507534027, "clip_i_per_subject": [0.49329, 0.43813, 0.49078, 0.43792, 0.47723, 0.38982, 0.43845, 0.51015], "clip_i": 0.45947, "n_refs": 8}
+{"task_id": "hard_053165", "clip_t": 0.32820576429367065, "clip_i_per_subject": [0.55009, 0.65129, 0.58269, 0.50633, 0.62521, 0.62282, 0.4252, 0.54199], "clip_i": 0.5632, "n_refs": 8}
+{"task_id": "hard_053209", "clip_t": 0.3819239139556885, "clip_i_per_subject": [0.5854, 0.51087, 0.64041, 0.5358, 0.53923, 0.53434, 0.5, 0.37936], "clip_i": 0.52818, "n_refs": 8}
+{"task_id": "hard_053285", "clip_t": 0.3874383568763733, "clip_i_per_subject": [0.73166, 0.71386, 0.72933, 0.50623, 0.59637, 0.62191, 0.639, 0.55487], "clip_i": 0.63665, "n_refs": 8}
+{"task_id": "hard_053306", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053306.png"}
+{"task_id": "hard_053362", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053362.png"}
+{"task_id": "hard_053369", "clip_t": 0.4009643793106079, "clip_i_per_subject": [0.4051, 0.48581, 0.40444, 0.42966, 0.3983, 0.3771, 0.35538, 0.35107], "clip_i": 0.40086, "n_refs": 8}
+{"task_id": "hard_053437", "clip_t": 0.3698109984397888, "clip_i_per_subject": [0.56637, 0.53795, 0.52101, 0.52904, 0.44789, 0.45103, 0.52001, 0.42469], "clip_i": 0.49975, "n_refs": 8}
+{"task_id": "hard_053730", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053730.png"}
+{"task_id": "hard_053734", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053734.png"}
+{"task_id": "hard_053786", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053786.png"}
+{"task_id": "hard_053845", "clip_t": 0.40276211500167847, "clip_i_per_subject": [0.51066, 0.60316, 0.55957, 0.52917, 0.37123, 0.38778, 0.40573, 0.47462], "clip_i": 0.48024, "n_refs": 8}
+{"task_id": "hard_053878", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053878.png"}
+{"task_id": "hard_053882", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053882.png"}
+{"task_id": "hard_053926", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053926.png"}
+{"task_id": "hard_053942", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_053942.png"}
+{"task_id": "hard_054049", "clip_t": 0.3305354416370392, "clip_i_per_subject": [0.52776, 0.48841, 0.59964, 0.51286, 0.66331, 0.56621, 0.57969, 0.66213], "clip_i": 0.575, "n_refs": 8}
+{"task_id": "hard_054062", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_054062.png"}
+{"task_id": "hard_054250", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_054250.png"}
+{"task_id": "hard_054477", "clip_t": 0.4212421774864197, "clip_i_per_subject": [0.40682, 0.46095, 0.41865, 0.40561, 0.4491, 0.41847, 0.38552, 0.37904], "clip_i": 0.41552, "n_refs": 8}
+{"task_id": "hard_054602", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_054602.png"}
+{"task_id": "hard_054638", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_054638.png"}
+{"task_id": "hard_054702", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_054702.png"}
+{"task_id": "hard_054749", "clip_t": 0.3833774924278259, "clip_i_per_subject": [0.56099, 0.5609, 0.57579, 0.50559, 0.58097, 0.47336, 0.55421, 0.52759], "clip_i": 0.54243, "n_refs": 8}
+{"task_id": "hard_054774", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_054774.png"}
+{"task_id": "hard_054781", "clip_t": 0.35455524921417236, "clip_i_per_subject": [0.55081, 0.50479, 0.52739, 0.38028, 0.52375, 0.48809, 0.4322, 0.4657], "clip_i": 0.48413, "n_refs": 8}
+{"task_id": "hard_054834", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_054834.png"}
+{"task_id": "hard_054837", "clip_t": 0.37999260425567627, "clip_i_per_subject": [0.47739, 0.63016, 0.63666, 0.52796, 0.52896, 0.64665, 0.46496, 0.62854], "clip_i": 0.56766, "n_refs": 8}
+{"task_id": "hard_054889", "clip_t": 0.38354551792144775, "clip_i_per_subject": [0.5048, 0.5296, 0.4698, 0.29685, 0.49359, 0.42723, 0.48683, 0.44319], "clip_i": 0.45649, "n_refs": 8}
+{"task_id": "hard_055590", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_055590.png"}
+{"task_id": "hard_055682", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_055682.png"}
+{"task_id": "hard_055717", "clip_t": 0.3470127582550049, "clip_i_per_subject": [0.63464, 0.55481, 0.64612, 0.59833, 0.57014, 0.6293, 0.63838, 0.69986], "clip_i": 0.62145, "n_refs": 8}
+{"task_id": "hard_055725", "clip_t": 0.34522271156311035, "clip_i_per_subject": [0.46685, 0.49704, 0.57067, 0.41654, 0.24086, 0.34138, 0.39253, 0.43045], "clip_i": 0.41954, "n_refs": 8}
+{"task_id": "hard_055841", "clip_t": 0.33899036049842834, "clip_i_per_subject": [0.59354, 0.56042, 0.54372, 0.46712, 0.60376, 0.48726, 0.43757, 0.55817], "clip_i": 0.53145, "n_refs": 8}
+{"task_id": "hard_055881", "clip_t": 0.36514347791671753, "clip_i_per_subject": [0.43197, 0.59832, 0.506, 0.47592, 0.34551, 0.3938, 0.60455, 0.41718], "clip_i": 0.47166, "n_refs": 8}
+{"task_id": "hard_056017", "clip_t": 0.3309217691421509, "clip_i_per_subject": [0.46003, 0.485, 0.63153, 0.53221, 0.3502, 0.60826, 0.41837, 0.52809], "clip_i": 0.50171, "n_refs": 8}
+{"task_id": "hard_056234", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_056234.png"}
+{"task_id": "hard_056306", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_056306.png"}
+{"task_id": "hard_056377", "clip_t": 0.3605335056781769, "clip_i_per_subject": [0.54438, 0.51617, 0.64414, 0.5337, 0.57164, 0.62102, 0.55719, 0.69731], "clip_i": 0.58569, "n_refs": 8}
+{"task_id": "hard_056550", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_056550.png"}
+{"task_id": "hard_056581", "clip_t": 0.3235093355178833, "clip_i_per_subject": [0.55996, 0.45955, 0.58011, 0.57799, 0.44725, 0.57135, 0.58609, 0.55608], "clip_i": 0.5423, "n_refs": 8}
+{"task_id": "hard_056597", "clip_t": 0.41227152943611145, "clip_i_per_subject": [0.63895, 0.63324, 0.455, 0.44632, 0.39614, 0.50468, 0.48314, 0.44226], "clip_i": 0.49997, "n_refs": 8}
+{"task_id": "hard_056602", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_056602.png"}
+{"task_id": "hard_056681", "clip_t": 0.3760286271572113, "clip_i_per_subject": [0.50903, 0.52474, 0.57988, 0.45767, 0.56844, 0.6267, 0.57409, 0.53566], "clip_i": 0.54703, "n_refs": 8}
+{"task_id": "hard_056726", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_056726.png"}
+{"task_id": "hard_056833", "clip_t": 0.38602036237716675, "clip_i_per_subject": [0.55901, 0.59508, 0.48531, 0.46701, 0.54555, 0.50957, 0.56547, 0.47612], "clip_i": 0.52539, "n_refs": 8}
+{"task_id": "hard_056933", "clip_t": 0.37133777141571045, "clip_i_per_subject": [0.58441, 0.46193, 0.4928, 0.48449, 0.43957, 0.44219, 0.44072, 0.47626], "clip_i": 0.4778, "n_refs": 8}
+{"task_id": "hard_057018", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_057018.png"}
+{"task_id": "hard_057237", "clip_t": 0.3580154478549957, "clip_i_per_subject": [0.48434, 0.42681, 0.43941, 0.44193, 0.43823, 0.42723, 0.41878, 0.44776], "clip_i": 0.44056, "n_refs": 8}
+{"task_id": "hard_057285", "clip_t": 0.421879380941391, "clip_i_per_subject": [0.49811, 0.51428, 0.43137, 0.4014, 0.41219, 0.41208, 0.36698, 0.41716], "clip_i": 0.4317, "n_refs": 8}
+{"task_id": "hard_057294", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_057294.png"}
+{"task_id": "hard_057306", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_057306.png"}
+{"task_id": "hard_057317", "clip_t": 0.3994143009185791, "clip_i_per_subject": [0.61783, 0.53701, 0.55697, 0.50298, 0.39543, 0.54321, 0.44449, 0.38474], "clip_i": 0.49783, "n_refs": 8}
+{"task_id": "hard_057385", "clip_t": 0.34099048376083374, "clip_i_per_subject": [0.4342, 0.61166, 0.62291, 0.46445, 0.57577, 0.53491, 0.57672, 0.64377], "clip_i": 0.55805, "n_refs": 8}
+{"task_id": "hard_057505", "clip_t": 0.34066566824913025, "clip_i_per_subject": [0.51244, 0.4414, 0.47744, 0.421, 0.4154, 0.51577, 0.40439, 0.33874], "clip_i": 0.44082, "n_refs": 8}
+{"task_id": "hard_057558", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_057558.png"}
+{"task_id": "hard_057574", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_057574.png"}
+{"task_id": "hard_057970", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_057970.png"}
+{"task_id": "hard_058049", "clip_t": 0.42318469285964966, "clip_i_per_subject": [0.46354, 0.67911, 0.46693, 0.56008, 0.44577, 0.52177, 0.45713, 0.41942], "clip_i": 0.50172, "n_refs": 8}
+{"task_id": "hard_058086", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_058086.png"}
+{"task_id": "hard_058118", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_058118.png"}
+{"task_id": "hard_058142", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_058142.png"}
+{"task_id": "hard_058165", "clip_t": 0.38814595341682434, "clip_i_per_subject": [0.68365, 0.61176, 0.6723, 0.61221, 0.5591, 0.5614, 0.50437, 0.59172], "clip_i": 0.59956, "n_refs": 8}
+{"task_id": "hard_058229", "clip_t": 0.33078938722610474, "clip_i_per_subject": [0.57661, 0.48851, 0.52103, 0.53452, 0.52175, 0.5257, 0.51178, 0.4615], "clip_i": 0.51768, "n_refs": 8}
+{"task_id": "hard_058274", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_058274.png"}
+{"task_id": "hard_058393", "clip_t": 0.3163633942604065, "clip_i_per_subject": [0.48607, 0.53066, 0.74598, 0.49008, 0.608, 0.65203, 0.69824, 0.60316], "clip_i": 0.60178, "n_refs": 8}
+{"task_id": "hard_058501", "clip_t": 0.40859198570251465, "clip_i_per_subject": [0.49632, 0.53087, 0.54945, 0.4903, 0.52047, 0.51126, 0.57774, 0.47668], "clip_i": 0.51914, "n_refs": 8}
+{"task_id": "hard_058502", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_058502.png"}
+{"task_id": "hard_058537", "clip_t": 0.4343608319759369, "clip_i_per_subject": [0.58325, 0.53504, 0.57424, 0.46579, 0.48585, 0.37838, 0.52684, 0.45682], "clip_i": 0.50077, "n_refs": 8}
+{"task_id": "hard_058542", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_058542.png"}
+{"task_id": "hard_058713", "clip_t": 0.35470300912857056, "clip_i_per_subject": [0.44335, 0.54159, 0.44469, 0.42337, 0.32389, 0.49916, 0.34866, 0.43762], "clip_i": 0.43279, "n_refs": 8}
+{"task_id": "hard_058942", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_058942.png"}
+{"task_id": "hard_058977", "clip_t": 0.4120575189590454, "clip_i_per_subject": [0.50577, 0.54875, 0.52179, 0.44182, 0.45351, 0.37342, 0.43308, 0.42905], "clip_i": 0.4634, "n_refs": 8}
+{"task_id": "hard_058993", "clip_t": 0.3233436644077301, "clip_i_per_subject": [0.42598, 0.48401, 0.52931, 0.48445, 0.48831, 0.54835, 0.41239, 0.60224], "clip_i": 0.49688, "n_refs": 8}
+{"task_id": "hard_059121", "clip_t": 0.31943050026893616, "clip_i_per_subject": [0.5125, 0.48924, 0.5137, 0.52982, 0.60912, 0.6181, 0.45795, 0.52014], "clip_i": 0.53132, "n_refs": 8}
+{"task_id": "hard_059329", "clip_t": 0.4390428066253662, "clip_i_per_subject": [0.50167, 0.51202, 0.4782, 0.36521, 0.43747, 0.45229, 0.37405, 0.49752], "clip_i": 0.4523, "n_refs": 8}
+{"task_id": "hard_059421", "clip_t": 0.3882533311843872, "clip_i_per_subject": [0.64458, 0.63207, 0.5764, 0.54412, 0.5527, 0.4669, 0.51182, 0.58959], "clip_i": 0.56477, "n_refs": 8}
+{"task_id": "hard_059422", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_059422.png"}
+{"task_id": "hard_059438", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_059438.png"}
+{"task_id": "hard_059598", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_059598.png"}
+{"task_id": "hard_059738", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_059738.png"}
+{"task_id": "hard_059777", "clip_t": 0.3605461120605469, "clip_i_per_subject": [0.55161, 0.57481, 0.58416, 0.47618, 0.56107, 0.44299, 0.56937, 0.59736], "clip_i": 0.54469, "n_refs": 8}
+{"task_id": "hard_059802", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_059802.png"}
+{"task_id": "hard_059910", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_059910.png"}
+{"task_id": "hard_059990", "error": "FileNotFoundError: no image at results_flux2/flux2_8_oneshot_s0/images/hard_059990.png"}

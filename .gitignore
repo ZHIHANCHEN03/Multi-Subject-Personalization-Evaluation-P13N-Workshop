@@ -34,6 +34,14 @@ dist/
 **/hf_cache/
 **/torch_cache/
 
+# LaTeX build artifacts (main.tex + main.pdf are tracked; these are regenerable)
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.synctex.gz
+
 # Logs
 *.log
 
@@ -41,3 +49,18 @@ dist/
 # submission/   — MIDC source (paper + code + results)
 # companion/    — MIBE companion-paper data
 # meta/         — working docs, refs, human-eval tarballs, external reference clones
+
+# LaTeX build artifacts (main.log embeds absolute paths -> anonymity leak)
+submission/paper/*.aux
+submission/paper/*.log
+submission/paper/*.out
+submission/paper/*.bbl
+submission/paper/*.blg
+submission/paper/*.synctex.gz
+submission/paper/*.fdb_latexmk
+submission/paper/*.fls
+
+# Extracted copy of Gold Set results — the same data already lives on the
+# feat/neurips-lens branch (Evaluation_Pipeline/paper_data/). The zip beside it
+# is committed for sharing; re-extract with `unzip mie_goldset_results.zip`.
+companion/MIBE Rebuttal/mie_goldset_results/

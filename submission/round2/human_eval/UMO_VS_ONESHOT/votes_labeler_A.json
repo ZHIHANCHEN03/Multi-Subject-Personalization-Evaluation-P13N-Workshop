@@ -1,0 +1,625 @@
+{
+  "labeler": "labeler_A",
+  "n_pairs": 100,
+  "n_voted": 100,
+  "votes": {
+    "umo_s0_vs_one_shot_s0__hard_041443": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_041443"
+    },
+    "umo_s0_vs_one_shot_s0__hard_040895": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_040895"
+    },
+    "umo_s0_vs_one_shot_s0__hard_053443": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_053443"
+    },
+    "umo_s0_vs_one_shot_s0__hard_043971": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_043971"
+    },
+    "umo_s0_vs_one_shot_s0__hard_058431": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_058431"
+    },
+    "umo_s0_vs_one_shot_s0__hard_058591": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_058591"
+    },
+    "umo_s0_vs_one_shot_s0__hard_047807": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_047807"
+    },
+    "umo_s0_vs_one_shot_s0__hard_049787": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_049787"
+    },
+    "umo_s0_vs_one_shot_s0__hard_057135": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_057135"
+    },
+    "umo_s0_vs_one_shot_s0__hard_049315": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_049315"
+    },
+    "umo_s0_vs_one_shot_s0__hard_052975": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_052975"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046803": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046803"
+    },
+    "umo_s0_vs_one_shot_s0__hard_059075": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_059075"
+    },
+    "umo_s0_vs_one_shot_s0__hard_057411": {
+      "q1": "TIE",
+      "q2": "LEFT",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_057411"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046659": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046659"
+    },
+    "umo_s0_vs_one_shot_s0__hard_055403": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_055403"
+    },
+    "umo_s0_vs_one_shot_s0__hard_041155": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_041155"
+    },
+    "umo_s0_vs_one_shot_s0__hard_050515": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_050515"
+    },
+    "umo_s0_vs_one_shot_s0__hard_045879": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_045879"
+    },
+    "umo_s0_vs_one_shot_s0__hard_047271": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_047271"
+    },
+    "umo_s0_vs_one_shot_s0__hard_047199": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_047199"
+    },
+    "umo_s0_vs_one_shot_s0__hard_048579": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_048579"
+    },
+    "umo_s0_vs_one_shot_s0__hard_040539": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_040539"
+    },
+    "umo_s0_vs_one_shot_s0__hard_047891": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_047891"
+    },
+    "umo_s0_vs_one_shot_s0__hard_040327": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_040327"
+    },
+    "umo_s0_vs_one_shot_s0__hard_058435": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_058435"
+    },
+    "umo_s0_vs_one_shot_s0__hard_047151": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_047151"
+    },
+    "umo_s0_vs_one_shot_s0__hard_054063": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_054063"
+    },
+    "umo_s0_vs_one_shot_s0__hard_052671": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_052671"
+    },
+    "umo_s0_vs_one_shot_s0__hard_050519": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_050519"
+    },
+    "umo_s0_vs_one_shot_s0__hard_053703": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_053703"
+    },
+    "umo_s0_vs_one_shot_s0__hard_047875": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_047875"
+    },
+    "umo_s0_vs_one_shot_s0__hard_043375": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_043375"
+    },
+    "umo_s0_vs_one_shot_s0__hard_056551": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_056551"
+    },
+    "umo_s0_vs_one_shot_s0__hard_059099": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_059099"
+    },
+    "umo_s0_vs_one_shot_s0__hard_055899": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_055899"
+    },
+    "umo_s0_vs_one_shot_s0__hard_041671": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_041671"
+    },
+    "umo_s0_vs_one_shot_s0__hard_045303": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_045303"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046247": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046247"
+    },
+    "umo_s0_vs_one_shot_s0__hard_049027": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_049027"
+    },
+    "umo_s0_vs_one_shot_s0__hard_055739": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_055739"
+    },
+    "umo_s0_vs_one_shot_s0__hard_059499": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_059499"
+    },
+    "umo_s0_vs_one_shot_s0__hard_044103": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_044103"
+    },
+    "umo_s0_vs_one_shot_s0__hard_043655": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_043655"
+    },
+    "umo_s0_vs_one_shot_s0__hard_056535": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_056535"
+    },
+    "umo_s0_vs_one_shot_s0__hard_057827": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_057827"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046751": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046751"
+    },
+    "umo_s0_vs_one_shot_s0__hard_055695": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_055695"
+    },
+    "umo_s0_vs_one_shot_s0__hard_058047": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_058047"
+    },
+    "umo_s0_vs_one_shot_s0__hard_043559": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_043559"
+    },
+    "umo_s0_vs_one_shot_s0__hard_040399": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_040399"
+    },
+    "umo_s0_vs_one_shot_s0__hard_052607": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_052607"
+    },
+    "umo_s0_vs_one_shot_s0__hard_052983": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_052983"
+    },
+    "umo_s0_vs_one_shot_s0__hard_054123": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_054123"
+    },
+    "umo_s0_vs_one_shot_s0__hard_059947": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_059947"
+    },
+    "umo_s0_vs_one_shot_s0__hard_042663": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_042663"
+    },
+    "umo_s0_vs_one_shot_s0__hard_041683": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_041683"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046615": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046615"
+    },
+    "umo_s0_vs_one_shot_s0__hard_050135": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_050135"
+    },
+    "umo_s0_vs_one_shot_s0__hard_045095": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_045095"
+    },
+    "umo_s0_vs_one_shot_s0__hard_054299": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_054299"
+    },
+    "umo_s0_vs_one_shot_s0__hard_054839": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_054839"
+    },
+    "umo_s0_vs_one_shot_s0__hard_045295": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_045295"
+    },
+    "umo_s0_vs_one_shot_s0__hard_053395": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_053395"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046259": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046259"
+    },
+    "umo_s0_vs_one_shot_s0__hard_042491": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_042491"
+    },
+    "umo_s0_vs_one_shot_s0__hard_055343": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_055343"
+    },
+    "umo_s0_vs_one_shot_s0__hard_048983": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_048983"
+    },
+    "umo_s0_vs_one_shot_s0__hard_048007": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_048007"
+    },
+    "umo_s0_vs_one_shot_s0__hard_044883": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_044883"
+    },
+    "umo_s0_vs_one_shot_s0__hard_042895": {
+      "q1": "TIE",
+      "q2": "RIGHT",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_042895"
+    },
+    "umo_s0_vs_one_shot_s0__hard_054407": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_054407"
+    },
+    "umo_s0_vs_one_shot_s0__hard_045339": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_045339"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046907": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046907"
+    },
+    "umo_s0_vs_one_shot_s0__hard_046323": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_046323"
+    },
+    "umo_s0_vs_one_shot_s0__hard_051747": {
+      "q1": "RIGHT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_051747"
+    },
+    "umo_s0_vs_one_shot_s0__hard_055583": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_055583"
+    },
+    "umo_s0_vs_one_shot_s0__hard_052927": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_052927"
+    },
+    "umo_s0_vs_one_shot_s0__hard_056851": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_056851"
+    },
+    "umo_s0_vs_one_shot_s0__hard_041463": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_041463"
+    },
+    "umo_s0_vs_one_shot_s0__hard_057387": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_057387"
+    },
+    "umo_s0_vs_one_shot_s0__hard_043223": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_043223"
+    },
+    "umo_s0_vs_one_shot_s0__hard_051155": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_051155"
+    },
+    "umo_s0_vs_one_shot_s0__hard_054447": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_054447"
+    },
+    "umo_s0_vs_one_shot_s0__hard_040111": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_040111"
+    },
+    "umo_s0_vs_one_shot_s0__hard_059379": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_059379"
+    },
+    "umo_s0_vs_one_shot_s0__hard_052023": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_052023"
+    },
+    "umo_s0_vs_one_shot_s0__hard_056955": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_056955"
+    },
+    "umo_s0_vs_one_shot_s0__hard_056395": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_056395"
+    },
+    "umo_s0_vs_one_shot_s0__hard_042251": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_042251"
+    },
+    "umo_s0_vs_one_shot_s0__hard_050399": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_050399"
+    },
+    "umo_s0_vs_one_shot_s0__hard_043031": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_043031"
+    },
+    "umo_s0_vs_one_shot_s0__hard_051315": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_051315"
+    },
+    "umo_s0_vs_one_shot_s0__hard_045223": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_045223"
+    },
+    "umo_s0_vs_one_shot_s0__hard_053915": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_053915"
+    },
+    "umo_s0_vs_one_shot_s0__hard_052839": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_052839"
+    },
+    "umo_s0_vs_one_shot_s0__hard_051627": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_051627"
+    },
+    "umo_s0_vs_one_shot_s0__hard_041231": {
+      "q1": "LEFT",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_041231"
+    },
+    "umo_s0_vs_one_shot_s0__hard_058767": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_058767"
+    },
+    "umo_s0_vs_one_shot_s0__hard_058655": {
+      "q1": "TIE",
+      "q2": "TIE",
+      "comparison": "one_shot_s0",
+      "pair_id": "umo_s0_vs_one_shot_s0__hard_058655"
+    }
+  },
+  "summary": {
+    "answered": 100,
+    "total": 100,
+    "byCmp": {
+      "one_shot_s0": {
+        "q1": {
+          "L": 10,
+          "R": 4,
+          "T": 86
+        },
+        "q2": {
+          "L": 1,
+          "R": 4,
+          "T": 95
+        }
+      }
+    }
+  }
+}

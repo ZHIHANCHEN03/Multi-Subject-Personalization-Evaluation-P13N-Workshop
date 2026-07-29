@@ -28,21 +28,23 @@ guarded acceptance. See [`paper/main.tex`](paper/main.tex) for the full method.
 | [`paper/`](paper/) | AAAI-27 paper source (`main.tex`, `refs.bib`, `aaai2027.sty`, figures) — see [`paper/README.md`](paper/README.md) |
 | [`round1/`](round1/) | Core MIDC pipeline: `p1_ours_v2.py` (main method), `p2_oneshot.py`, `p3_bestofn.py`, `p4_umo.py`, `external_generators.py` (OmniGen2 / FLUX.2 / UMO LoRA adapters), `common.py` |
 | [`round1_1/`](round1_1/) | Ablation sweep configs (`sweep.py`) |
-| [`round2/`](round2/) | Round-2/3 experiment scripts, manifests, and results — see [`round2/README.md`](round2/README.md) and [`round2/README_round3.md`](round2/README_round3.md) |
+| [`round2/`](round2/) | Round-2/3 experiment scripts, manifests, and results — see [`round2/README.md`](round2/README.md) |
 | [`round2/results_r2/`](round2/results_r2/) | **Raw per-task records** (`records.jsonl`) for the 500-task OmniGen2 main experiment (all methods, 3 seeds) — the basis for Table 1 |
-| [`round2/results_flux2/`](round2/results_flux2/) | Raw records for the FLUX.2-klein-9B 6/8-entity scaling study — the basis for Table 2 and the gating analysis (§4.5) |
+| [`round2/results_flux2/`](round2/results_flux2/) | Raw records for the FLUX.2-klein-9B 6/8-entity scaling study — the basis for Table 2 and the gating analysis (§4.5, Figure 4) |
+| [`round2/verify_paper_numbers.py`](round2/verify_paper_numbers.py) | Recomputes every value in Tables 1–5 and Figure 4 from the committed records and diffs them against `paper/main.tex`; exits non-zero on any disagreement |
 | [`ABSTRACT.md`](ABSTRACT.md) | Final title + abstract (synced with `paper/main.tex`) — **must be mirrored to OpenReview before 7/28** |
-| [`PLAN.md`](PLAN.md) | Project plan and claim boundaries |
+| `../meta/PLAN.md` | Project plan and claim boundaries (working doc, outside `submission/`) |
 
-> **Companion MIBE data (not in this repo):** the MIE verifier training data
+> **Companion MIBE data (outside `submission/`):** the MIE verifier training data
 > (`prompt/train_60k_v13_2.jsonl`, 42 MB) and the full MIBE evaluator/benchmark
 > (`MIBE_Core/`, 258 MB) belong to the companion MIBE paper (cited as
-> `anon2025mibe`, under review separately). They have been moved to a sibling
-> local folder `../MIBE_companion_data/` to keep this submission repo lean.
-> Experiment scripts reference the training data via the `DATA_SRC` env var
-> (default `prompt/train_60k_v13_2.jsonl`, overridable); set `DATA_SRC` to the
-> sibling path to reproduce hard-case selection. The data will be released with
-> the MIBE paper upon its acceptance.
+> `anon2025mibe`, under review separately). They live in the repo's sibling
+> [`companion/`](../companion/) folder, deliberately kept out of `submission/`
+> so the submission export stays lean. Experiment scripts reference the training
+> data via the `DATA_SRC` env var (default `prompt/train_60k_v13_2.jsonl`,
+> overridable); point `DATA_SRC` at `../companion/prompt/train_60k_v13_2.jsonl`
+> to reproduce hard-case selection. The data will be released with the MIBE
+> paper upon its acceptance.
 
 ## Reproducing the main results
 
@@ -63,23 +65,28 @@ reproducibility. Aggregate with `round2/analyze.py`.
 
 ## Key results (3 seeds, 95% bootstrap CI)
 
-| Method | SCR (hard 4-entity) | DINO |
+OmniGen2, hard 4-entity slice (n=250 tasks × 3 seeds). SCR lower is better,
+DINO identity similarity higher is better. These match Table 1 of the paper;
+regenerate with `python3 round2/verify_paper_numbers.py`.
+
+| Method | SCR | DINO |
 |---|---|---|
-| one-shot | 0.536 | 0.491 |
-| best-of-8 | 0.492 | 0.526 |
+| one-shot | 0.536 | 0.455 |
+| best-of-8 | 0.492 | 0.492 |
 | UMO (retrained SOTA) | 0.531 | 0.455 |
-| **MIDC (ours)** | **0.470** | **0.545** |
+| **MIDC (ours)** | **0.470** | **0.509** |
 
 MIDC triggers on only 28% of 8-entity tasks (the harder ones) and cuts SCR by
-24.5% on that subset, while cleanly declining to act on the remaining 72%
-(no measurable regression vs one-shot) — see §4.5 of the paper.
+23.8% on that subset (0.688 → 0.524), while cleanly declining to act on the
+remaining 72% (no measurable regression vs one-shot) — see §4.5 and Figure 4
+of the paper.
 
 ## Notes
 
 - The MIE verifier checkpoint is not committed (large binary); it is provided
   in the supplementary Code & Data package. Training data
-  (`train_60k_v13_2.jsonl`) lives in the sibling `../MIBE_companion_data/prompt/`
-  folder — see the note above.
+  (`train_60k_v13_2.jsonl`) lives in [`../companion/prompt/`](../companion/prompt/)
+  — see the note above.
 - All headline metrics (SCR, DINO) use an **independent** DINOv2-based judge,
   not the verifier used inside MIDC, to avoid self-evaluation circularity.
 - `HF_TOKEN` is required to access gated FLUX.2-klein-9B weights.
