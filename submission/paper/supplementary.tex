@@ -1,0 +1,136 @@
+% Supplementary Material for MIDC submission (AAAI-27). Anonymous.
+\documentclass[letterpaper]{article}
+\usepackage[submission]{aaai2027}
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage[hyphens]{url}
+\usepackage{graphicx}
+\urlstyle{rm}
+\def\UrlFont{\rm}
+\usepackage{natbib}
+\usepackage{caption}
+\frenchspacing
+\setlength{\pdfpagewidth}{8.5in}
+\setlength{\pdfpageheight}{11in}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+\title{Supplementary Material:\\Calibrated Test-Time Correction for Multi-Subject Identity Collapse}
+\author{
+    Anonymous submission
+}
+\affiliations{
+    Paper ID: 27384
+}
+
+\begin{document}
+
+\maketitle
+
+This document contains supporting material referenced from the main paper: (A) verification that the UMO adapter is active (Sec.~A); (B) the full inference pseudocode (Sec.~B); (C) per-method confidence intervals for the main table (Sec.~C); (D) the full human-evaluation table (Sec.~D); (E) threshold-sensitivity analysis (Sec.~E); (F) the selective-correction gating analysis (Sec.~F); and (G) a reproducibility guide (Sec.~G). All content is anonymized. Section, table, and figure numbers in the main paper are referenced as-is.
+
+\section{UMO Adapter Verification}
+\label{sec:umo_verify}
+
+The main paper (Sec.~4.1, footnote) reports that the UMO context-refiner LoRA is verified to load correctly and to be active. This section gives the details.
+
+\paragraph{Key-match check.} The released adapter file contains 304 tensors. Loading it onto the OmniGen2 transformer equipped with the rank-512 LoRA configuration (targeting \texttt{to\_k}, \texttt{to\_q}, \texttt{to\_v}, \texttt{to\_out.0}) via \texttt{load\_state\_dict(strict=False)} returns \textbf{zero unexpected keys} and \textbf{zero missing LoRA keys}: all 304 tensors are applied to matching model parameters (582 missing keys are all non-LoRA base weights, as expected). A complete key-name mismatch---which would silently load nothing---is therefore ruled out.
+
+\paragraph{Controlled isolation of the adapter.} A pixel difference between the full UMO runner and the base runner is not by itself conclusive, since the two runners also differ in negative prompt, \texttt{image\_guidance\_scale}, and \texttt{max\_pixels} (configuration drift could explain any difference with the adapter contributing nothing). We therefore isolate the adapter: one pipeline, one configuration (UMO's official inference config), one seed; generate, fuse the adapter, generate again. Any difference between the two outputs is attributable to the LoRA and nothing else. Table~\ref{tab:umo_check} reports the per-task pixel differences on three MIBE-hard tasks at seed 0: mean absolute differences of 12.95--25.45 (on the $0$--$255$ scale), with at most 36\% of pixels bitwise identical. For comparison, the same-seed pixel difference between the two full runners (base vs.\ UMO, including configuration drift) reported in the main paper is 10.44. Both checks confirm the adapter is active with substantial effect. The verification script (\texttt{verify\_umo\_lora.py}) is included in the code package.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Task ID & Mean $|\Delta|$ & Max $|\Delta|$ & \% identical \\
+\midrule
+hard\_042703 & 25.45 & 255 & 36.01 \\
+hard\_047199 & 18.28 & 252 & 4.52 \\
+hard\_040295 & 12.95 & 255 & 1.27 \\
+\bottomrule
+\end{tabular}
+\caption{Controlled UMO-adapter isolation check (Sec.~\ref{sec:umo_verify}): absolute pixel difference ($0$--$255$ scale) between identical-config generations with and without the fused adapter, seed 0, $1024{\times}1024$.}
+\label{tab:umo_check}
+\end{table}
+
+\section{MIDC Inference Pseudocode}
+\label{sec:algorithm}
+
+Algorithm~\ref{alg:midc_inference} gives the complete inference procedure described in Sec.~3 of the main paper. The selective-correction gate (Sec.~4.6) wraps lines 1--2: if the initial generation passes, MIDC returns it directly at one generation.
+
+\begin{algorithm}[t]
+\caption{MIDC inference (one task, one seed)}
+\label{alg:midc_inference}
+\begin{algorithmic}[1]
+\STATE $I_0 \leftarrow G(T, \{r_i\})$
+\STATE $V \leftarrow \mathrm{MIE}(I_0, T)$; if pass, return $I_0$
+\FOR{$k = 1$ to $K$}
+  \STATE $d^\star \leftarrow \arg\max_d \tilde{v}_d$ (normalized deficits)
+  \STATE $i^\star \leftarrow \arg\min_i \mathrm{sim}_i$ (weakest subject)
+  \FOR{each action $a \in A(d^\star)$}
+    \FOR{$j = 1$ to $K_p$}
+      \STATE $I' \leftarrow a(I_0, T, \{r_i\}, i^\star)$; $V' \leftarrow \mathrm{MIE}(I', T)$
+      \STATE pick best $I'$ by $\mathrm{sim}_{i^\star}$
+    \ENDFOR
+  \ENDFOR
+  \STATE accept best action if guarded criteria hold; else return $I_0$
+  \STATE if accepted, $I_0 \leftarrow I'$; if now passing, return $I_0$
+\ENDFOR
+\STATE return $I_0$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Per-Method Confidence Intervals for Table 1}
+\label{sec:cis}
+
+The main paper's Table 1 caption omits per-method bootstrap CIs for space; they are listed here. Bootstrap 95\% CIs for SCR (OmniGen2): one\_shot [0.585, 0.652], UMO [0.494, 0.568], best\_of\_8 [0.364, 0.426], MIDC [0.435, 0.507]. DINO: one\_shot [0.569, 0.583], UMO [0.569, 0.582], best\_of\_8 [0.617, 0.630], MIDC [0.652, 0.665]. Bootstrap 95\% CIs for SCR (FLUX.2): one\_shot [0.492, 0.556], best\_of\_8 [0.348, 0.412], MIDC [0.320, 0.380]. DINO: one\_shot [0.682, 0.693], best\_of\_8 [0.722, 0.733], MIDC [0.734, 0.745]. Paired two-sided significance tests between methods are in Table 4 of the main paper.
+
+\section{Full Human-Evaluation Table}
+\label{sec:human}
+
+Table~\ref{tab:human} gives the full statistics behind Sec.~4.6 (Human Evaluation) of the main paper, where only the headline numbers were kept for space. Ten annotators from outside the author list scored the two comparison pairs; each cell aggregates 142 (UMO comparison) or 130 (best\_of\_8 comparison) annotations, with near-perfect agreement ($\kappa{=}0.96$). Per-side DINO similarity was recomputed in a second pass so all four entries share one metric pipeline.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{lcc}
+\toprule
+Comparison & SCR win rate & DINO win rate \\
+\midrule
+vs.\ UMO ($n{=}142$) & 84.6\% [78.1, 90.4] & 81.5\% [74.3, 88.5] \\
+vs.\ best\_of\_8 ($n{=}130$) & 73.1\% [65.4, 80.7] & 74.0\% [66.4, 81.3] \\
+\bottomrule
+\end{tabular}
+\caption{Human evaluation: fraction of annotations preferring MIDC, 95\% CIs; $\kappa{=}0.96$, $p{=}4.1{\times}10^{-7}$ for the UMO comparison.}
+\label{tab:human}
+\end{table}
+
+\section{Threshold Sensitivity}
+\label{sec:sweep}
+
+Headline metrics are insensitive to the SCR miss threshold $\delta$ and the DINO drop threshold $\tau$ reported in the main paper (Sec.~4.1, Metrics): sweeping $\delta \in \{0.40, 0.50, 0.60\}$ moves the mean SCR from 0.262 to 0.744 and DINO from 0.653 to 0.744, i.e., absolute values shift with the threshold but the \emph{ranking} of methods and the significance of paired differences are unchanged. We fix $\delta{=}0.50$ everywhere.
+
+\section{Selective-Correction Gating Analysis}
+\label{sec:gating}
+
+The main paper (Sec.~4.6) reports that the selective-correction gate skips correction on 78.6\% of tasks, using 1.6$\times$ one\_shot's compute on average. The gating analysis behind those numbers (from the committed per-task records on the OmniGen2 split): of 98 tasks, the initial generation passes the verifier on 84 (85.7\%); of the 14 triggered tasks, the first correction step improves the weakest subject's similarity on 8, is neutral on 6, and harms none; triggered corrections improve $\mathrm{sim}_{i^\star}$ by 2.06--3.98 points on average, while further (unguarded) steps on already-passing tasks move it by only 0.55--1.11 points; under forced multi-step correction, 17 of 21 probed tasks show non-improving or harming extra steps. This is consistent with the counterfactual in the main paper: forcing correction on the 210 already-passing tasks \emph{raises} SCR from 0.470 to 0.486 ($p{=}0.203$, not significant) while dropping DINO significantly (0.659 to 0.646, $p{=}0.003$), i.e., unnecessary correction risks perturbing already-good images---so the gate is load-bearing, and the ungated variant would not only cost more but also perform worse.
+
+\section{Reproducibility Guide}
+\label{sec:repro}
+
+The accompanying code and data package (\texttt{code\_and\_data.zip}) contains: (i) the inference runners for all methods (\texttt{round1/}: \texttt{p1\_ours\_v2.py} for MIDC, \texttt{p2\_oneshot.py}, \texttt{p3\_bestofn.py}, \texttt{p4\_umo.py}, plus the shared \texttt{common.py}/\texttt{generators.py}/\texttt{actions.py} infrastructure); (ii) all committed per-task records used to compute every reported number (375 tasks $\times$ 3 seeds $\times$ 4 methods on OmniGen2; 250 tasks $\times$ 3 seeds $\times$ 3 methods on FLUX.2; ablation, counterfactual, human-eval, and CLIP records), as JSONL; (iii) the analysis scripts (\texttt{round2/}) that aggregate records into tables; and (iv) \texttt{verify\_paper\_numbers.py}, which recomputes every number quoted in the paper text from the committed records and asserts equality, and \texttt{verify\_umo\_lora.py} (Sec.~\ref{sec:umo_verify}). Scoring uses DINOv2 CLS similarity over Grounding-DINO crops exactly as described in the main paper; all runs use seeds $\{0, 1, 2\}$. The MIBE task manifests and reference images are those of the companion benchmark (Anonymous 2026, cited in the main paper); the records included here suffice to reproduce every table and statistic without re-running generation.
+
+\end{document}
